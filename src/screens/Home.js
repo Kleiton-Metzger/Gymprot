@@ -3,10 +3,10 @@ import { View, Text, TouchableOpacity, Platform } from "react-native";
 import { Camera } from 'expo-camera';
 import * as MediaLibrary from 'expo-media-library';
 import { StyleSheet } from "react-native-web";
-import { getStorage, ref, uploadString,getDownloadURL } from 'firebase/storage';
-import {addDoc, collection, onSnapshot} from 'firebase/firestore';
+import { getStorage, ref, uploadBytes } from 'firebase/storage';
 import { app } from '../../storage/Firebase';
-import { encode } from 'base-64';
+import { v4 as uuidv4 } from 'uuid';
+import { accelerometer, barometer, gyroscope } from 'expo-sensors';
 
 export default function HomeScreen({ navigation }) {
   const [hasPermission, setHasPermission] = useState(null);
@@ -69,7 +69,7 @@ export default function HomeScreen({ navigation }) {
         if (videoRecordPromise) {
           setIsRecording(true);
           const data = await videoRecordPromise;
-          setVideoUri(data.uri);
+          setVideoUri(data.uri); 
           saveVideo(data.uri);
         }
       } catch (error) {
@@ -90,16 +90,13 @@ export default function HomeScreen({ navigation }) {
   async function uploadVideoToFirebase(videoUri) {
     try {
       const response = await fetch(videoUri);
-      const blob = await response.blob(); // Convert to Blob to upload
+      const blob = await response.blob();
   
-      const reader = new FileReader(); // Convert to base64 to display
-      reader.readAsDataURL(blob); // Read the blob as data URL
-      reader.onloadend = async () => { 
-        const base64data = reader.result; // Store base64 data in state
-        const storageRef = ref(storage, 'videos/' + new Date().toISOString() + '.mp4'); 
-        await uploadString(storageRef, base64data, 'data_url'); 
-        console.log('Video uploaded successfully!');
-      };
+      const storageRef = ref(storage, `videos/${uuidv4()}.mp4`);
+  
+      await uploadBytes(storageRef, blob);
+  
+      console.log('Video uploaded successfully!');
     } catch (error) {
       console.error('Error uploading video to Firebase:', error);
     }
