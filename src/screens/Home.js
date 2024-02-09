@@ -6,7 +6,7 @@ import { StyleSheet } from "react-native-web";
 import { getStorage, ref, uploadString,getDownloadURL } from 'firebase/storage';
 import {addDoc, collection, onSnapshot} from 'firebase/firestore';
 import { app } from '../../storage/Firebase';
-import { encode } from 'base-64';
+import { uuid } from 'uuidv4';
 
 export default function HomeScreen({ navigation }) {
   const [hasPermission, setHasPermission] = useState(null);
@@ -88,21 +88,20 @@ export default function HomeScreen({ navigation }) {
   const storage = getStorage(app);
 
   async function uploadVideoToFirebase(videoUri) {
-    try {
-      const response = await fetch(videoUri);
-      const blob = await response.blob(); // Convert to Blob to upload
-  
-      const reader = new FileReader(); // Convert to base64 to display
-      reader.readAsDataURL(blob); // Read the blob as data URL
-      reader.onloadend = async () => { 
-        const base64data = reader.result; // Store base64 data in state
-        const storageRef = ref(storage, 'videos/' + new Date().toISOString() + '.mp4'); 
-        await uploadString(storageRef, base64data, 'data_url'); 
-        console.log('Video uploaded successfully!');
-      };
-    } catch (error) {
-      console.error('Error uploading video to Firebase:', error);
-    }
+   
+    const storageRef = ref(storage, `videos/${uuid()}`);
+    const response = await fetch(videoUri);
+    const blob = await response.blob();
+    await uploadString(storageRef, blob, 'data_url');
+    const url = await getDownloadURL(storageRef);
+    console.log('url', url);
+    const db = app.firestore();
+    const docRef = await addDoc(collection(db, 'videos'), {
+      url
+    });
+    console.log('Document written with ID: ', docRef.id);
+
+
   }
   
  
