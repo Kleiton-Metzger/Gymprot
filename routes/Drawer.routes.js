@@ -3,9 +3,9 @@ import { createDrawerNavigator } from "@react-navigation/drawer";
 // import icons 
 import { Ionicons } from "@expo/vector-icons";
 
-import Home from "../src/screens/Home";
-import Profile from "../src/screens/Profile";
-import Multimedia from "../src/screens/Multimedia";
+import Home from '../screens/Home';
+import Profile from '../screens/Profile';
+import Multimedia from '../screens/Multimedia';
 
 
 const Drawer = createDrawerNavigator();
@@ -14,10 +14,10 @@ export default function DrawerRoutes() {
     return (
         <Drawer.Navigator initialRouteName="Home">
 
-<Drawer.Screen name="Home"
+<Drawer.Screen name="Home" 
                 options={{ 
                     drawerIcon: ({ focused, size, color }) => (
-                        <Ionicons name= {focused ? "home" : "home-outline"} size={size} color={color} />
+                        <Ionicons name= {focused ? "home" : "home-outline"} size={size} color={color}  />
                     ),
                 }}
                 component={Home} />
