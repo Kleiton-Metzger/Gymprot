@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Platform } from "react-native";
 import { Camera } from 'expo-camera';
 import * as MediaLibrary from 'expo-media-library';
 import { StyleSheet } from "react-native-web";
-import { getStorage, ref, uploadBytes } from 'firebase/storage';
+import { getStorage, ref, uploadBytesResumable} from 'firebase/storage';
 import { app } from '../../storage/Firebase';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -61,6 +61,8 @@ export default function HomeScreen({ navigation }) {
     }
   }
 
+ 
+
   async function startRecording() {
     if (cameraRef.current) {
       try {
@@ -68,8 +70,9 @@ export default function HomeScreen({ navigation }) {
         if (videoRecordPromise) {
           setIsRecording(true);
           const data = await videoRecordPromise;
-          setVideoUri(data.uri); 
+          setVideoUri(data.uri);           
           saveVideo(data.uri);
+          
         }
       } catch (error) {
         console.error('Error recording video:', error);
@@ -81,39 +84,44 @@ export default function HomeScreen({ navigation }) {
     if (cameraRef.current && isRecording) {
       cameraRef.current.stopRecording();
       setIsRecording(false);
+      
+
     }
   }
 
   const storage = getStorage(app);
 
-  async function uploadVideoToFirebase(videoUri) {
-    try {
-      const response = await fetch(videoUri);
-      const blob = await response.blob();
-  
-      const storageRef = ref(storage, `videos/${uuidv4()}.mp4`);
-  
-      await uploadBytes(storageRef, blob);
-  
-      console.log('Video uploaded successfully!');
-    } catch (error) {
-      console.error('Error uploading video to Firebase:', error);
-    }
-  }
-  
- 
-  async function saveVideo(video) {
+  async function uploadVideoToFirebase(uri) {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    //const storageRef = ref(storage, "Stuff/" + new Date().getTime());
+    const storageRef = ref(storage, `videos/${uuidv4()}.mp4` + new Date().getTime());
+    const uploadTask = uploadBytesResumable(storageRef, blob);
    
-    const asset = await MediaLibrary.createAssetAsync(video); // Save video to gallery
-    const album = await MediaLibrary.getAlbumAsync('Expo'); 
-    if (album === null) {
-      await MediaLibrary.createAlbumAsync('Expo', asset, false);
-    } else {
-      await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
-    }
-    uploadVideoToFirebase(video);
-  
+    // listen for events
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log("Upload is " + progress + "% done");
+        
+      }
+    );
+        
   }
+ 
+     async function saveVideo(video) {
+    try {
+      await MediaLibrary.createAssetAsync(video);
+      await uploadVideoToFirebase(video);
+    
+      alert('Vídeo salvo com sucesso!');
+    } catch (error) {
+      console.log('Error saving video:', error);
+    }
+  }
+  
+  
 
   return (
     <View style={styles.container}>
@@ -130,7 +138,7 @@ export default function HomeScreen({ navigation }) {
         </View>
         <View style={styles.infoTextContainer}>
           <Text style={styles.infoText}>Distance:</Text>
-          <Text style={styles.infoText}>Time:</Text>
+          <Text style={styles.infoText}>Time: </Text>
         </View>
       </View>
     </View>
