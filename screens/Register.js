@@ -1,13 +1,10 @@
-import React,{useState,useEffect} from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
-import { StyleSheet } from "react-native-web";
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { StyleSheet } from 'react-native-web';
 import { useNavigation } from '@react-navigation/native'; 
-import { auth,createUserWithEmailAndPassword } from '../storage/Firebase';
-
-
+import { auth, createUserWithEmailAndPassword } from '../storage/Firebase';
 
 export default function Register() {
-
     const navigation = useNavigation(); 
 
     const [name, setName] = useState('');
@@ -15,15 +12,17 @@ export default function Register() {
     const [password, setPassword] = useState('');
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(user => {
             setUser(user);
             if (loading) setLoading(false);
+            if (user) {
+                navigation.navigate('Profile'); // Navigate to Profile screen if user is logged in
+            }
         });
         return unsubscribe;
-    } , [user, loading]);
+    }, [loading, navigation]);
 
     const handleSignUp = () => {
         createUserWithEmailAndPassword(auth, email, password)
@@ -36,14 +35,6 @@ export default function Register() {
 
     if (loading) return null;
 
-    if (user) {
-        navigation.navigate('Home');
-    }
-
-    
-
-      
-
     return (
         <View style={styles.container}>
             <View style={styles.titleContainer}>
@@ -51,43 +42,44 @@ export default function Register() {
                 <Text style={styles.detail}>Please enter your details to register</Text>
             </View>
             <Text style={styles.text}>Name</Text>
-            <TextInput style={styles.input} placeholder="Name" 
-            value={name}
-            onChangeText={setName}
+            <TextInput
+                style={styles.input}
+                placeholder="Name" 
+                value={name}
+                onChangeText={setName}
             />
             <Text style={styles.text}>Email</Text>
-            <TextInput style={styles.input} 
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
+            <TextInput
+                style={styles.input} 
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
             />
             <Text style={styles.text}>Password</Text>
-            <TextInput style={styles.input}
-             placeholder="Password" 
-             value={password}
+            <TextInput
+                style={styles.input}
+                placeholder="Password" 
+                value={password}
                 secureTextEntry={true}
                 onChangeText={setPassword}
-             />
+            />
             <Text style={styles.text}>Confirm Password</Text>
-            <TextInput style={styles.input}
-             placeholder="Confirm Password" 
-             value={password}
-             secureTextEntry={true}
-             onChangeText={setPassword}
-              />
-            <TouchableOpacity style={styles.buttonContainer}
-            onPress={handleSignUp}>
-                <Text style={styles.buttonText}
-                
-               >
-                Register</Text>
+            <TextInput
+                style={styles.input}
+                placeholder="Confirm Password" 
+                value={password}
+                secureTextEntry={true}
+                onChangeText={setPassword}
+            />
+            <TouchableOpacity style={styles.buttonContainer} onPress={handleSignUp}>
+                <Text style={styles.buttonText}>Register</Text>
             </TouchableOpacity>
             <Text style={styles.textRegister}>
                 Already have an account?{' '}
                 <Text
                     style={styles.register}
                     onPress={() => navigation.navigate('Login')}
-                    >
+                >
                     Login
                 </Text>
             </Text>

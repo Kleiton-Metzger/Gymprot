@@ -1,12 +1,12 @@
-import React , {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
 import { StyleSheet } from 'react-native-web';
-import { useNavigation } from '@react-navigation/native'; // Import useNavigation hook
-import { auth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from '../storage/Firebase';
+import { useNavigation } from '@react-navigation/native';
+import { auth, signInWithEmailAndPassword } from '../storage/Firebase';
 
 export default function Login() {
-    const navigation = useNavigation(); // Initialize navigation
-    
+    const navigation = useNavigation();
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [user, setUser] = useState(null);
@@ -17,9 +17,12 @@ export default function Login() {
         const unsubscribe = auth.onAuthStateChanged(user => {
             setUser(user);
             if (loading) setLoading(false);
+            if (user) {
+                navigation.navigate('Home'); // Navigate to Profile screen if user is logged in
+            }
         });
         return unsubscribe;
-    }, [user, loading]);
+    }, [loading, navigation]);
 
     const handleLogin = () => {
         signInWithEmailAndPassword(auth, email, password)
@@ -28,54 +31,42 @@ export default function Login() {
                 console.log('Logged in with:', user.email);
             })
             .catch(error => alert(error.message));
-    }
+    };
 
     if (loading) return null;
 
-    if (user) {
-        navigation.navigate('Home');
-    }
-
-
-  
-
-
-
-  
- 
     return (
         <View style={styles.container}>
-
             <Image source={require('../assets/logo.png')} style={styles.logo} />
             <Text style={styles.title}>Login</Text>
-
             <Text style={styles.text}>Email</Text>
-            <TextInput style={styles.input} 
-                placeholder="Email" 
+            <TextInput
+                style={styles.input}
+                placeholder="Email"
                 value={email}
                 onChangeText={setEmail}
             />
-
             <Text style={styles.text}>Password</Text>
-            <TextInput style={styles.input} placeholder="Password" 
+            <TextInput
+                style={styles.input}
+                placeholder="Password"
                 value={password}
-                onChangeText={setPassword} secureTextEntry={true}
+                onChangeText={setPassword}
+                secureTextEntry={true}
             />
-
-                <TouchableOpacity style={styles.buttonContainer}
-                    onPress={handleLogin}>
-                    <Text style={styles.buttonText} > Login</Text>
-                </TouchableOpacity>
-
-            <Text style={styles.textRegister}> Don't have an account yet?{' '}  
-                <Text  style={styles.register} onPress={() => navigation.navigate('Register')}>Register 
+            <TouchableOpacity style={styles.buttonContainer} onPress={handleLogin}>
+                <Text style={styles.buttonText}>Login</Text>
+            </TouchableOpacity>
+            <Text style={styles.textRegister}>
+                Don't have an account yet?{' '}
+                <Text style={styles.register} onPress={() => navigation.navigate('Register')}>
+                    Register
                 </Text>
             </Text>
-            
         </View>
     );
-
 }
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,

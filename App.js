@@ -2,6 +2,7 @@ import React from 'react';
 import { NavigationContainer} from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createDrawerNavigator } from "@react-navigation/drawer";
+import { Ionicons } from '@expo/vector-icons';
 
 import HomeScreen from './screens/Home';
 import Profile from './screens/Profile';
@@ -18,10 +19,41 @@ export default function App() {
   const DrawerNavigator = () => {
     return (
       <Drawer.Navigator initialRouteName="Home">
-        <Drawer.Screen name="Dashboard" component={HomeScreen} options={{headerShown: false}} />
-        <Drawer.Screen name="Profile" component={Profile} />
-        <Drawer.Screen name="Camera" component={Camera} />
-        <Drawer.Screen name="Upload" component={UploadScreen} />
+        <Drawer.Screen name="Dashboard" component={HomeScreen} 
+        options={{headerShown: false,
+          drawerLabel: 'Home',
+          drawerIcon: ({focused, size}) => (
+            <Ionicons name="home" size={size} color={focused ? 'blue' : 'black'} />
+          )
+
+        }} />
+        <Drawer.Screen name="Profile" component={Profile}
+        options={{ 
+          headerShown: false,
+          drawerLabel: 'Profile',
+          drawerIcon: ({focused, size}) => (
+            <Ionicons name="person" size={size} color={focused ? 'blue' : 'black'} />
+          )
+        }}
+        />
+        <Drawer.Screen name="Camera" component={Camera} 
+        options={{ 
+          headerShown: false,
+          drawerLabel: 'Camera',
+          drawerIcon: ({focused, size}) => (
+            <Ionicons name="camera" size={size} color={focused ? 'blue' : 'black'} />
+          )
+        }}
+        />
+        <Drawer.Screen name="Upload" component={UploadScreen}
+        options={{ 
+          headerShown: false,
+          drawerLabel: 'Upload',
+          drawerIcon: ({focused, size}) => (
+            <Ionicons name="cloud-upload" size={size} color={focused ? 'blue' : 'black'} />
+          )
+        }}
+        />
       </Drawer.Navigator>
     );
   }

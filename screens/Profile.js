@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { View, Text, StyleSheet, TouchableOpacity,Image } from 'react-native';
+import { useNavigation, NavigationContainer } from '@react-navigation/native';
 import { auth } from '../storage/Firebase';
-
-
+import { Ionicons } from '@expo/vector-icons';
 
 
 export default function Profile () {
 
-  const navigation = useNavigation(); 
+  const navigation = useNavigation();
+
 
     const handleSignOut = () => {
         auth
@@ -18,15 +18,13 @@ export default function Profile () {
             // show the email of the user how logged out 
             console.log('User signed out!')
             
-            
           })
           .catch(error => alert(error.message))
       }
 
         return (
             <View style={styles.container}>
-                <Text style={styles.text}>Profile</Text>
-                <Text style={styles.text}>Welcome to your profile</Text>
+                <Text style={styles.title}>Profile</Text>
             <TouchableOpacity style={styles.buttonContainer}
                 onPress={handleSignOut}>
                  <Text style={styles.buttonText}>Logout</Text>
@@ -42,10 +40,15 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         backgroundColor:'rgba(154, 151, 151, 1)'
     },
-    text: {
+    title: {
         color: '#161924', 
         fontSize: 20, 
-        fontWeight: '500'
+        fontWeight: 'bold',
+        position: 'absolute', 
+        left:50,
+        padding: 10,
+        top: "10%",
+
     },
     buttonContainer: {
         backgroundColor: 'rgba(88, 29, 185, 1)',
