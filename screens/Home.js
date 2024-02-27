@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 
 
-export default function MediaItem () {
+
+export default function HomeScreen () {
   return (
       <View style={styles.container}>
-          <Text style={styles.text}>Multimedia</Text>
+          <Text style={styles.text}>Home</Text>         
       </View>
   );
 }
@@ -15,7 +16,8 @@ const styles = StyleSheet.create({
   container: {
       flex: 1, 
       alignItems: 'center', 
-      justifyContent: 'center'
+      justifyContent: 'center',
+      backgroundColor:'rgba(154, 151, 151, 1)'
   },
   text: {
       color: '#161924', 
