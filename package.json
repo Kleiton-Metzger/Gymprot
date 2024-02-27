@@ -42,9 +42,7 @@
     "react-native-svg": "13.9.0",
     "react-native-vector-icons": "^10.0.3",
     "react-native-web": "~0.19.6",
-    "reanimated-bottom-sheet": "1.0.0-alpha.22",
-    "tunnel": "^0.0.6",
-    "uuid4": "^2.0.3"
+    "reanimated-bottom-sheet": "1.0.0-alpha.22"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
