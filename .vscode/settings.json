@@ -1,3 +1,4 @@
 {
-    "vscode-edge-devtools.defaultEntrypoint": "App.js"
+    "vscode-edge-devtools.defaultEntrypoint": "App.js",
+    "compile-hero.disable-compile-files-on-did-save-code": true
 }
