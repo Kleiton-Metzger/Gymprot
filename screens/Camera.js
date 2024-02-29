@@ -236,16 +236,18 @@ const styles = StyleSheet.create({
   },
   recordButton: { 
     position: 'absolute',
-    bottom: 20,
+    bottom: 80,
     alignSelf: 'center',
     alignItems: 'center',
-    height: 50,
-    width: 50,
-    borderRadius: 25, 
+    height: 80,
+    width: 80,
+    borderRadius: 35, 
+    bordercolor: 'black',
+    borderWidth: 3,
   },
   timerContainer: {
     position: 'absolute',
-    top: 10,
+    top: "5%",
     alignSelf: 'center',
     backgroundColor: 'red',
     padding: 5,
@@ -257,7 +259,7 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     position: 'absolute', 
-    top: 0,
+    top: "10%",
     left: 0,
     padding: 15,
     backgroundColor: 'rgba(0, 0, 0, 0.2)', 
@@ -277,7 +279,7 @@ const styles = StyleSheet.create({
     position: 'absolute',   
     right: 0,
     padding: 15,
-    top: 0,
+    top: 10,
     fontSize: 40,
   }
 });
