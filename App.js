@@ -10,6 +10,7 @@ import Camera from './screens/Camera';
 import UploadScreen from './screens/Upload';
 import Login from "./screens/Login";
 import Register from "./screens/Register";
+import MyVideos from "./screens/MyVideos";
 
 
 export default function App() {
@@ -20,7 +21,8 @@ export default function App() {
     return (
       <Drawer.Navigator initialRouteName="Profile">
         <Drawer.Screen name="Home" component={HomeScreen} 
-        options={{headerShown: false,
+        options={{
+          //headerShown: false,
           drawerLabel: 'Home',
           drawerIcon: ({focused, size}) => (
             <Ionicons name="home" size={size} color={focused ? 'blue' : 'black'} />
@@ -38,7 +40,7 @@ export default function App() {
         />
         <Drawer.Screen name="Camera" component={Camera} 
         options={{ 
-          headerShown: false,
+         // headerShown: false,
           drawerLabel: 'Camera',
           drawerIcon: ({focused, size}) => (
             <Ionicons name="camera" size={size} color={focused ? 'blue' : 'black'} />
@@ -47,13 +49,21 @@ export default function App() {
         />
         <Drawer.Screen name="Upload" component={UploadScreen}
         options={{ 
-          headerShown: false,
+          //headerShown: false,
           drawerLabel: 'Upload',
           drawerIcon: ({focused, size}) => (
             <Ionicons name="cloud-upload" size={size} color={focused ? 'blue' : 'black'} />
           )
         }}
         />
+        <Drawer.Screen name="MyVideos" component={MyVideos}
+        options={{ 
+         // headerShown: false,
+          drawerLabel: 'My Videos',
+          drawerIcon: ({focused, size}) => (
+            <Ionicons name="film-outline" size={size} color={focused ? 'blue' : 'black'} />
+                        )}} />
+
       </Drawer.Navigator>
     );
   }
