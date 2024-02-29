@@ -163,22 +163,26 @@ export default function CameraModel({ navigation }) {
   const storage = getStorage(app);
 
   async function uploadVideoToFirebase(uri) {
-  try {
+    try {
       const response = await fetch(uri);
       const blob = await response.blob();
-      const filename = `${uuidv4()}.mp4`;
-      const storageRef = ref(storage, `videos/${filename}`);
+      const storageRef = ref(storage, `Videos/${uuidv4()}.mp4`);
       const uploadTask = uploadBytesResumable(storageRef, blob);
-
-      uploadTask.on('state_changed', snapshot => {
-        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        setUploadProgress(progress);
-      }
-
-      , error => {
-        console.error('Error uploading video to Firebase:', error);
-      }
-      
+      uploadTask.on('state_changed', 
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log('Upload is ' + progress + '% done');
+          setUploadProgress(progress); // Update upload progress state
+        }, 
+        (error) => {
+          console.log('Error uploading video:', error);
+        }, 
+        () => {
+          console.log('Upload complete');
+         
+          alert('Vídeo salvo com sucesso!');
+         
+        }
       );
     } catch (error) {
       console.error('Error uploading video to Firebase:', error);
