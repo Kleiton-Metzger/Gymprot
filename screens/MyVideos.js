@@ -31,21 +31,20 @@ export default function MyVideos() {
             flexDirection: 'row',
             justifyContent: 'space-between',
             width: "95%",
-            marginTop: 30,
             position: 'absolute',
-            top: "15%",
+            top: 20,
             borderRadius: 20,
             borderColor: 'black',
             borderWidth: 1,
             backgroundColor: 'rgba(154, 151, 151, 1)',
-            padding: 10,
+            padding: 10, 
             
-
-        },
+             },
         buttonText: {
             fontSize: 20,
             color: 'black',
             fontWeight: 'bold',
+            
         },
 
         
