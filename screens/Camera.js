@@ -163,26 +163,22 @@ export default function CameraModel({ navigation }) {
   const storage = getStorage(app);
 
   async function uploadVideoToFirebase(uri) {
-    try {
+  try {
       const response = await fetch(uri);
       const blob = await response.blob();
-      const storageRef = ref(storage, `Videos/${uuidv4()}.mp4`);
+      const filename = `${uuidv4()}.mp4`;
+      const storageRef = ref(storage, `videos/${filename}`);
       const uploadTask = uploadBytesResumable(storageRef, blob);
-      uploadTask.on('state_changed', 
-        (snapshot) => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log('Upload is ' + progress + '% done');
-          setUploadProgress(progress); // Update upload progress state
-        }, 
-        (error) => {
-          console.log('Error uploading video:', error);
-        }, 
-        () => {
-          console.log('Upload complete');
-         
-          alert('Vídeo salvo com sucesso!');
-         
-        }
+
+      uploadTask.on('state_changed', snapshot => {
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setUploadProgress(progress);
+      }
+
+      , error => {
+        console.error('Error uploading video to Firebase:', error);
+      }
+      
       );
     } catch (error) {
       console.error('Error uploading video to Firebase:', error);
@@ -236,16 +232,18 @@ const styles = StyleSheet.create({
   },
   recordButton: { 
     position: 'absolute',
-    bottom: 20,
+    bottom: 80,
     alignSelf: 'center',
     alignItems: 'center',
-    height: 50,
-    width: 50,
-    borderRadius: 25, 
+    height: 80,
+    width: 80,
+    borderRadius: 35, 
+    bordercolor: 'black',
+    borderWidth: 3,
   },
   timerContainer: {
     position: 'absolute',
-    top: 10,
+    top: "5%",
     alignSelf: 'center',
     backgroundColor: 'red',
     padding: 5,
@@ -257,7 +255,7 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     position: 'absolute', 
-    top: 0,
+    top: "10%",
     left: 0,
     padding: 15,
     backgroundColor: 'rgba(0, 0, 0, 0.2)', 
@@ -277,7 +275,7 @@ const styles = StyleSheet.create({
     position: 'absolute',   
     right: 0,
     padding: 15,
-    top: 0,
+    top: 10,
     fontSize: 40,
   }
 });

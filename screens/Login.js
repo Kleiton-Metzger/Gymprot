@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image,KeyboardAvoidingView } from 'react-native';
 import { StyleSheet } from 'react-native-web';
 import { useNavigation } from '@react-navigation/native';
 import { auth, signInWithEmailAndPassword } from '../storage/Firebase';
@@ -18,7 +18,7 @@ export default function Login() {
             setUser(user);
             if (loading) setLoading(false);
             if (user) {
-                navigation.navigate('Home'); // Navigate to Profile screen if user is logged in
+                navigation.navigate('ProfileScreen'); // Navigate to Profile screen if user is logged in
             }
         });
         return unsubscribe;
@@ -36,8 +36,11 @@ export default function Login() {
     if (loading) return null;
 
     return (
-        <View style={styles.container}>
-            <Image source={require('../assets/logo.png')} style={styles.logo} />
+        <KeyboardAvoidingView style={styles.container}>
+            <Image
+                style={styles.logo}
+                source={require('../assets/logo.png')}
+            />
             <Text style={styles.title}>Login</Text>
             <Text style={styles.text}>Email</Text>
             <TextInput
@@ -50,20 +53,16 @@ export default function Login() {
             <TextInput
                 style={styles.input}
                 placeholder="Password"
+                secureTextEntry
                 value={password}
                 onChangeText={setPassword}
-                secureTextEntry={true}
             />
-            <TouchableOpacity style={styles.buttonContainer} onPress={handleLogin}>
+            <TouchableOpacity style={styles.buttonContainer}
+                onPress={handleLogin}>
                 <Text style={styles.buttonText}>Login</Text>
             </TouchableOpacity>
-            <Text style={styles.textRegister}>
-                Don't have an account yet?{' '}
-                <Text style={styles.register} onPress={() => navigation.navigate('Register')}>
-                    Register
-                </Text>
-            </Text>
-        </View>
+            <Text style={styles.textRegister}>Don't have an account? <Text style={styles.register} onPress={() => navigation.navigate('Register')}>Register</Text></Text>
+        </KeyboardAvoidingView>
     );
 }
 
@@ -72,7 +71,8 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(154, 151, 151, 1)',
+       // backgroundColor: 'rgba(154, 151, 151, 1)',
+       backgroundColor: 'white',
     },
     logo: {
         width: 150,

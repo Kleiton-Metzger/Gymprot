@@ -15,7 +15,6 @@ export default function Profile () {
           .signOut()
           .then(() => {
             navigation.replace("Login")
-            // show the email of the user how logged out 
             console.log('User signed out!')
             
           })
@@ -38,7 +37,7 @@ const styles = StyleSheet.create({
         flex: 1, 
         alignItems: 'center', 
         justifyContent: 'center',
-        backgroundColor:'rgba(154, 151, 151, 1)'
+        backgroundColor: "white",
     },
     title: {
         color: '#161924', 
@@ -52,12 +51,19 @@ const styles = StyleSheet.create({
     },
     buttonContainer: {
         backgroundColor: 'rgba(88, 29, 185, 1)',
-        padding: 15,
-        width: '45%',
+        padding: 10,
+        width: '20%',
         alignItems: 'center',
         borderRadius: 25,
-        top: 20,
+        top: "10%",
         borderColor: 'black',
         borderWidth: 1,
+        right: 15,
+        position: 'absolute',
+        
+    },
+    buttonText: {
+        color: 'white',
+        fontSize: 15,
     },
 });

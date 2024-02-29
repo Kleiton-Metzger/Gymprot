@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView } from 'react-native';
 import { StyleSheet } from 'react-native-web';
 import { useNavigation } from '@react-navigation/native'; 
 import { auth, createUserWithEmailAndPassword } from '../storage/Firebase';
@@ -18,7 +18,7 @@ export default function Register() {
             setUser(user);
             if (loading) setLoading(false);
             if (user) {
-                navigation.navigate('Profile'); // Navigate to Profile screen if user is logged in
+                navigation.navigate('ProfileScreen'); // Navigate to Profile screen if user is logged in
             }
         });
         return unsubscribe;
@@ -92,7 +92,9 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(154, 151, 151, 1)',
+       // backgroundColor: 'rgba(154, 151, 151, 1)',
+       borderColor: 'black',
+
     },
     titleContainer: {
         marginBottom: 30,

@@ -18,8 +18,8 @@ export default function App() {
 
   const DrawerNavigator = () => {
     return (
-      <Drawer.Navigator initialRouteName="Home">
-        <Drawer.Screen name="Dashboard" component={HomeScreen} 
+      <Drawer.Navigator initialRouteName="Profile">
+        <Drawer.Screen name="Home" component={HomeScreen} 
         options={{headerShown: false,
           drawerLabel: 'Home',
           drawerIcon: ({focused, size}) => (
@@ -29,7 +29,7 @@ export default function App() {
         }} />
         <Drawer.Screen name="Profile" component={Profile}
         options={{ 
-          headerShown: false,
+          //headerShown: false,
           drawerLabel: 'Profile',
           drawerIcon: ({focused, size}) => (
             <Ionicons name="person" size={size} color={focused ? 'blue' : 'black'} />
@@ -63,7 +63,7 @@ export default function App() {
       <Stack.Navigator>
         <Stack.Screen name="Login" component={Login} options={{headerShown: false}} />
         <Stack.Screen name="Register" component={Register} options={{headerShown: false}} />
-        <Stack.Screen name="Home" component={DrawerNavigator}
+        <Stack.Screen name="ProfileScreen" component={DrawerNavigator}
          options={{headerShown: false,gestureEnabled: false,}
          
       }/>

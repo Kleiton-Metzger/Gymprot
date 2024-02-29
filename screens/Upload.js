@@ -9,10 +9,14 @@ export default function Uploadcreen () {
           <Text style={styles.text}>Uploads</Text>  
           <Text style={styles.subtext}>Select the file you want to upload</Text>
         <View style={styles.container2}> 
-          <TouchableOpacity style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.buttonContainer}
+          onPress={() => alert('Video are not supported to Upload yet') }
+          >
                     <Text style={styles.buttonText}>Videos</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.buttonContainer}
+            onPress={() => alert('PDFs are not supported to Upload yet')}
+            >
                     <Text style={styles.buttonText}>PDF</Text>
             </TouchableOpacity>
           </View>         
@@ -27,12 +31,13 @@ const styles = StyleSheet.create({
       flex: 1, 
       alignItems: 'center', 
       justifyContent: 'center',
-      backgroundColor:'rgba(154, 151, 151, 1)'
+      backgroundColor: "white",
+
   },
   container2: {
     alignItems: 'center', 
     justifyContent: 'center',
-    backgroundColor:'rgba(35, 31, 32, 1)',
+    backgroundColor:'rgba(154, 151, 151, 1)',
     width: 350,
     height: "50%",
     position: 'absolute',
