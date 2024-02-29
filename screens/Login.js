@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image,KeyboardAvoidingView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import { StyleSheet } from 'react-native-web';
 import { useNavigation } from '@react-navigation/native';
 import { auth, signInWithEmailAndPassword } from '../storage/Firebase';
@@ -9,6 +9,7 @@ export default function Login() {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [passwordVisible, setPasswordVisible] = useState(false); // State to manage password visibility
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -36,11 +37,11 @@ export default function Login() {
     if (loading) return null;
 
     return (
-        <KeyboardAvoidingView style={styles.container}>
-            <Image
-                style={styles.logo}
-                source={require('../assets/logo.png')}
-            />
+        <KeyboardAvoidingView
+            style={styles.container}
+            behavior={Platform.OS === "ios" ? "padding" : null} // Remove behavior for Android
+        >
+            <Image source={require('../assets/logo.png')} style={styles.logo} />
             <Text style={styles.title}>Login</Text>
             <Text style={styles.text}>Email</Text>
             <TextInput
@@ -50,18 +51,32 @@ export default function Login() {
                 onChangeText={setEmail}
             />
             <Text style={styles.text}>Password</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="Password"
-                secureTextEntry
-                value={password}
-                onChangeText={setPassword}
-            />
-            <TouchableOpacity style={styles.buttonContainer}
-                onPress={handleLogin}>
+            <View style={styles.passwordInputContainer}>
+                <TextInput
+                    style={styles.passwordInput}
+                    placeholder="Password"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry={!passwordVisible} // Toggle secureTextEntry based on passwordVisible state
+                />
+                <TouchableOpacity
+                    style={styles.visibilityIcon}
+                    onPress={() => setPasswordVisible(!passwordVisible)}>
+                    <Image
+                        source={passwordVisible ? require('../assets/eye-open.png') : require('../assets/eye-closed.png')}
+                        style={styles.eyeIcon}
+                    />
+                </TouchableOpacity>
+            </View>
+            <TouchableOpacity style={styles.buttonContainer} onPress={handleLogin}>
                 <Text style={styles.buttonText}>Login</Text>
             </TouchableOpacity>
-            <Text style={styles.textRegister}>Don't have an account? <Text style={styles.register} onPress={() => navigation.navigate('Register')}>Register</Text></Text>
+            <Text style={styles.textRegister}>
+                Don't have an account yet?{' '}
+                <Text style={styles.register} onPress={() => navigation.navigate('Register')}>
+                    Register
+                </Text>
+            </Text>
         </KeyboardAvoidingView>
     );
 }
@@ -71,8 +86,8 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-       // backgroundColor: 'rgba(154, 151, 151, 1)',
-       backgroundColor: 'white',
+        backgroundColor: 'white',
+        paddingBottom: 50, // Adjust paddingBottom to accommodate space for the keyboard
     },
     logo: {
         width: 150,
@@ -129,5 +144,26 @@ const styles = StyleSheet.create({
     register: {
         color: 'rgba(88, 29, 185, 1)',
         fontWeight: 'bold',
+    },
+    passwordInputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        width: '80%',
+        marginBottom: 20,
+        borderRadius: 25,
+        borderColor: 'black',
+        borderWidth: 1,
+    },
+    passwordInput: {
+        flex: 1,
+        height: 40,
+        paddingLeft: 10,
+    },
+    visibilityIcon: {
+        padding: 10,
+    },
+    eyeIcon: {
+        width: 20,
+        height: 20,
     },
 });

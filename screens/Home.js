@@ -5,11 +5,11 @@ import { Feather } from "@expo/vector-icons";
 // SearchBar component
 const SearchBar = ({ clicked, searchPhrase, setSearchPhrase, setClicked }) => {
   return (
-    <View style={clicked ? styles.searchBarClicked : styles.searchBarUnclicked}>
+    <View style={[styles.searchBar, clicked && styles.searchBarClicked]}>
       <Feather name="search" size={20} color="black" style={{ marginLeft: 1 }} />
       <TextInput
         style={styles.input}
-        placeholder="Search"
+        placeholder="Search by location"
         value={searchPhrase}
         onChangeText={setSearchPhrase}
         onFocus={() => setClicked(true)}
@@ -56,6 +56,9 @@ const VideoGrid = ({ filteredVideos, handleVideoClick }) => {
       keyExtractor={item => item.id.toString()}
       contentContainerStyle={styles.videoGridContainer}
       removeClippedSubviews={true}
+      ListEmptyComponent={() => (
+        <Text style={styles.emptyText}>No videos found</Text>
+      )}
     />
   );
 };
@@ -85,7 +88,7 @@ export default function HomeScreen() {
     if (text === '') {
       setFilteredVideos(videos);
     } else {
-      const filtered = videos.filter(video => video.title.toLowerCase().includes(text.toLowerCase()));
+      const filtered = videos.filter(video => video.location.toLowerCase().includes(text.toLowerCase()));
       setFilteredVideos(filtered);
     }
   };
@@ -116,24 +119,19 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 50,
     top: 40,
+
+  },
+  searchBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f2f2f2",
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#000000",
   },
   searchBarClicked: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f2f2f2",
-    padding: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#000000",
-  },
-  searchBarUnclicked: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f2f2f2",
-    padding: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#000000",
+    borderColor: "#581DB9",
   },
   input: {
     flex: 1,
@@ -169,6 +167,7 @@ const styles = StyleSheet.create({
   location: {
     fontSize: 14,
     color: 'gray',
+    
   },
   avatar: {
     width: 40,
@@ -187,4 +186,8 @@ const styles = StyleSheet.create({
   userInfo: {
     alignItems: 'center',
   },
+  emptyText: {
+    textAlign: 'center',
+    marginTop: 20,
+  }
 });
