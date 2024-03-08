@@ -48,6 +48,13 @@
           "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos.",
           "isAccessMediaLocationEnabled": true
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photo",
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera"
+        }
       ]
     ],
     "sdkVersion": "49.0.0"

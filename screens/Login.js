@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import { StyleSheet } from 'react-native-web';
 import { useNavigation } from '@react-navigation/native';
 import { auth, signInWithEmailAndPassword } from '../storage/Firebase';
@@ -34,12 +34,14 @@ export default function Login() {
             .catch(error => alert(error.message));
     };
 
-    if (loading) return null;
+    if (loading)return null;
+    
+    
 
     return (
         <KeyboardAvoidingView
             style={styles.container}
-            behavior={Platform.OS === "ios" ? "padding" : null} // Remove behavior for Android
+            behavior={Platform.OS === "ios" ? "padding" : null}
         >
             <Image source={require('../assets/logo.png')} style={styles.logo} />
             <Text style={styles.title}>Login</Text>

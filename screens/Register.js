@@ -3,6 +3,10 @@ import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Image } 
 import { StyleSheet } from 'react-native-web';
 import { useNavigation } from '@react-navigation/native';
 import { auth, createUserWithEmailAndPassword } from '../storage/Firebase';
+import { db } from '../storage/Firebase';
+import {doc, setDoc} from "firebase/firestore";
+
+
 
 export default function Register() {
     const navigation = useNavigation();
@@ -38,6 +42,10 @@ export default function Register() {
             .then(userCredential => {
                 const user = userCredential.user;
                 console.log('Registered with:', user.email);
+                setDoc(doc(db, "users", user.uid), {
+                    name: name,
+                    email: email,
+                });
             })
             .catch(error => alert(error.message));
     }
@@ -187,6 +195,7 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         borderColor: 'black',
         borderWidth: 1,
+        backgroundColor: 'white',
     },
     passwordInput: {
         flex: 1,
