@@ -1,18 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Image } from 'react-native';
 import { StyleSheet } from 'react-native-web';
 import { useNavigation } from '@react-navigation/native';
-import { auth, signInWithEmailAndPassword } from '../storage/Firebase';
+import { auth, createUserWithEmailAndPassword } from '../../storage/Firebase';
+import { db } from '../../storage/Firebase';
+import {doc, setDoc} from "firebase/firestore";
 
-export default function Login() {
+
+
+export default function Register() {
     const navigation = useNavigation();
 
+    const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordVisible, setPasswordVisible] = useState(false); // State to manage password visibility
+    const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false); // State to manage confirm password visibility
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(user => {
@@ -25,26 +31,41 @@ export default function Login() {
         return unsubscribe;
     }, [loading, navigation]);
 
-    const handleLogin = () => {
-        signInWithEmailAndPassword(auth, email, password)
+    const handleSignUp = () => {
+        // Validate password and confirm password
+        if (password !== confirmPassword) {
+            alert("Passwords do not match!");
+            return;
+        }
+
+        createUserWithEmailAndPassword(auth, email, password)
             .then(userCredential => {
                 const user = userCredential.user;
-                console.log('Logged in with:', user.email);
+                console.log('Registered with:', user.email);
+                setDoc(doc(db, "users", user.uid), {
+                    name: name,
+                    email: email,
+                    userId: user.uid,
+                });
             })
             .catch(error => alert(error.message));
-    };
+    }
 
-    if (loading)return null;
-    
-    
+    if (loading) return null;
 
     return (
-        <KeyboardAvoidingView
-            style={styles.container}
-            behavior={Platform.OS === "ios" ? "padding" : null}
-        >
-            <Image source={require('../assets/logo.png')} style={styles.logo} />
-            <Text style={styles.title}>Login</Text>
+        <KeyboardAvoidingView style={styles.container} behavior="padding">
+            <View style={styles.titleContainer}>
+                <Text style={styles.title}>Register</Text>
+                <Text style={styles.detail}>Please enter your details to register</Text>
+            </View>
+            <Text style={styles.text}>Name</Text>
+            <TextInput
+                style={styles.input}
+                placeholder="Name"
+                value={name}
+                onChangeText={setName}
+            />
             <Text style={styles.text}>Email</Text>
             <TextInput
                 style={styles.input}
@@ -58,25 +79,46 @@ export default function Login() {
                     style={styles.passwordInput}
                     placeholder="Password"
                     value={password}
-                    onChangeText={setPassword}
                     secureTextEntry={!passwordVisible} // Toggle secureTextEntry based on passwordVisible state
+                    onChangeText={setPassword}
                 />
                 <TouchableOpacity
                     style={styles.visibilityIcon}
                     onPress={() => setPasswordVisible(!passwordVisible)}>
                     <Image
-                        source={passwordVisible ? require('../assets/eye-open.png') : require('../assets/eye-closed.png')}
+                        source={passwordVisible ? require('../../assets/eye-open.png') : require('../../assets/eye-closed.png')}
                         style={styles.eyeIcon}
                     />
                 </TouchableOpacity>
             </View>
-            <TouchableOpacity style={styles.buttonContainer} onPress={handleLogin}>
-                <Text style={styles.buttonText}>Login</Text>
+            <Text style={styles.text}>Confirm Password</Text>
+            <View style={styles.passwordInputContainer}>
+                <TextInput
+                    style={styles.passwordInput}
+                    placeholder="Confirm Password"
+                    value={confirmPassword}
+                    secureTextEntry={!confirmPasswordVisible} // Toggle secureTextEntry based on confirmPasswordVisible state
+                    onChangeText={setConfirmPassword}
+                />
+                <TouchableOpacity
+                    style={styles.visibilityIcon}
+                    onPress={() => setConfirmPasswordVisible(!confirmPasswordVisible)}>
+                    <Image
+                        source={confirmPasswordVisible ? require('../../assets/eye-open.png') : require('../../assets/eye-closed.png')}
+                        style={styles.eyeIcon}
+                    />
+                </TouchableOpacity>
+            </View>
+            <TouchableOpacity style={styles.buttonContainer} onPress={handleSignUp}>
+                <Text style={styles.buttonText}>Register</Text>
             </TouchableOpacity>
             <Text style={styles.textRegister}>
-                Don't have an account yet?{' '}
-                <Text style={styles.register} onPress={() => navigation.navigate('Register')}>
-                    Register
+                Already have an account?{' '}
+                <Text
+                    style={styles.register}
+                    onPress={() => navigation.navigate('Login')}
+                >
+                    Login
                 </Text>
             </Text>
         </KeyboardAvoidingView>
@@ -88,22 +130,21 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'white',
-        paddingBottom: 50, // Adjust paddingBottom to accommodate space for the keyboard
-    },
-    logo: {
-        width: 150,
-        height: 150,
-        borderRadius: 100,
-        marginBottom: 50,
-        borderWidth: 1,
         borderColor: 'black',
+    },
+    titleContainer: {
+        marginBottom: 30,
+        alignItems: 'center',
     },
     title: {
         fontSize: 30,
-        marginBottom: 30,
         color: 'black',
         fontWeight: 'bold',
+    },
+    detail: {
+        fontSize: 15,
+        color: 'black',
+        textAlign: 'center',
     },
     text: {
         color: 'black',
@@ -115,12 +156,13 @@ const styles = StyleSheet.create({
     },
     input: {
         width: '80%',
-        backgroundColor: 'rgba(255, 255, 255, 1)',
-        padding: 15,
-        marginBottom: 20,
-        borderRadius: 25,
-        borderColor: 'black',
+        height: 40,
+        backgroundColor: 'white',
         borderWidth: 1,
+        borderColor: 'black',
+        marginBottom: 20,
+        paddingLeft: 10,
+        borderRadius: 25,
     },
     buttonContainer: {
         backgroundColor: 'rgba(88, 29, 185, 1)',
@@ -141,7 +183,6 @@ const styles = StyleSheet.create({
         color: 'black',
         fontSize: 15,
         marginTop: 40,
-        textAlign: 'center',
     },
     register: {
         color: 'rgba(88, 29, 185, 1)',
@@ -155,6 +196,7 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         borderColor: 'black',
         borderWidth: 1,
+        backgroundColor: 'white',
     },
     passwordInput: {
         flex: 1,

@@ -11,8 +11,9 @@ export default function Profile() {
   useEffect(() => {
     const unsubscribe = onSnapshot(doc(db, 'users', auth.currentUser.uid), (docSnap) => {
       if (docSnap.exists()) {
-        setUserData(docSnap.data());
-        console.log(docSnap.data())
+        const userData = docSnap.data();
+        console.log('User Data:', userData);
+        setUserData(userData);
       } else {
         console.log('No such document!');
       }
@@ -48,9 +49,12 @@ export default function Profile() {
 
       {userData && (
         <View style={styles.userDataContainer}>
-          <UserData label="Name" value={userData.name} />
+          <UserData label="Nome" value={userData.name} />
           <UserData label="Email" value={userData.email} />
-          {/* Add other user data fields here */}
+          <UserData label="Idade" value={userData.age} />
+          <UserData label="Peso" value={userData.weight} />
+          <UserData label="Altura" value={userData.height} />
+          <UserData label="Genero" value={userData.gender} />
         </View>
       )}
 

@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
-import { getStorage, ref, uploadString, getDownloadURL } from 'firebase/storage';
-import { auth, db } from '../../storage/Firebase'; // Import 'auth' from Firebase
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { auth, db } from '../../storage/Firebase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -11,7 +11,10 @@ export default function EditProfile() {
     const navigation = useNavigation();
 
     const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
+    const [age, setAge] = useState('');
+    const [weight, setWeight] = useState('');
+    const [height, setHeight] = useState('');
+    const [gender, setGender] = useState('');
     const [password, setPassword] = useState('');
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [avatar, setAvatar] = useState(null);
@@ -19,12 +22,14 @@ export default function EditProfile() {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const userDocRef = doc(db, 'users', auth.currentUser.uid);
-                const userDocSnap = await getDoc(userDocRef);
+                const userDocSnap = await getDoc(doc(db, 'users', auth.currentUser.uid));
                 if (userDocSnap.exists()) {
                     const userData = userDocSnap.data();
                     setName(userData.name);
-                    setEmail(userData.email);
+                    setAge(userData.age || '');
+                    setWeight(userData.weight || '');
+                    setHeight(userData.height || '');
+                    setGender(userData.gender || '');
                     setAvatar(userData.photoURL);
                 }
             } catch (error) {
@@ -35,16 +40,22 @@ export default function EditProfile() {
     }, []);
 
     const pickImage = async () => {
-        const options = {
-            mediaTypes: ImagePicker.MediaTypeOptions.All,
-            quality: 1,
-            allowsEditing: true,
-            aspect: [4, 3],
-        };
         try {
-            const result = await ImagePicker.launchImageLibraryAsync(options);
-            if (!result.cancelled) {
-                setAvatar(result.uri);
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+                console.error('Permission to access camera roll was denied');
+                return;
+            }
+            
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.All,
+                quality: 1,
+                allowsEditing: true,
+                aspect: [4, 3],
+            });
+            
+            if (!result.canceled) {
+                setAvatar(result.assets[0].uri);
             }
         } catch (error) {
             console.error('Error picking image: ', error);
@@ -53,28 +64,59 @@ export default function EditProfile() {
 
     const handleUpdateProfile = async () => {
         try {
-            if (auth.currentUser) {
-                const promises = [];
-                if (email !== '' && auth.currentUser.email !== email) {
-                    promises.push(auth.currentUser.updateEmail(email));
-                }
-                if (password !== '') {
-                    promises.push(auth.currentUser.updatePassword(password));
-                }
-                if (name !== '') {
-                    promises.push(setDoc(doc(db, 'users', auth.currentUser.uid), { name }, { merge: true }));
-                }
-                if (avatar !== null) {
-                    promises.push(uploadToFirebase(avatar));
-                }
-
-                await Promise.all(promises);
-                
-                console.log('Profile updated successfully');
-                navigation.navigate('Profile');
-            } else {
+            const currentUser = auth.currentUser;
+            if (!currentUser) {
                 console.error('User not signed in');
+                return;
             }
+
+            const updates = {};
+
+            if (name.trim() !== '') {
+                updates.name = name.trim();
+            }
+
+            if (age.trim() !== '') {
+                updates.age = age.trim();
+            }
+
+            if (weight.trim() !== '') {
+                updates.weight = weight.trim();
+            }
+
+            if (height.trim() !== '') {
+                updates.height = height.trim();
+            }
+
+            if (gender.trim() !== '') {
+                updates.gender = gender.trim();
+            }
+
+            if (password.trim() !== '') {
+                try {
+                    await currentUser.updatePassword(password.trim());
+                    console.log('Password updated successfully');
+                } catch (error) {
+                    console.error('Error updating password:', error);
+                }
+            }
+
+            if (avatar !== null) {
+                try {
+                    const photoURL = await uploadToFirebase(avatar);
+                    updates.photoURL = photoURL;
+                    console.log('Avatar uploaded successfully');
+                } catch (error) {
+                    console.error('Error uploading avatar:', error);
+                }
+            }
+
+            if (Object.keys(updates).length > 0) {  
+                await setDoc(doc(db, 'users', currentUser.uid), updates, { merge: true });
+                console.log('Profile updated successfully'); 
+            }
+
+            navigation.navigate('Profile');
         } catch (error) {
             console.error('Error updating profile: ', error);
         }
@@ -82,30 +124,22 @@ export default function EditProfile() {
 
     const uploadToFirebase = async (uri) => {
         const storage = getStorage();
-        const fileName = `${auth.currentUser.uid}-${uuidv4()}.jpg`; // Ensure the file extension is correct
+        const fileName = `${auth.currentUser.uid}-${uuidv4()}.jpg`;
         const storageRef = ref(storage, `avatars/${fileName}`);
-        
+
         try {
             const response = await fetch(uri);
+            if (!response.ok) {
+                throw new Error('Failed to fetch the image');
+            }
+
             const blob = await response.blob();
-            const reader = new FileReader();
-            
-            reader.onload = async () => {
-                const dataURL = reader.result;
-                const uploadTask = uploadString(storageRef, dataURL, 'data_url'); // Upload the data URL
-                try {
-                    await uploadTask;
-                    console.log('Upload successful');
-                    const photoURL = await getDownloadURL(storageRef);
-                    await setDoc(doc(db, 'users', auth.currentUser.uid), { photoURL }, { merge: true });
-                } catch (error) {
-                    console.error('Error uploading file: ', error);
-                }
-            };
-            
-            reader.readAsDataURL(blob); // Convert blob to data URL
+            await uploadBytesResumable(storageRef, blob);
+            const photoURL = await getDownloadURL(storageRef);
+            return photoURL;
         } catch (error) {
-            console.error('Error fetching image: ', error);
+            console.error('Error uploading file: ', error);
+            throw error;
         }
     };
 
@@ -127,12 +161,36 @@ export default function EditProfile() {
                 value={name}
                 onChangeText={setName}
             />
-            <Text style={styles.text}>Email</Text>
+            <Text style={styles.text}>Age</Text>
             <TextInput
                 style={styles.input}
-                placeholder="Email"
-                value={email}
-                onChangeText={setEmail}
+                placeholder="Age"
+                value={age}
+                onChangeText={setAge}
+                keyboardType="numeric"
+            />
+            <Text style={styles.text}>Weight (kg)</Text>
+            <TextInput
+                style={styles.input}
+                placeholder="Weight"
+                value={weight}
+                onChangeText={setWeight}
+                keyboardType="numeric"
+            />
+            <Text style={styles.text}>Height (cm)</Text>
+            <TextInput
+                style={styles.input}
+                placeholder="Height"
+                value={height}
+                onChangeText={setHeight}
+                keyboardType="numeric"
+            />
+            <Text style={styles.text}>Gender</Text>
+            <TextInput
+                style={styles.input}
+                placeholder="Gender"
+                value={gender}
+                onChangeText={setGender}
             />
             <Text style={styles.text}>Password</Text>
             <View style={styles.passwordInputContainer}>

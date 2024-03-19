@@ -1,13 +1,14 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useId } from "react";
 import { View, Text, TouchableOpacity, Platform } from "react-native";
 import { Camera } from 'expo-camera';
 import * as MediaLibrary from 'expo-media-library';
 import { StyleSheet } from "react-native-web";
-import { getStorage, ref, uploadBytesResumable} from 'firebase/storage';
-import { app } from "../storage/Firebase";
+import { getDownloadURL, getStorage, ref, uploadBytesResumable} from 'firebase/storage';
+import { app, db } from "../storage/Firebase";
 import { v4 as uuidv4 } from 'uuid';
 import { Accelerometer } from 'expo-sensors';
 import * as Location from 'expo-location'; 
+import { doc, setDoc } from "firebase/firestore";
 
 
 export default function CameraModel({ navigation }) {
@@ -22,6 +23,9 @@ export default function CameraModel({ navigation }) {
   const cameraRef = useRef(null);
   const timerRef = useRef(null);
   const [uploadProgress, setUploadProgress] = useState(0); // State for upload progress
+  const [description, setDescription] = useState('');
+  const [city, setCity] = useState('');
+  const [modal, setModal] = useState(false);
 
  
   const calculateSpeed = accelerometerData => {
@@ -74,9 +78,25 @@ export default function CameraModel({ navigation }) {
       };
     })();
   }, []);
+  
 
+  const uuidKey=uuidv4();
 
-  const chooseOptimalAspectRatio = (ratios) => {
+const addVideo= async (uri) => {
+
+const videoURL= await uploadVideoToFirebase(uri);
+
+setDoc(doc(db, "videos", uuidKey), {
+  id: uuidKey,
+ videoURL,
+//createBy: 'xzs',
+ //dispayname:xzs,
+ //description: description,
+ //city:city
+});
+//setModal(false);
+}
+    const chooseOptimalAspectRatio = (ratios) => {
     return { width: ratios[0].split(':')[0], height: ratios[0].split(':')[1] };
   };
 
@@ -141,11 +161,12 @@ export default function CameraModel({ navigation }) {
         if (videoRecordPromise) {
           setIsRecording(true);
           const data = await videoRecordPromise;
-          setVideoUri(data.uri);           
-          saveVideo(data.uri);
+          setVideoUri(data.uri);   
+        addVideo(data.uri);        
+        //  uploadVideoToFirebase(data.uri);
         }
       } catch (error) {
-        console.error('Error recording video:', error);
+        console.log('Error recording video:', error);
       }
     }
   }
@@ -167,35 +188,17 @@ export default function CameraModel({ navigation }) {
       const response = await fetch(uri);
       const blob = await response.blob();
       const storageRef = ref(storage, `Videos/${uuidv4()}.mp4`);
-      const uploadTask = uploadBytesResumable(storageRef, blob);
-      uploadTask.on('state_changed', 
-        (snapshot) => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log('Upload is ' + progress + '% done');
-          setUploadProgress(progress); // Update upload progress state
-        }, 
-        (error) => {
-          console.log('Error uploading video:', error);
-        }, 
-        () => {
-          console.log('Upload complete');
-         
-          alert('Vídeo salvo com sucesso!');
-         
-        }
-      );
+      const uploadTask =await uploadBytesResumable(storageRef, blob);       
+          const videoURL =  getDownloadURL(storageRef);
+
+
+      return videoURL;
     } catch (error) {
-      console.error('Error uploading video to Firebase:', error);
+      console.log('Error uploading video to Firebase:', error);
     }
   }
 
-  async function saveVideo(video) {
-    try {
-      await uploadVideoToFirebase(video);
-    } catch (error) {
-      console.log('Error saving video:', error);
-    }
-  }
+
 
   return (
     <View style={styles.container}>

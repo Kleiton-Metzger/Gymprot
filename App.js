@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, createContext} from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -8,18 +8,22 @@ import HomeScreen from './screens/Home';
 import Profile from './screens/Profile/Profile';
 import Camera from './screens/Camera';
 import UploadScreen from './screens/Upload';
-import Login from "./screens/Login";
-import Register from "./screens/Register";
+import Login from "./screens/Auth/Login";
+import Register from "./screens/Auth/Register";
 import MyVideos from "./screens/MyVideos";
 import PrivateScreen from "./screens/PrivateScreen";
 import PublicScreen from "./screens/PublicScreen";
 import EditProfile from './screens/Profile/EditProfile';
+import { AuthContext } from './src/contexts/auth';
 
 export default function App() {
   const Stack = createStackNavigator();
   const Tab = createBottomTabNavigator();
-
+  const [loggedIn, setLoggedIn] = useState(false);
+  
+  
   const TabNavigator = () => {
+
     return (
       <Tab.Navigator
         screenOptions={({ route }) => ({
