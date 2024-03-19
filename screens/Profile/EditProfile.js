@@ -7,7 +7,7 @@ import { auth, db } from '../../storage/Firebase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 
-export default function EditProfile() {
+export const EditProfile = () => {
     const navigation = useNavigation();
 
     const [name, setName] = useState('');
@@ -154,41 +154,41 @@ export default function EditProfile() {
                 <Image source={avatar ? { uri: avatar } : require('../../assets/avatar.jpg')} style={styles.avatar} />
             </TouchableOpacity>
 
-            <Text style={styles.text}>Name</Text>
+            <Text style={styles.text}>Nome</Text>
             <TextInput
                 style={styles.input}
-                placeholder="Name"
+                placeholder="Nome"
                 value={name}
                 onChangeText={setName}
             />
-            <Text style={styles.text}>Age</Text>
+            <Text style={styles.text}>Idade</Text>
             <TextInput
                 style={styles.input}
-                placeholder="Age"
+                placeholder="Idade"
                 value={age}
                 onChangeText={setAge}
                 keyboardType="numeric"
             />
-            <Text style={styles.text}>Weight (kg)</Text>
+            <Text style={styles.text}>Peso (kg)</Text>
             <TextInput
                 style={styles.input}
-                placeholder="Weight"
+                placeholder="Peso"
                 value={weight}
                 onChangeText={setWeight}
                 keyboardType="numeric"
             />
-            <Text style={styles.text}>Height (cm)</Text>
+            <Text style={styles.text}>Altura (cm)</Text>
             <TextInput
                 style={styles.input}
-                placeholder="Height"
+                placeholder="Altura"
                 value={height}
                 onChangeText={setHeight}
                 keyboardType="numeric"
             />
-            <Text style={styles.text}>Gender</Text>
+            <Text style={styles.text}>Genero</Text>
             <TextInput
                 style={styles.input}
-                placeholder="Gender"
+                placeholder="Genero"
                 value={gender}
                 onChangeText={setGender}
             />

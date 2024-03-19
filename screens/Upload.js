@@ -6,7 +6,7 @@ import { auth, db } from '../storage/Firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 
-export default function UploadScreen() {
+export const UploadScreen = () => {
     const handleFileUpload = async (type) => {
         try {
             const document = await DocumentPicker.getDocumentAsync({ type: type });

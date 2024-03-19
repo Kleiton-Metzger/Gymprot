@@ -8,7 +8,7 @@ import {doc, setDoc} from "firebase/firestore";
 
 
 
-export default function Register() {
+export const Register = () => {
     const navigation = useNavigation();
 
     const [name, setName] = useState('');

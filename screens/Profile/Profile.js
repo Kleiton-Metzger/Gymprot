@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '../../storage/Firebase';
 
-export default function Profile() {
+export const Profile = () => {
   const navigation = useNavigation();
   const [userData, setUserData] = useState(null);
 
@@ -56,6 +56,7 @@ export default function Profile() {
           <UserData label="Altura" value={userData.height} />
           <UserData label="Genero" value={userData.gender} />
         </View>
+        
       )}
 
       <TouchableOpacity style={styles.buttonContainer} onPress={handleSignOut}>

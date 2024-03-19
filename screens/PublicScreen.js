@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
-export default function PrivateScreen() {
+export const PublicScreen = () => {
     const navigation = useNavigation();
     return (
         <View style={styles.container}>

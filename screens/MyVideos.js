@@ -1,13 +1,12 @@
-import React from "react";
+import React ,{useContext} from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import PublicScreen from "./PublicScreen";
 import PrivateScreen from "./PrivateScreen";
 
-export default function MyVideos() {
+export const MyVideos = () => {
     const navigation = useNavigation();
     const route = useRoute();
-
     // Check the route name to determine which content to render
     const renderContent = () => {
         switch (route.name) {
@@ -59,4 +58,5 @@ const styles = StyleSheet.create({
         color: 'black',
         fontWeight: 'bold',
     },
+  
 });

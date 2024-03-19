@@ -11,7 +11,7 @@ import * as Location from 'expo-location';
 import { doc, setDoc } from "firebase/firestore";
 
 
-export default function CameraModel({ navigation }) {
+export const CameraScreen = ({ navigation }) => {
   const [hasPermission, setHasPermission] = useState(null);
   const [type] = useState(Camera.Constants.Type.back);
   const [isRecording, setIsRecording] = useState(false);

@@ -1,9 +1,10 @@
-import React from "react";
+import React,{useContext} from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
-export default function PrivateScreen() {
+export const PrivateScreen = () => {
     const navigation = useNavigation();
+    
     return (
         <View style={styles.container}>
             <TouchableOpacity style={styles.backContainer} onPress={() => navigation.navigate('MyVideos')}>
