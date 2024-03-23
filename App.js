@@ -48,9 +48,9 @@ export default function App() {
         <Stack.Screen name="Login" component={Login} options={{ headerShown: false, gestureEnabled:false }} />
         <Stack.Screen name="Register" component={Register} options={{ headerShown: false }} />
         <Stack.Screen name="ProfileScreen" component={TabNavigator} options={{ headerShown: false,gestureEnabled: false  }} />
-        <Stack.Screen name="PublicScreen" component={PublicScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="PrivateScreen" component={PrivateScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="EditProfileScreen" component={EditProfile} options={{ headerShown: false }} />
+        <Stack.Screen name="PublicScreen" component={PublicScreen} options={{ headerShown: false,gestureEnabled:false }} />
+        <Stack.Screen name="PrivateScreen" component={PrivateScreen} options={{ headerShown: false,gestureEnabled:false }} />
+        <Stack.Screen name="EditProfileScreen" component={EditProfile} options={{ headerShown: false,gestureEnabled:false }} />
       </Stack.Navigator>
       </AuthContext.Provider>
     </NavigationContainer>

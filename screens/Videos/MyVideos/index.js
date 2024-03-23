@@ -1,8 +1,9 @@
-import React ,{useContext} from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import React from "react";
+import { View, Text, TouchableOpacity } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import PublicScreen from "./PublicScreen";
-import PrivateScreen from "./PrivateScreen";
+import PublicScreen from "../PublicVideos/index.js";
+import PrivateScreen from "../PrivateVideos/index.js";
+import styles from "./styles.js";
 
 export const MyVideos = () => {
     const navigation = useNavigation();
@@ -35,28 +36,3 @@ export const MyVideos = () => {
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "white",
-    },
-    opcbar: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-        backgroundColor: 'rgba(154, 151, 151, 1)',
-        borderBottomWidth: 1,
-        borderBottomColor: 'black',
-        top: "20%",
-        borderRadius: 25,
-        height: 50,
-    },
-    buttonText: {
-        fontSize: 20,
-        color: 'black',
-        fontWeight: 'bold',
-    },
-  
-});

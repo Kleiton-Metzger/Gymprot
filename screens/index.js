@@ -1,8 +1,8 @@
 export * from './Camera'
 export * from './Home'
-export * from './MyVideos'
-export * from './PrivateScreen'
-export * from './PublicScreen'
+export * from './Videos/MyVideos'
+export * from './Videos/PrivateVideos'
+export * from './Videos/PublicVideos'
 export * from './Upload'
 
 export *from './Profile'

@@ -1,12 +1,16 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { getStorage, ref, uploadFile, getDownloadURL } from 'firebase/storage';
-import { auth, db } from '../storage/Firebase';
+import { auth, db } from '../../storage/Firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
+import styles from './styles';
+import { AuthContext } from '../../contexts/auth';
 
 export const UploadScreen = () => {
+    const { userData } = React.useContext(AuthContext);
+
     const handleFileUpload = async (type) => {
         try {
             const document = await DocumentPicker.getDocumentAsync({ type: type });
@@ -70,6 +74,7 @@ export const UploadScreen = () => {
         <View style={styles.container}>
             <Text style={styles.text}>Uploads</Text>
             <Text style={styles.subtext}>Select the file type you want to upload</Text>
+            <Text style={styles.usrname}>User: {userData.name}</Text>
             <View style={styles.container2}>
                 <TouchableOpacity
                     style={styles.buttonContainer}
@@ -85,52 +90,3 @@ export const UploadScreen = () => {
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'white',
-    },
-    container2: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'rgba(154, 151, 151, 1)',
-        width: 350,
-        height: '50%',
-        position: 'absolute',
-        top: '30%',
-        borderRadius: 25,
-        borderColor: 'black',
-        borderWidth: 1,
-    },
-    text: {
-        fontSize: 40,
-        fontWeight: 'bold',
-        position: 'absolute',
-        padding: '20%',
-        top: 30,
-    },
-    subtext: {
-        fontSize: 15,
-        position: 'absolute',
-        padding: '20%',
-        top: 100,
-    },
-    buttonContainer: {
-        backgroundColor: 'rgba(88, 29, 185, 1)',
-        padding: 15,
-        width: 250,
-        alignItems: 'center',
-        borderRadius: 25,
-        top: 20,
-        borderColor: 'black',
-        borderWidth: 1,
-        marginBottom: 20,
-    },
-    buttonText: {
-        color: 'white',
-        fontSize: 20,
-    },
-});

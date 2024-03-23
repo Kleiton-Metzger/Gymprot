@@ -1,17 +1,17 @@
-import React, { useEffect, useState, useRef, useId } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { View, Text, TouchableOpacity, Platform } from "react-native";
 import { Camera } from 'expo-camera';
 import * as MediaLibrary from 'expo-media-library';
 import { StyleSheet } from "react-native-web";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable} from 'firebase/storage';
-import { app, db } from "../storage/Firebase";
+import { app, db,auth } from "../../storage/Firebase";
 import { v4 as uuidv4 } from 'uuid';
 import { Accelerometer } from 'expo-sensors';
 import * as Location from 'expo-location'; 
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc,onSnapshot } from "firebase/firestore";
 
 
-export const CameraScreen = ({ navigation }) => {
+export const CameraScreen = ({}) => {
   const [hasPermission, setHasPermission] = useState(null);
   const [type] = useState(Camera.Constants.Type.back);
   const [isRecording, setIsRecording] = useState(false);
@@ -22,17 +22,29 @@ export const CameraScreen = ({ navigation }) => {
   const [isMoving, setIsMoving] = useState(false); 
   const cameraRef = useRef(null);
   const timerRef = useRef(null);
-  const [uploadProgress, setUploadProgress] = useState(0); // State for upload progress
-  const [description, setDescription] = useState('');
-  const [city, setCity] = useState('');
-  const [modal, setModal] = useState(false);
-
- 
+   
   const calculateSpeed = accelerometerData => {
     const { x, y, z } = accelerometerData; 
     const newSpeed = Math.sqrt(x * x + y * y + z * z); 
     return newSpeed;
   };
+
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(doc(db, 'users', auth.currentUser.uid), (docSnap) => {
+      if (docSnap.exists()) {
+        const userData = docSnap.data();
+        console.log('User Data:', userData);
+        setUserData(userData);
+      } else {
+        console.log('No such document!');
+      }
+    });
+
+    // Clean up the listener when the component unmounts
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -89,8 +101,8 @@ const videoURL= await uploadVideoToFirebase(uri);
 setDoc(doc(db, "videos", uuidKey), {
   id: uuidKey,
  videoURL,
+ createBy: userData.userId,
 //createBy: 'xzs',
- //dispayname:xzs,
  //description: description,
  //city:city
 });
