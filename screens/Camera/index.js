@@ -108,45 +108,7 @@ setDoc(doc(db, "videos", uuidKey), {
 });
 //setModal(false);
 }
-    const chooseOptimalAspectRatio = (ratios) => {
-    return { width: ratios[0].split(':')[0], height: ratios[0].split(':')[1] };
-  };
-
-  if (Platform.OS === 'android') {
-    Camera.requestCameraPermissionsAsync()
-      .then(({ status }) => {
-        if (status === 'granted') {
-          Camera.getSupportedRatiosAsync().then(ratios => {
-            const aspectRatio = chooseOptimalAspectRatio(ratios);
-            Camera.setPreviewSize({ width: aspectRatio.width, height: aspectRatio.height });
-          });
-        } else {
-          // Permission denied
-          return (
-            <View>
-              <Text>Acesso negado!</Text>
-            </View>
-          );
-        }
-      })
-      .catch((error) => {
-        console.error('Error requesting camera permissions:', error);
-        return (
-          <View>
-            <Text>Error requesting camera permissions</Text>
-          </View>
-        );
-      });
-  } else if (Platform.OS === 'ios') {
-    Camera.requestCameraPermissionsAsync();
-    if (hasPermission === null) {
-      return <View />;
-    }
-    if (hasPermission === false) {
-      return <Text>Acesso negado!</Text>;
-    }
-  }
-
+  
   const startTimer = () => {
     timerRef.current = setInterval(() => {
       setRecordTime(prevTime => prevTime + 1);

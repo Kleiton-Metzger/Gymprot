@@ -6,7 +6,6 @@ import { Ionicons } from '@expo/vector-icons';
 
 import  { Profile, CameraScreen, HomeScreen, UploadScreen, Login, Register, MyVideos, PrivateScreen, PublicScreen, EditProfile} from './screens';
 
-import { AuthContext } from './contexts/auth';
 import { getTabIconName }from './utils'
 
 export default function App() {
@@ -43,7 +42,6 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <AuthContext.Provider value={{ loggedIn, setLoggedIn }}>
       <Stack.Navigator>
         <Stack.Screen name="Login" component={Login} options={{ headerShown: false, gestureEnabled:false }} />
         <Stack.Screen name="Register" component={Register} options={{ headerShown: false }} />
@@ -52,7 +50,6 @@ export default function App() {
         <Stack.Screen name="PrivateScreen" component={PrivateScreen} options={{ headerShown: false,gestureEnabled:false }} />
         <Stack.Screen name="EditProfileScreen" component={EditProfile} options={{ headerShown: false,gestureEnabled:false }} />
       </Stack.Navigator>
-      </AuthContext.Provider>
     </NavigationContainer>
   );
 }
