@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { FirebaseContext } from './contexts/auth';
 
 import  { Profile, CameraScreen, HomeScreen, UploadScreen, Login, Register, MyVideos, PrivateScreen, PublicScreen, EditProfile} from './screens';
 
@@ -41,6 +42,7 @@ export default function App() {
 
   return (
     <NavigationContainer>
+      <FirebaseContext.Provider value={{}}>
       <Stack.Navigator>
         <Stack.Screen name="Login" component={Login} options={{ headerShown: false, gestureEnabled:false }} />
         <Stack.Screen name="Register" component={Register} options={{ headerShown: false }} />
@@ -49,6 +51,7 @@ export default function App() {
         <Stack.Screen name="PrivateScreen" component={PrivateScreen} options={{ headerShown: false,gestureEnabled:false }} />
         <Stack.Screen name="EditProfileScreen" component={EditProfile} options={{ headerShown: false,gestureEnabled:false }} />
       </Stack.Navigator>
+      </FirebaseContext.Provider>
     </NavigationContainer>
   );
 }

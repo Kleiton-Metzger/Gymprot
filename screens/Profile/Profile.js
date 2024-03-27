@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { doc, onSnapshot } from 'firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { db, auth } from '../../storage/Firebase';
 
 export const Profile = () => {
@@ -9,11 +10,25 @@ export const Profile = () => {
   const [userData, setUserData] = useState(null);
 
   useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        const cachedUserData = await AsyncStorage.getItem('userData');
+        if (cachedUserData) {
+          setUserData(JSON.parse(cachedUserData));
+        }
+      } catch (error) {
+        console.error('Error loading user data from cache:', error);
+      }
+    };
+
+    loadUserData();
+
     const unsubscribe = onSnapshot(doc(db, 'users', auth.currentUser.uid), (docSnap) => {
       if (docSnap.exists()) {
         const userData = docSnap.data();
-        console.log('User Data:', userData);
         setUserData(userData);
+        // Salvar os dados do usuário em cache
+        AsyncStorage.setItem('userData', JSON.stringify(userData));
       } else {
         console.log('No such document!');
       }
@@ -54,7 +69,7 @@ export const Profile = () => {
           <UserData label="Idade" value={userData.age} />
           <UserData label="Peso" value={userData.weight} />
           <UserData label="Altura" value={userData.height} />
-          <UserData label="Genero" value={userData.gender} />
+          <UserData label="Gênero" value={userData.gender} />
         </View>
         
       )}

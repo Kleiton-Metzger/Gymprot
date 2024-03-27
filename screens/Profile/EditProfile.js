@@ -105,7 +105,7 @@ export const EditProfile = () => {
                 try {
                     const photoURL = await uploadToFirebase(avatar);
                     updates.photoURL = photoURL;
-                    console.log('Avatar uploaded successfully');
+                    //console.log('Avatar uploaded successfully');
                 } catch (error) {
                     console.error('Error uploading avatar:', error);
                 }

@@ -35,7 +35,7 @@ export const CameraScreen = ({}) => {
     const unsubscribe = onSnapshot(doc(db, 'users', auth.currentUser.uid), (docSnap) => {
       if (docSnap.exists()) {
         const userData = docSnap.data();
-        console.log('User Data:', userData);
+       // console.log('User Data:', userData);
         setUserData(userData);
       } else {
         console.log('No such document!');
@@ -91,37 +91,6 @@ export const CameraScreen = ({}) => {
     })();
   }, []);
   
-
-  const uuidKey=uuidv4();
-
-const addVideo= async (uri) => {
-  try {
-    // Upload video to Firebase Storage
-    const videoURL = await uploadVideoToFirebase(uri);
-
-    // Get current location
-    const location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
-    const { latitude, longitude } = location.coords;
-
-    // Reverse geocode to get city name
-    const geocode = await Location.reverseGeocodeAsync({ latitude, longitude });
-    const cityName = geocode[0].city;
-    await setDoc(doc(db, "videos", uuidv4()), {
-      id: uuidv4(),
-      videoURL,
-      createBy: userData.userId,
-      createAt: new Date().toISOString(),
-      location: { cityName, latitude, longitude },
-      speed,
-      elevation,
-      type: "Running" ,
-      status: "Public",
-    });
-  } catch (error) {
-    console.log('Error adding video to Firestore:', error);
-  }
-  
-}
   
   const startTimer = () => {
     timerRef.current = setInterval(() => {
@@ -185,7 +154,37 @@ const addVideo= async (uri) => {
       console.log('Error uploading video to Firebase:', error);
     }
   }
+  const addVideo = async (uri) => {
+    const videoURL = await uploadVideoToFirebase(uri);
+     
 
+    // Get current location
+    const location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
+
+    const { latitude, longitude } = location.coords;
+
+    try {
+        // Reverse geocode to get city name
+        const geocode = await Location.reverseGeocodeAsync({ latitude, longitude });
+        const cityName = geocode[0].city;
+
+        // Upload video and store data in Firestore
+        await setDoc(doc(db, "videos", uuidv4()), {
+            id: uuidv4(),
+            videoURL,
+            createBy: userData.userId,
+            createAt: new Date().toISOString(),
+            location: {cityName , latitude, longitude},
+            speed,
+            elevation,
+            type: "Running" ,
+            status: "Private",
+           
+        });
+    } catch (error) {
+        console.log('Error adding video to Firestore:', error);
+    }
+  };
 
 
   return (

@@ -6,10 +6,9 @@ import { auth, db } from '../../storage/Firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import styles from './styles';
-import { AuthContext } from '../../contexts/auth';
+
 
 export const UploadScreen = () => {
-    const { userData } = React.useContext(AuthContext);
 
     const handleFileUpload = async (type) => {
         try {
@@ -74,7 +73,6 @@ export const UploadScreen = () => {
         <View style={styles.container}>
             <Text style={styles.text}>Uploads</Text>
             <Text style={styles.subtext}>Select the file type you want to upload</Text>
-            <Text style={styles.usrname}>User: {userData.name}</Text>
             <View style={styles.container2}>
                 <TouchableOpacity
                     style={styles.buttonContainer}

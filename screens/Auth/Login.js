@@ -51,6 +51,7 @@ export const Login = () => {
                 placeholder="Email"
                 value={email}
                 onChangeText={setEmail}
+               // textContentType="oneTimeCode"
             />
             <Text style={styles.text}>Password</Text>
             <View style={styles.passwordInputContainer}>
@@ -59,7 +60,8 @@ export const Login = () => {
                     placeholder="Password"
                     value={password}
                     onChangeText={setPassword}
-                    secureTextEntry={!passwordVisible} // Toggle secureTextEntry based on passwordVisible state
+                    secureTextEntry={!passwordVisible} 
+                   // textContentType='oneTimeCode'
                 />
                 <TouchableOpacity
                     style={styles.visibilityIcon}

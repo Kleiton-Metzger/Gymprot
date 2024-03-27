@@ -58,6 +58,7 @@ const styles = StyleSheet.create({
       padding: 15,
       top: 10,
       fontSize: 40,
-    }
+    },
+    
   });
 export default styles;  
