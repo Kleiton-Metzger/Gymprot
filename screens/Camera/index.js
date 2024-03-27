@@ -114,6 +114,8 @@ const addVideo= async (uri) => {
       location: { cityName, latitude, longitude },
       speed,
       elevation,
+      type: "Running" ,
+      status: "Public",
     });
   } catch (error) {
     console.log('Error adding video to Firestore:', error);
