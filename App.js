@@ -11,7 +11,6 @@ import { getTabIconName }from './utils'
 export default function App() {
   const Stack = createStackNavigator();
   const Tab = createBottomTabNavigator();
-  const [loggedIn, setLoggedIn] = useState(false);
   
   
   const TabNavigator = () => {
