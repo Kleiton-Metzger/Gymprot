@@ -4,6 +4,8 @@ import { StyleSheet } from 'react-native-web';
 import { useNavigation } from '@react-navigation/native';
 import { auth, signInWithEmailAndPassword } from '../../storage/Firebase';
 
+import { DismissKeyboard, Logo, Header, Input, Button } from '../../components'
+
 export const Login = () => {
     const navigation = useNavigation();
 
@@ -39,135 +41,91 @@ export const Login = () => {
     
 
     return (
-        <KeyboardAvoidingView
-            style={styles.container}
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-        >
-            <Image source={require('../../assets/logo.png')} style={styles.logo} />
-            <Text style={styles.title}>Login</Text>
-            <Text style={styles.text}>Email</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="Email"
-                value={email}
-                onChangeText={setEmail}
-               // textContentType="oneTimeCode"
-            />
-            <Text style={styles.text}>Password</Text>
-            <View style={styles.passwordInputContainer}>
-                <TextInput
-                    style={styles.passwordInput}
-                    placeholder="Password"
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry={!passwordVisible} 
-                   // textContentType='oneTimeCode'
-                />
-                <TouchableOpacity
-                    style={styles.visibilityIcon}
-                    onPress={() => setPasswordVisible(!passwordVisible)}>
-                    <Image
-                        source={passwordVisible ? require('../../assets/eye-open.png') : require('../../assets/eye-closed.png')}
-                        style={styles.eyeIcon}
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
+            <DismissKeyboard>
+                <View style={styles.container}>
+                <Logo />
+                    <Header>Login</Header>
+                    <View style={styles.inputContainer}>
+                        <Input
+                        mode='outlined'
+                        label='Email'
+                        color="#581DB9"
+                        underline="#581DB9"
+                        returnKeyType='next'
+                        value={email}
+                        onChangeText={setEmail}
+                        autoCapitalize='none'
+                        textContentType='emailAddress'
+                        keyboardType='default'
                     />
-                </TouchableOpacity>
-            </View>
-            <TouchableOpacity style={styles.buttonContainer} onPress={handleLogin}>
-                <Text style={styles.buttonText}>Login</Text>
-            </TouchableOpacity>
-            <Text style={styles.textRegister}>
-                Don't have an account yet?{' '}
-                <Text style={styles.register} onPress={() => navigation.navigate('Register')}>
+                    <Input  
+                        mode='outlined'
+                        label='Password'
+                        color="#581DB9"
+                        underline="#581DB9"
+                        returnKeyType='done'
+
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry={!passwordVisible}
+                        autoCapitalize='none'
+                        textContentType='password'
+                        keyboardType='default'
+                    />
+                    <Button onPress={handleLogin} label="Login" />
+                    <Text style={styles.textRegister}>
+                Don't have an account?{' '}
+                <Text
+                    style={styles.register}
+                    onPress={() => navigation.navigate('Register')}
+                >
                     Register
                 </Text>
             </Text>
+
+                </View>                   
+                </View>
+            </DismissKeyboard>
         </KeyboardAvoidingView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        alignItems: 'center',
         justifyContent: 'center',
+        marginTop: "20%",
+    },
+    inputContainer: {
         alignItems: 'center',
-        backgroundColor: 'white',
-        paddingBottom: 50, // Adjust paddingBottom to accommodate space for the keyboard
-    },
-    logo: {
-        width: 150,
-        height: 150,
-        borderRadius: 100,
-        marginBottom: 50,
-        borderWidth: 1,
-        borderColor: 'black',
-    },
-    title: {
-        fontSize: 30,
-        marginBottom: 30,
-        color: 'black',
-        fontWeight: 'bold',
-    },
-    text: {
-        color: 'black',
-        fontWeight: 'bold',
-        fontSize: 15,
-        textAlign: 'left',
-        width: '80%',
-        marginBottom: 10,
-    },
-    input: {
-        width: '80%',
-        backgroundColor: 'rgba(255, 255, 255, 1)',
-        padding: 15,
-        marginBottom: 20,
-        borderRadius: 25,
-        borderColor: 'black',
-        borderWidth: 1,
-    },
-    buttonContainer: {
-        backgroundColor: 'rgba(88, 29, 185, 1)',
-        padding: 15,
-        width: '45%',
-        alignItems: 'center',
-        borderRadius: 25,
-        top: 20,
-        borderColor: 'black',
-        borderWidth: 1,
+        justifyContent: 'center',
+        width: "100%",
+        paddingLeft: "10%",
+        paddingRight: "10%",
     },
     buttonText: {
         color: 'white',
         fontWeight: 'bold',
         fontSize: 20,
     },
+    button: {
+        width: '50%',
+        height: 50,
+        borderRadius: 5,
+        backgroundColor: '#581DB9',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 20,
+    },
     textRegister: {
+        marginTop: 20,
         color: 'black',
         fontSize: 15,
-        marginTop: 40,
-        textAlign: 'center',
     },
     register: {
-        color: 'rgba(88, 29, 185, 1)',
+        color: '#581DB9',
         fontWeight: 'bold',
-    },
-    passwordInputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        width: '80%',
-        marginBottom: 20,
-        borderRadius: 25,
-        borderColor: 'black',
-        borderWidth: 1,
-    },
-    passwordInput: {
-        flex: 1,
-        height: 40,
-        paddingLeft: 10,
-    },
-    visibilityIcon: {
-        padding: 10,
-    },
-    eyeIcon: {
-        width: 20,
-        height: 20,
+        fontSize: 15,
     },
 });

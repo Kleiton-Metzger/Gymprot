@@ -5,6 +5,8 @@ import { useNavigation } from '@react-navigation/native';
 import { auth, createUserWithEmailAndPassword } from '../../storage/Firebase';
 import { db } from '../../storage/Firebase';
 import {doc, setDoc} from "firebase/firestore";
+import { DismissKeyboard, Logo, Header, Input, Button } from '../../components'
+
 
 
 
@@ -53,161 +55,101 @@ export const Register = () => {
 
     if (loading) return null;
 
-    return (
-        <KeyboardAvoidingView style={styles.container} behavior="padding">
-            <View style={styles.titleContainer}>
-                <Text style={styles.title}>Register</Text>
-                <Text style={styles.detail}>Please enter your details to register</Text>
-            </View>
-            <Text style={styles.text}>Name</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="Name"
-                value={name}
-                onChangeText={setName}
-            />
-            <Text style={styles.text}>Email</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="Email"
-                value={email}
-                onChangeText={setEmail}
-            />
-            <Text style={styles.text}>Password</Text>
-            <View style={styles.passwordInputContainer}>
-                <TextInput
-                    style={styles.passwordInput}
-                    placeholder="Password"
-                    value={password}
-                    secureTextEntry={!passwordVisible} // Toggle secureTextEntry based on passwordVisible state
-                    onChangeText={setPassword}
-                />
-                <TouchableOpacity
-                    style={styles.visibilityIcon}
-                    onPress={() => setPasswordVisible(!passwordVisible)}>
-                    <Image
-                        source={passwordVisible ? require('../../assets/eye-open.png') : require('../../assets/eye-closed.png')}
-                        style={styles.eyeIcon}
-                    />
-                </TouchableOpacity>
-            </View>
-            <Text style={styles.text}>Confirm Password</Text>
-            <View style={styles.passwordInputContainer}>
-                <TextInput
-                    style={styles.passwordInput}
-                    placeholder="Confirm Password"
-                    value={confirmPassword}
-                    secureTextEntry={!confirmPasswordVisible} // Toggle secureTextEntry based on confirmPasswordVisible state
-                    onChangeText={setConfirmPassword}
-                />
-                <TouchableOpacity
-                    style={styles.visibilityIcon}
-                    onPress={() => setConfirmPasswordVisible(!confirmPasswordVisible)}>
-                    <Image
-                        source={confirmPasswordVisible ? require('../../assets/eye-open.png') : require('../../assets/eye-closed.png')}
-                        style={styles.eyeIcon}
-                    />
-                </TouchableOpacity>
-            </View>
-            <TouchableOpacity style={styles.buttonContainer} onPress={handleSignUp}>
-                <Text style={styles.buttonText}>Register</Text>
-            </TouchableOpacity>
-            <Text style={styles.textRegister}>
-                Already have an account?{' '}
-                <Text
-                    style={styles.register}
-                    onPress={() => navigation.navigate('Login')}
-                >
-                    Login
-                </Text>
-            </Text>
-        </KeyboardAvoidingView>
+    return ( 
+            <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
+                <DismissKeyboard>
+                    <View style={styles.container}>
+                    <Logo />
+                        <Header> Register </Header>
+                        <View style={styles.inputContainer}>
+                            <Input
+                            mode='outlined'
+                            label='Name'
+                            color="#581DB9"
+                            underline="#581DB9"
+                            returnKeyType='next'
+                            value={name}
+                            onChangeText={setName}
+                            />
+                            <Input
+                            mode='outlined'
+                            label='Email'
+                            color="#581DB9"
+                            underline="#581DB9"
+                            returnKeyType='next'
+                            value={email}
+                            onChangeText={setEmail}
+                            />
+                            <Input
+                            mode='outlined'
+                            label='Password'
+                            color="#581DB9"
+                            underline="#581DB9"
+                            secureTextEntry={!passwordVisible}
+                            returnKeyType='next'
+                            value={password}
+                            onChangeText={setPassword}
+                            />
+                            <Input
+                            mode='outlined'
+                            label='Confirm Password'
+                            color="#581DB9"
+                            underline="#581DB9"
+                            secureTextEntry={!confirmPasswordVisible}
+                            returnKeyType='done'
+                            value={confirmPassword}
+                            onChangeText={setConfirmPassword}
+                            />
+                           <Button onPress={handleSignUp} label="Register" />
+                            <Text style={styles.textRegister}>
+                                Already have an account?{' '}
+                                <Text
+                                    style={styles.register}
+                                    onPress={() => navigation.navigate('Login')}
+                                >
+                                    Login
+                                </Text>
+                            </Text>
+                        </View>
+                    </View>
+                </DismissKeyboard>
+            </KeyboardAvoidingView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        alignItems: 'center',
         justifyContent: 'center',
+        marginTop: "10%",
+    },
+    inputContainer: {
         alignItems: 'center',
-        borderColor: 'black',
+        justifyContent: 'center',
+        width: "100%",
+        paddingLeft: "10%",
+        paddingRight: "10%",
     },
-    titleContainer: {
-        marginBottom: 30,
+    button: {
+        width: '100%',
+        height: 50,
         alignItems: 'center',
-    },
-    title: {
-        fontSize: 30,
-        color: 'black',
-        fontWeight: 'bold',
-    },
-    detail: {
-        fontSize: 15,
-        color: 'black',
-        textAlign: 'center',
-    },
-    text: {
-        color: 'black',
-        fontWeight: 'bold',
-        fontSize: 15,
-        textAlign: 'left',
-        width: '80%',
-        marginBottom: 10,
-    },
-    input: {
-        width: '80%',
-        height: 40,
-        backgroundColor: 'white',
-        borderWidth: 1,
-        borderColor: 'black',
-        marginBottom: 20,
-        paddingLeft: 10,
-        borderRadius: 25,
-    },
-    buttonContainer: {
-        backgroundColor: 'rgba(88, 29, 185, 1)',
-        padding: 15,
-        width: '45%',
-        alignItems: 'center',
-        borderRadius: 25,
-        top: 20,
-        borderColor: 'black',
-        borderWidth: 1,
+        justifyContent: 'center',
+        backgroundColor: '#581DB9',
+        borderRadius: 5,
+        marginVertical: 10,
     },
     buttonText: {
-        color: 'white',
-        fontWeight: 'bold',
-        fontSize: 20,
+        fontSize: 18,
+        color: '#fff'
     },
     textRegister: {
-        color: 'black',
-        fontSize: 15,
-        marginTop: 40,
+        marginTop: 20,
+        fontSize: 16,
     },
     register: {
-        color: 'rgba(88, 29, 185, 1)',
+        color: '#581DB9',
         fontWeight: 'bold',
-    },
-    passwordInputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        width: '80%',
-        marginBottom: 20,
-        borderRadius: 25,
-        borderColor: 'black',
-        borderWidth: 1,
-        backgroundColor: 'white',
-    },
-    passwordInput: {
-        flex: 1,
-        height: 40,
-        paddingLeft: 10,
-    },
-    visibilityIcon: {
-        padding: 10,
-    },
-    eyeIcon: {
-        width: 20,
-        height: 20,
-    },
+    }
+    
 });
