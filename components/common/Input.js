@@ -1,14 +1,24 @@
+import { useState } from 'react';
 import { StyleSheet, View, Text } from 'react-native'
 import { TextInput } from 'react-native-paper'
 
-const Input = ({ errorText, ...props }) => {
+const Input = ({ errorText, width, ...props }) => {
+    const [secureTextEntry, setSecureTextEntry] = useState(true);
+
+
     return (
-        <View style={styles.container}>
+        <View style={{ width: width ? width : "100%" }}>
             <TextInput
-                style={styles.input}
                 selectionColor={props.color}
                 underlineColor={props.underline}
                 mode={props.mode}
+                style={styles.input}
+                secureTextEntry={props.textContentType === 'password' ? secureTextEntry : false} 
+                right={props.textContentType === 'password' ? <TextInput.Icon
+                    icon={secureTextEntry ? 'eye' : 'eye-off'}
+                    onPress={() => setSecureTextEntry(!secureTextEntry)}
+                    forceTextInputFocus={false}
+                /> : null}
                 theme={{
                     roundness: 5,
                     colors: {
@@ -24,17 +34,14 @@ const Input = ({ errorText, ...props }) => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-        width: '100%',
-    },
     input: {
         width: '100%',
         height: 50,
         margin: 'auto',
         borderRadius: "50px",
         backgroundColor: '#fff',
-        marginVertical: 10,marginVertical: 10,
-        
+        marginVertical: 10,
+        marginVertical: 10,        
     },
     error: {
         fontSize: 14,
