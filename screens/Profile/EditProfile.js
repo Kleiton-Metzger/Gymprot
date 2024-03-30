@@ -112,8 +112,9 @@ export const EditProfile = () => {
     const handleUpdateAvatar = async (uid) => {
         try {
             const photoURL = await uploadToFirebase(avatar, uid);
-            await deleteOldAvatar(uid);
+            await deleteOldAvatar(uid);  
             return photoURL;
+
         } catch (error) {
             console.error('Error updating avatar: ', error);
             throw error;
@@ -140,7 +141,17 @@ export const EditProfile = () => {
             throw error;
         }
     };
-
+    const handleDeleteAvatar = async () => {
+        try {
+            // Delete o avatar da base de dados
+            await deleteOldAvatar(auth.currentUser.uid);
+            // Set o avatar como null no estado
+            setAvatar(null);
+            console.log('Avatar deleted successfully');
+        } catch (error) {
+            console.error('Error deleting avatar: ', error);
+        }
+    };
     const deleteOldAvatar = async (uid) => {
         try {
             const userDocSnap = await getDoc(doc(db, 'users', uid));
@@ -170,12 +181,15 @@ export const EditProfile = () => {
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
                 <BackBtn label="Voltar" onPress={() => navigation.goBack()} />
                 <View style={styles.body}>
-                    <TouchableOpacity onPress={pickImage}>
+                    <TouchableOpacity onPress={pickImage} >
                         {avatar ? (
                             <Avatar.Image size={150} source={{ uri: avatar }} />
                         ) : (
                             <Avatar.Image size={150} source={require('../../assets/avatar.png')} />
                         )}
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={handleDeleteAvatar} style={styles.deleteButton}>
+                           <Text style={styles.deleteButtonText}>Remover Avatar</Text>
                     </TouchableOpacity>
 
                     <View style={styles.inputContainer}>
@@ -299,11 +313,11 @@ const styles = StyleSheet.create({
     buttonContainer: {
         backgroundColor: 'rgba(88, 29, 185, 1)',
         padding: 10,
-        width: '40%',
+        width: '50%',
         alignItems: 'center',
         borderRadius: 5,
         marginVertical: 10,
-        top: 20,
+        top: 15,
     },
     genderButton: {
         marginTop: 10,
@@ -322,5 +336,14 @@ const styles = StyleSheet.create({
         color: 'black',
         fontSize: 16,
         marginTop: 10,
+    },
+    deleteButton: {
+        marginTop: 5,
+        borderColor: 'red',
+        borderRadius: 5,
+    },
+    deleteButtonText: {
+        color: 'red',
+        fontSize: 10,
     },
 });
