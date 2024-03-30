@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
   },
   videoItem: {
     backgroundColor: "#ccc",
-    width: 320,
+    width: "100%",
     height: 200,
     justifyContent: "center",
     alignItems: "center",
@@ -60,11 +60,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 5,
   },
-  title: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
+  
   location: {
     fontSize: 14,
     color: 'gray',
@@ -102,14 +98,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  relatedVideosContainer: {
-    marginTop: 10,
-  },
-  relatedVideo: {
-    fontSize: 14,
-    color: 'gray',
-    marginRight: 10,
-  },
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -118,6 +106,17 @@ const styles = StyleSheet.create({
   locationIcon: {
     marginRight: 5,
   },
+  tipo: {
+    fontSize: 14,
+    color: 'gray',
+  },
+  video: {
+    width: 300,
+    height: "100%",
+    borderRadius: 20,
+  },
+  
+
 });
 
 export default styles;

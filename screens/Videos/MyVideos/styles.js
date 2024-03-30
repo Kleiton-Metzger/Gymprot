@@ -3,27 +3,16 @@ import { StyleSheet } from 'react-native';
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "white",
-    },
-    opcbar: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-        backgroundColor: 'rgba(154, 151, 151, 1)',
-        borderBottomWidth: 1,
-        borderBottomColor: 'black',
-        top: "20%",
-        borderRadius: 25,
-        height: 50,
+        width: '100%',
+        height: '100%',
+        backgroundColor: '#fff',
     },
-    buttonText: {
-        fontSize: 20,
-        color: 'black',
-        fontWeight: 'bold',
+    segmentedButtons: {
+         width: '90%',
+         margin: 10,
+         padding: 10,
     },
-  
 });
 
 export default styles;  

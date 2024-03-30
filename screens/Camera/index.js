@@ -178,7 +178,7 @@ export const CameraScreen = ({}) => {
             speed,
             elevation,
             type: "Running" ,
-            status: "Private",
+            status: "Public",
            
         });
     } catch (error) {

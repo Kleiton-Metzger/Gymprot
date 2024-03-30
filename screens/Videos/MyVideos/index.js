@@ -1,38 +1,30 @@
 import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
-import { useNavigation, useRoute } from "@react-navigation/native";
-import PublicScreen from "../PublicVideos/index.js";
-import PrivateScreen from "../PrivateVideos/index.js";
-import styles from "./styles.js";
+import { SafeAreaView,View, Text } from "react-native";
+import { SegmentedButtons } from 'react-native-paper';
+import { PrivateScreen } from "../PrivateVideos";
+import { PublicScreen } from "../PublicVideos";
+import styles from "./styles";
 
 export const MyVideos = () => {
-    const navigation = useNavigation();
-    const route = useRoute();
-    // Check the route name to determine which content to render
-    const renderContent = () => {
-        switch (route.name) {
-            case 'PublicScreen':
-                return <PublicScreen />;
-            case 'PrivateScreen':
-                return <PrivateScreen />;
-            default:
-                return null;
-        }
-    };
+    const [value, setValue] = React.useState('public');
 
     return (
-        <View style={styles.container}>
-            <View style={styles.opcbar}>
-                <TouchableOpacity onPress={() => navigation.navigate('PublicScreen')}>
-                    <Text style={styles.buttonText}>Public</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate('PrivateScreen')}>
-                    <Text style={styles.buttonText}>Private</Text>
-                </TouchableOpacity>
+        <SafeAreaView style={styles.container}>
+            <SegmentedButtons
+                style={styles.segmentedButtons}
+                value={value}
+                onValueChange={setValue}
+                buttons={[
+                    { value: 'public', label: 'Public', icon: 'earth',checkedColor: 'green', uncheckedColor: 'red' },
+                    { value: 'private', label: 'Private' , icon: 'lock' ,checkedColor: 'green', uncheckedColor: 'red' },
+                ]}
+                
+            />
+            <View >
+       {value === 'public' ? <PublicScreen /> : <PrivateScreen />}
             </View>
-            {/* Render content based on the current route */}
-            {renderContent()}
-        </View>
+        </SafeAreaView>
     );
 }
+
 

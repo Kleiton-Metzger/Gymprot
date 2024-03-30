@@ -3,8 +3,8 @@ import { View, Text, TextInput, TouchableOpacity, Image, FlatList, Alert } from 
 import { Feather } from "@expo/vector-icons";
 import { collection, onSnapshot, doc, getDoc } from 'firebase/firestore';
 import { db } from '../../storage/Firebase';
-import styles  from './styles';
-import VideoPlayer from 'react-native-video-player';
+import { Video } from 'expo-av';
+import styles from './styles';
 
 export const HomeScreen = () => {
   const [searchPhrase, setSearchPhrase] = useState('');
@@ -49,16 +49,14 @@ export const HomeScreen = () => {
   }, [videos]);
 
   useEffect(() => {
-    // Aplica filtro de pesquisa quando o texto de pesquisa muda
+    // Apply search filter when the search phrase changes
     const filtered = videos.filter(video => 
       video.location?.cityName?.toLowerCase().includes(searchPhrase.toLowerCase()) 
     );
     setSearchResults(filtered);
   }, [searchPhrase, videos]);
 
-  const handleVideoClick = (id, title) => {
-    Alert.alert('Video Clicked', `Video ID: ${id}`);
-  };
+ 
 
   return (
     <View style={styles.container}>
@@ -73,7 +71,7 @@ export const HomeScreen = () => {
         />
         {searchPhrase ? (
           <TouchableOpacity style={styles.cancelButton} onPress={() => setSearchPhrase('')}>
-            <Text style={styles.cancelText}>Cancel</Text>
+            <Text style={styles.cancelText}>Cancelar</Text>
           </TouchableOpacity>
         ) : null}
       </View>
@@ -81,20 +79,20 @@ export const HomeScreen = () => {
         data={searchPhrase ? searchResults : filteredVideos.filter(video => video.status === "Public")}
         renderItem={({ item }) => (
           <View style={styles.infoContainer}>
-            <UserInfo
+          <UserInfo
               userName={item.creatorName}
               location={item.location?.cityName || ''}
               tipo={item.type}
               creatorAvatar={item.creatorAvatar}
-            />
-            <VideoItem item={item} onPress={() => handleVideoClick(item.id, item.title)} />
-          </View>
+          />
+          <VideoItem video={item.videoURL} />
+      </View>
         )}
         keyExtractor={item => item.id.toString()}
         contentContainerStyle={styles.videoGridContainer}
         removeClippedSubviews={true}
         ListEmptyComponent={() => (
-          <Text style={styles.emptyText}>Nenhum video encontrado nesta localização</Text>
+          <Text style={styles.emptyText}>Nenhum vídeo encontrado nesta localização</Text>
         )}
       />
     </View>
@@ -115,21 +113,14 @@ const UserInfo = ({ userName, location, tipo, creatorAvatar }) => (
   </View>
 );
 
-
-const VideoItem = ({ item, onPress }) => (
-  <TouchableOpacity onPress={onPress}>
-    <View style={styles.videoItem}>
-      <Text style={styles.title}>{item.title}</Text>
-      <FlatList
-        data={item.relatedVideos}
-        renderItem={({ item }) => (
-          <Text style={styles.relatedVideo}>{item.title}</Text>
-        )}
-        keyExtractor={item => item.id.toString()}
-        horizontal={true}
-        contentContainerStyle={styles.relatedVideosContainer}
-      />
-    </View>
-  </TouchableOpacity>
+const VideoItem = ({ video }) => (
+  <TouchableOpacity style={styles.videoItem}>
+  <Video
+      style={styles.video}
+      source={{ uri: video }}
+      useNativeControls
+      resizeMode="contain"
+      
+  />
+</TouchableOpacity>
 );
-
