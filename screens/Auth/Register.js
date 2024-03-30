@@ -21,6 +21,12 @@ export const Register = () => {
     const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false); // State to manage confirm password visibility
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [nameError, setNameError] = useState('');
+    const [emailError, setEmailError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
+    const [confirmPasswordError, setConfirmPasswordError] = useState('');
+
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(user => {
@@ -34,7 +40,33 @@ export const Register = () => {
     }, [loading, navigation]);
 
     const handleSignUp = () => {
-        // Validate password and confirm password
+
+        setNameError('');
+        setEmailError('');
+        setPasswordError('');
+        setConfirmPasswordError('');
+
+        // Validate name, email, password, and confirm password
+        if (!name.trim() && !email.trim() && !password.trim() && !confirmPassword.trim()) {
+            alert('Please enter your name, email, password, and confirm password to register an account');
+            return;
+        }
+        if (!name.trim()) {
+            setNameError('Please enter your name');
+            return;
+        }
+        if (!email.trim()) {
+            setEmailError('Please enter your email');
+            return;
+        }
+        if (!password.trim()) {
+            setPasswordError('Please enter your password');
+            return;
+        }
+        if (!confirmPassword.trim()) {
+            setConfirmPassword('Please enter your confirm password');
+            return;
+        }
         if (password !== confirmPassword) {
             alert("Passwords do not match!");
             return;
@@ -45,6 +77,7 @@ export const Register = () => {
                 const user = userCredential.user;
                 console.log('Registered with:', user.email);
                 setDoc(doc(db, "users", user.uid), {
+
                     name: name,
                     email: email,
                     userId: user.uid,
@@ -60,7 +93,7 @@ export const Register = () => {
                 <DismissKeyboard>
                     <View style={styles.container}>
                     <Logo />
-                        <Header> Register </Header>
+                        <Header>Register</Header>
                         <View style={styles.inputContainer}>
                             <Input
                             mode='outlined'
@@ -70,6 +103,7 @@ export const Register = () => {
                             returnKeyType='next'
                             value={name}
                             onChangeText={setName}
+                            errorText={nameError}
                             />
                             <Input
                             mode='outlined'
@@ -79,26 +113,29 @@ export const Register = () => {
                             returnKeyType='next'
                             value={email}
                             onChangeText={setEmail}
+                            errorText={emailError}
                             />
                             <Input
                             mode='outlined'
                             label='Password'
                             color="#581DB9"
                             underline="#581DB9"
-                            secureTextEntry={!passwordVisible}
+                            textContentType='password'
                             returnKeyType='next'
                             value={password}
                             onChangeText={setPassword}
+                            errorText={passwordError}
                             />
                             <Input
                             mode='outlined'
                             label='Confirm Password'
                             color="#581DB9"
                             underline="#581DB9"
-                            secureTextEntry={!confirmPasswordVisible}
+                            textContentType='password'
                             returnKeyType='done'
                             value={confirmPassword}
                             onChangeText={setConfirmPassword}
+                            errorText={confirmPasswordError}
                             />
                            <Button onPress={handleSignUp} label="Register" />
                             <Text style={styles.textRegister}>
