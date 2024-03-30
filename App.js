@@ -1,11 +1,12 @@
-import React, {useState} from 'react';
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { FirebaseContext } from './contexts/auth';
+import {PaperProvider} from 'react-native-paper';
 
-import  { Profile, CameraScreen, HomeScreen, UploadScreen, Login, Register, MyVideos, PrivateScreen, PublicScreen, EditProfile} from './screens';
+import  { Profile, CameraScreen, HomeScreen, UploadScreen, Login, Register, MyVideos, PrivateScreen, PublicScreen, EditProfile,ForgotPassword} from './screens';
 
 import { getTabIconName }from './utils'
 
@@ -41,11 +42,14 @@ export default function App() {
   }
 
   return (
+
+    <PaperProvider>
     <NavigationContainer>
       <FirebaseContext.Provider value={{}}>
       <Stack.Navigator>
         <Stack.Screen name="Login" component={Login} options={{ headerShown: false, gestureEnabled:false }} />
-        <Stack.Screen name="Register" component={Register} options={{ headerShown: false }} />
+        <Stack.Screen name="Register" component={Register} options={{ headerShown: false,gestureEnabled:false}} />
+        <Stack.Screen name="ForgotPassword" component={ForgotPassword} options={{ headerShown: false }} />
         <Stack.Screen name="ProfileScreen" component={TabNavigator} options={{ headerShown: false,gestureEnabled: false  }} />
         <Stack.Screen name="PublicScreen" component={PublicScreen} options={{ headerShown: false,gestureEnabled:false }} />
         <Stack.Screen name="PrivateScreen" component={PrivateScreen} options={{ headerShown: false,gestureEnabled:false }} />
@@ -53,5 +57,6 @@ export default function App() {
       </Stack.Navigator>
       </FirebaseContext.Provider>
     </NavigationContainer>
+    </PaperProvider>
   );
 }
