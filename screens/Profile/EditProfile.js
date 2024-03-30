@@ -1,23 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { auth, db } from '../../storage/Firebase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
+import { DismissKeyboard, Input, Button as BTN, BackBtn } from '../../components'
+import { Dialog, Portal, Button as PaperButton, RadioButton,Avatar } from 'react-native-paper';
 
 export const EditProfile = () => {
     const navigation = useNavigation();
-
     const [name, setName] = useState('');
     const [age, setAge] = useState('');
     const [weight, setWeight] = useState('');
     const [height, setHeight] = useState('');
     const [gender, setGender] = useState('');
     const [password, setPassword] = useState('');
-    const [passwordVisible, setPasswordVisible] = useState(false);
     const [avatar, setAvatar] = useState(null);
+    const [visible, setVisible] = useState(false);
+
+    const hideDialog = () => setVisible(false);
+    const showDialog = () => setVisible(true);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -39,6 +43,7 @@ export const EditProfile = () => {
         fetchUserData();
     }, []);
 
+
     const pickImage = async () => {
         try {
             const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -46,21 +51,25 @@ export const EditProfile = () => {
                 console.error('Permission to access camera roll was denied');
                 return;
             }
-            
+    
             const result = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ImagePicker.MediaTypeOptions.All,
                 quality: 1,
                 allowsEditing: true,
                 aspect: [4, 3],
             });
-            
+    
             if (!result.canceled) {
                 setAvatar(result.assets[0].uri);
+            } else {
+                // Se o usuário cancelou a seleção da imagem, mantenha o avatar como null
+                setAvatar(null);
             }
         } catch (error) {
             console.error('Error picking image: ', error);
         }
     };
+    
 
     const handleUpdateProfile = async () => {
         try {
@@ -69,29 +78,15 @@ export const EditProfile = () => {
                 console.error('User not signed in');
                 return;
             }
-
+    
             const updates = {};
-
-            if (name.trim() !== '') {
-                updates.name = name.trim();
-            }
-
-            if (age.trim() !== '') {
-                updates.age = age.trim();
-            }
-
-            if (weight.trim() !== '') {
-                updates.weight = weight.trim();
-            }
-
-            if (height.trim() !== '') {
-                updates.height = height.trim();
-            }
-
-            if (gender.trim() !== '') {
-                updates.gender = gender.trim();
-            }
-
+    
+            if (name.trim() !== '') updates.name = name.trim();
+            if (age.trim() !== '') updates.age = age.trim();
+            if (weight.trim() !== '') updates.weight = weight.trim();
+            if (height.trim() !== '') updates.height = height.trim();
+            if (gender.trim() !== '') updates.gender = gender.trim();
+    
             if (password.trim() !== '') {
                 try {
                     await currentUser.updatePassword(password.trim());
@@ -100,31 +95,46 @@ export const EditProfile = () => {
                     console.error('Error updating password:', error);
                 }
             }
-
-            if (avatar !== null) {
-                try {
-                    const photoURL = await uploadToFirebase(avatar);
-                    updates.photoURL = photoURL;
-                    //console.log('Avatar uploaded successfully');
-                } catch (error) {
-                    console.error('Error uploading avatar:', error);
-                }
+    
+            if (avatar) {
+                await handleUpdateAvatar(currentUser.uid, updates);
             }
-
-            if (Object.keys(updates).length > 0) {  
+    
+            if (Object.keys(updates).length > 0) {
                 await setDoc(doc(db, 'users', currentUser.uid), updates, { merge: true });
-                console.log('Profile updated successfully'); 
+                console.log('Profile updated successfully');
             }
-
+    
             navigation.navigate('Profile');
         } catch (error) {
             console.error('Error updating profile: ', error);
         }
     };
+    
+
+    const handleUpdateAvatar = async (uid, updates) => {
+        try {
+            const currentUser = auth.currentUser;
+            if (!currentUser) {
+                console.error('User not signed in');
+                return;
+            }
+       if (avatar) {
+            const photoURL = await uploadToFirebase(avatar); //
+            updates.photoURL = photoURL;
+            await deleteOldAvatar(uid);
+        }
+    }
+        catch (error) {
+            console.error('Error updating avatar: ', error);
+        }
+    }
+
+            
 
     const uploadToFirebase = async (uri) => {
         const storage = getStorage();
-        const fileName = `${auth.currentUser.uid}-${uuidv4()}.jpg`;
+        const fileName = `${auth.currentUser.uid}-${uuidv4()}.png`;
         const storageRef = ref(storage, `avatars/${fileName}`);
 
         try {
@@ -143,169 +153,186 @@ export const EditProfile = () => {
         }
     };
 
+    const deleteOldAvatar = async (uid) => {
+        try {
+            const userDocSnap = await getDoc(doc(db, 'users', uid));
+            if (userDocSnap.exists()) {
+                const userData = userDocSnap.data();
+                const oldPhotoURL = userData.photoURL;
+                if (oldPhotoURL) {
+                    const storage = getStorage();
+                    const oldAvatarRef = ref(storage, oldPhotoURL);
+                    await deleteObject(oldAvatarRef);
+                }
+            }
+        } catch (error) {
+            if (error.code === 'storage/object-not-found') {
+                console.log('Old avatar not found in storage');
+            } else {
+                console.error('Error deleting old avatar:', error.code, error.message);
+            }
+        }
+    };
+
     return (
-        <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : null}>
-            <TouchableOpacity style={styles.backContainer} onPress={() => navigation.navigate('Profile')}>
-                <Image source={require('../../assets/back.png')} style={styles.backbtn} />
-                <Text style={styles.backtxt}>Profile</Text>
-            </TouchableOpacity>
+        <DismissKeyboard>
+            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
 
-            <TouchableOpacity style={styles.avatarContainer} onPress={pickImage}>
-                <Image source={avatar ? { uri: avatar } : require('../../assets/avatar.jpg')} style={styles.avatar} />
-            </TouchableOpacity>
+                <BackBtn label="Voltar" onPress={() => navigation.goBack()} />
+                <View style={styles.body}>
+                <TouchableOpacity onPress={pickImage}>
+                        {avatar ? (
+                            <Avatar.Image size={150} source={{ uri: avatar }} />
+                        ) : (
+                            <Avatar.Image size={150} source={require('../../assets/avatar.png')} />
+                        )}
+                    </TouchableOpacity>
 
-            <Text style={styles.text}>Nome</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="Nome"
-                value={name}
-                onChangeText={setName}
-            />
-            <Text style={styles.text}>Idade</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="Idade"
-                value={age}
-                onChangeText={setAge}
-                keyboardType="numeric"
-            />
-            <Text style={styles.text}>Peso (kg)</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="Peso"
-                value={weight}
-                onChangeText={setWeight}
-                keyboardType="numeric"
-            />
-            <Text style={styles.text}>Altura (cm)</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="Altura"
-                value={height}
-                onChangeText={setHeight}
-                keyboardType="numeric"
-            />
-            <Text style={styles.text}>Genero</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="Genero"
-                value={gender}
-                onChangeText={setGender}
-            />
-            <Text style={styles.text}>Password</Text>
-            <View style={styles.passwordInputContainer}>
-                <TextInput
-                    style={styles.passwordInput}
-                    placeholder="Password"
-                    value={password}
-                    secureTextEntry={!passwordVisible}
-                    onChangeText={setPassword}
-                />
-                <TouchableOpacity
-                    style={styles.visibilityIcon}
-                    onPress={() => setPasswordVisible(!passwordVisible)}>
-                    <Image
-                        source={passwordVisible ? require('../../assets/eye-open.png') : require('../../assets/eye-closed.png')}
-                        style={styles.eyeIcon}
-                    />
-                </TouchableOpacity>
-            </View>
+                    <View style={styles.inputContainer}>
 
-            <TouchableOpacity style={styles.buttonContainer} onPress={handleUpdateProfile}>
-                <Text style={styles.buttonText}>Update</Text>
-            </TouchableOpacity>
-        </KeyboardAvoidingView>
+                        <Input
+                            mode='outlined'
+                            label='Name'
+                            color='#581DB9'
+                            underline='#581DB9'
+                            returnKeyType='next'
+                            value={name}
+                            onChangeText={setName}
+                            autoCapitalize='words'
+                            textContentType='name'
+                            keyboardType='default'
+                        />
+                        <View style={styles.rowContainer}>
+                            <Input
+                                mode='outlined'
+                                label='Idade'
+                                color='#581DB9'
+                                underline='#581DB9'
+                                returnKeyType='next'
+                                value={age}
+                                onChangeText={setAge}
+                                autoCapitalize='none'
+                                textContentType='none'
+                                keyboardType='numeric'
+                                width={"45%"}
+                                />
+                            <Input
+                                mode='outlined'
+                                label='Peso'
+                                color='#581DB9'
+                                underline='#581DB9'
+                                returnKeyType='next'
+                                value={weight}
+                                onChangeText={setWeight}
+                                autoCapitalize='none'
+                                textContentType='none'
+                                keyboardType='numeric'
+                                width={"45%"}
+                                />
+                        </View>
+                        <Input
+                            mode='outlined'
+                            label='Altura'
+                            color='#581DB9'
+                            underline='#581DB9'
+                            returnKeyType='next'
+                            value={height}
+                            onChangeText={setHeight}
+                            autoCapitalize='none'
+                            textContentType='none'
+                            keyboardType='numeric'
+                        />
+                        <Input
+                            mode='outlined'
+                            label='Password'
+                            color='#581DB9'
+                            underline='#581DB9'
+                            returnKeyType='done'
+                            value={password}
+                            onChangeText={setPassword}
+                            autoCapitalize='none'
+                            textContentType='password'
+                            keyboardType='default'
+                            containerStyle={styles.input}
+                        />
+                         <Text style={styles.genderopcText}>Selecione o gênero</Text>
+                        <TouchableOpacity onPress={showDialog} style={styles.genderButton}>
+                            <Text style={styles.genderButtonText}>{gender ? (gender === '1' ? 'Masculino' : gender === '2' ? 'Feminino' : 'Outro') : 'Selecione o Gênero'}</Text>
+                        </TouchableOpacity>
+                        <Portal>
+                            <Dialog visible={visible} onDismiss={hideDialog}>
+                                <Dialog.Title>Gênero</Dialog.Title>
+                                <Dialog.Content>
+                                    <RadioButton.Group onValueChange={newValue => setGender(newValue)} value={gender}>
+                                        <RadioButton.Item label="Masculino" value="1" />
+                                        <RadioButton.Item label="Feminino" value="2" />
+                                        <RadioButton.Item label="Outro" value="3" />
+                                    </RadioButton.Group>
+                                </Dialog.Content>
+                                <Dialog.Actions>
+                                    <PaperButton onPress={hideDialog}>Cancelar</PaperButton>
+                                    <PaperButton onPress={hideDialog}>OK</PaperButton>
+                                </Dialog.Actions>
+                            </Dialog>
+                        </Portal>
+                        <BTN onPress={handleUpdateProfile} label="Atualizar" style={styles.buttonContainer} />
+                    </View>
+                </View>
+            </KeyboardAvoidingView>
+        </DismissKeyboard>
+
     );
-}
+};
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+    },
+    body: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: "100%",
+        marginTop: "20%",
+    },
+    inputContainer: {
+        width: "100%",
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'white',
     },
-    backContainer: {
-        position: 'absolute',
-        top: 50,
-        left: 20,
+    rowContainer: {
         flexDirection: 'row',
-        alignItems: 'center',
-        padding: 10,
-    },
-    backbtn: {
-        width: 30,
-        height: 30,
-        marginRight: 10,
-    },
-    backtxt: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: 'black',
-    },
-    avatarContainer: {
+        justifyContent: 'space-between',
+        width: '100%',
         marginBottom: 20,
-    },
-    avatar: {
-        width: 150,
-        height: 150,
-        borderRadius: 75,
-        borderColor: 'black',
-        borderWidth: 1,
-    },
-    text: {
-        color: 'black',
-        fontWeight: 'bold',
-        fontSize: 15,
-        textAlign: 'left',
-        width: '80%',
-        marginBottom: 10,
-    },
-    input: {
-        width: '80%',
-        height: 40,
-        backgroundColor: 'white',
-        borderWidth: 1,
-        borderColor: 'black',
-        marginBottom: 20,
-        paddingLeft: 10,
-        borderRadius: 25,
     },
     buttonContainer: {
         backgroundColor: 'rgba(88, 29, 185, 1)',
-        padding: 15,
-        width: '45%',
-        alignItems: 'center',
-        borderRadius: 25,
-        top: 20,
-        borderColor: 'black',
-        borderWidth: 1,
-    },
-    buttonText: {
-        color: 'white',
-        fontWeight: 'bold',
-        fontSize: 20,
-    },
-    passwordInputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        width: '80%',
-        marginBottom: 20,
-        borderRadius: 25,
-        borderColor: 'black',
-        borderWidth: 1,
-        backgroundColor: 'white',
-    },
-    passwordInput: {
-        flex: 1,
-        height: 40,
-        paddingLeft: 10,
-    },
-    visibilityIcon: {
         padding: 10,
+        width: '40%',
+        alignItems: 'center',
+        borderRadius: 5,
+        marginVertical: 10,
+        top: 20,
     },
-    eyeIcon: {
-        width: 20,
-        height: 20,
+    genderButton: {
+        marginTop: 10,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderWidth: 1,
+        borderColor: '#581DB9',
+        borderRadius: 5,
+        backgroundColor: '#fff',
+    },
+    genderButtonText: {
+        color: '#581DB9',
+        fontSize: 16,
+    },
+    genderopcText: {
+        color: 'black',
+        fontSize: 16,
+        marginTop: 10,
     },
 });
+

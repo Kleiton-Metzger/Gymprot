@@ -4,6 +4,9 @@ import { useNavigation } from '@react-navigation/native';
 import { doc, onSnapshot } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { db, auth } from '../../storage/Firebase';
+import {Button } from '../../components'
+import { getUSerSex } from '../../utils';
+import { Avatar } from 'react-native-paper';
 
 export const Profile = () => {
   const navigation = useNavigation();
@@ -36,14 +39,23 @@ export const Profile = () => {
 
     // Clean up the listener when the component unmounts
     return () => unsubscribe();
+    
   }, []);
+
+
+
+  useEffect(() => {
+    if (userData) {
+    }
+  }, [userData]);
+
+
 
   const handleSignOut = () => {
     auth
       .signOut()
       .then(() => {
         navigation.replace('Login');
-        console.log('User signed out!');
       })
       .catch(error => alert(error.message));
   };
@@ -57,26 +69,24 @@ export const Profile = () => {
       <TouchableOpacity style={styles.editContainer} onPress={handleMenuPress}>
         <Image source={require('../../assets/edit.png')} style={styles.editIcon} />
       </TouchableOpacity>
-
-      <TouchableOpacity onPress={handleMenuPress}>
-        <Image source={userData?.photoURL ? { uri: userData.photoURL } : require('../../assets/avatar.jpg')} style={styles.avatar} />
-      </TouchableOpacity>
+     
+      
+       {userData && userData.photoURL ?
+        (<Avatar.Image size={150} source={{ uri: userData.photoURL }} /> ) :
+        ( <Avatar.Image size={150} source={require('../../assets/avatar.png')} />)}
+       
 
       {userData && (
         <View style={styles.userDataContainer}>
           <UserData label="Nome" value={userData.name} />
           <UserData label="Email" value={userData.email} />
           <UserData label="Idade" value={userData.age} />
-          <UserData label="Peso" value={userData.weight} />
-          <UserData label="Altura" value={userData.height} />
-          <UserData label="Gênero" value={userData.gender} />
+          <UserData label="Sexo" value={getUSerSex(userData.gender)} />
         </View>
         
       )}
 
-      <TouchableOpacity style={styles.buttonContainer} onPress={handleSignOut}>
-        <Text style={styles.buttonText}>Logout</Text>
-      </TouchableOpacity>
+      <Button onPress={handleSignOut} label="Logout" style={styles.buttonContainer} />  
     </View>
   );
 };
@@ -104,20 +114,21 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
   },
-  avatar: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    marginBottom: 20,
-    borderColor: 'black',
-    borderWidth: 1,
+  deltContainer: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+  },
+  dltText: {
+    color: 'red',
+    fontSize: 15,
   },
   buttonContainer: {
     backgroundColor: 'rgba(88, 29, 185, 1)',
     padding: 10,
     width: '40%',
     alignItems: 'center',
-    borderRadius: 25,
+    borderRadius: 5,
     marginVertical: 10,
   },
   buttonText: {
@@ -126,6 +137,7 @@ const styles = StyleSheet.create({
   },
   userDataContainer: {
     alignItems: 'center',
+    padding: 20,
   },
   userData: {
     flexDirection: 'row',
