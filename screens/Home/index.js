@@ -50,13 +50,13 @@ export const HomeScreen = () => {
 
   useEffect(() => {
     // Apply search filter when the search phrase changes
-    const filtered = videos.filter(video => 
+    const filtered = filteredVideos.filter(video => 
       video.location?.cityName?.toLowerCase().includes(searchPhrase.toLowerCase()) 
     );
     setSearchResults(filtered);
   }, [searchPhrase, videos]);
 
- 
+ console.log("\n \n", filteredVideos, "___________________________________")
 
   return (
     <View style={styles.container}>
