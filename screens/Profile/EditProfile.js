@@ -7,10 +7,11 @@ import { auth, db } from '../../storage/Firebase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import { DismissKeyboard, Input, Button as BTN, BackBtn } from '../../components'
-import { Dialog, Portal, Button as PaperButton, RadioButton,Avatar } from 'react-native-paper';
+import { Dialog, Portal, Button as PaperButton, RadioButton, Avatar } from 'react-native-paper';
 
 export const EditProfile = () => {
     const navigation = useNavigation();
+    const [userData, setUserData] = useState(null);
     const [name, setName] = useState('');
     const [age, setAge] = useState('');
     const [weight, setWeight] = useState('');
@@ -20,15 +21,13 @@ export const EditProfile = () => {
     const [avatar, setAvatar] = useState(null);
     const [visible, setVisible] = useState(false);
 
-    const hideDialog = () => setVisible(false);
-    const showDialog = () => setVisible(true);
-
     useEffect(() => {
         const fetchUserData = async () => {
             try {
                 const userDocSnap = await getDoc(doc(db, 'users', auth.currentUser.uid));
                 if (userDocSnap.exists()) {
                     const userData = userDocSnap.data();
+                    setUserData(userData);
                     setName(userData.name);
                     setAge(userData.age || '');
                     setWeight(userData.weight || '');
@@ -42,7 +41,6 @@ export const EditProfile = () => {
         };
         fetchUserData();
     }, []);
-
 
     const pickImage = async () => {
         try {
@@ -69,7 +67,6 @@ export const EditProfile = () => {
             console.error('Error picking image: ', error);
         }
     };
-    
 
     const handleUpdateProfile = async () => {
         try {
@@ -81,11 +78,11 @@ export const EditProfile = () => {
     
             const updates = {};
     
-            if (name.trim() !== '') updates.name = name.trim();
-            if (age.trim() !== '') updates.age = age.trim();
-            if (weight.trim() !== '') updates.weight = weight.trim();
-            if (height.trim() !== '') updates.height = height.trim();
-            if (gender.trim() !== '') updates.gender = gender.trim();
+            if (name.trim() !== '' && name !== userData.name) updates.name = name.trim();
+            if (age.trim() !== '' && age !== userData.age) updates.age = age.trim();
+            if (weight.trim() !== '' && weight !== userData.weight) updates.weight = weight.trim();
+            if (height.trim() !== '' && height !== userData.height) updates.height = height.trim();
+            if (gender.trim() !== '' && gender !== userData.gender) updates.gender = gender.trim();
     
             if (password.trim() !== '') {
                 try {
@@ -96,8 +93,9 @@ export const EditProfile = () => {
                 }
             }
     
-            if (avatar) {
-                await handleUpdateAvatar(currentUser.uid, updates);
+            if (avatar && userData.photoURL !== avatar) {
+                const photoURL = await handleUpdateAvatar(currentUser.uid);
+                updates.photoURL = photoURL;
             }
     
             if (Object.keys(updates).length > 0) {
@@ -111,30 +109,20 @@ export const EditProfile = () => {
         }
     };
     
-
-    const handleUpdateAvatar = async (uid, updates) => {
+    const handleUpdateAvatar = async (uid) => {
         try {
-            const currentUser = auth.currentUser;
-            if (!currentUser) {
-                console.error('User not signed in');
-                return;
-            }
-       if (avatar) {
-            const photoURL = await uploadToFirebase(avatar); //
-            updates.photoURL = photoURL;
+            const photoURL = await uploadToFirebase(avatar, uid);
             await deleteOldAvatar(uid);
-        }
-    }
-        catch (error) {
+            return photoURL;
+        } catch (error) {
             console.error('Error updating avatar: ', error);
+            throw error;
         }
     }
-
             
-
-    const uploadToFirebase = async (uri) => {
+    const uploadToFirebase = async (uri, uid) => {
         const storage = getStorage();
-        const fileName = `${auth.currentUser.uid}-${uuidv4()}.png`;
+        const fileName = `${uid}-${uuidv4()}.png`;
         const storageRef = ref(storage, `avatars/${fileName}`);
 
         try {
@@ -174,13 +162,15 @@ export const EditProfile = () => {
         }
     };
 
+    const hideDialog = () => setVisible(false);
+    const showDialog = () => setVisible(true);
+
     return (
         <DismissKeyboard>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
-
                 <BackBtn label="Voltar" onPress={() => navigation.goBack()} />
                 <View style={styles.body}>
-                <TouchableOpacity onPress={pickImage}>
+                    <TouchableOpacity onPress={pickImage}>
                         {avatar ? (
                             <Avatar.Image size={150} source={{ uri: avatar }} />
                         ) : (
@@ -189,7 +179,6 @@ export const EditProfile = () => {
                     </TouchableOpacity>
 
                     <View style={styles.inputContainer}>
-
                         <Input
                             mode='outlined'
                             label='Name'
@@ -215,7 +204,7 @@ export const EditProfile = () => {
                                 textContentType='none'
                                 keyboardType='numeric'
                                 width={"45%"}
-                                />
+                            />
                             <Input
                                 mode='outlined'
                                 label='Peso'
@@ -228,7 +217,7 @@ export const EditProfile = () => {
                                 textContentType='none'
                                 keyboardType='numeric'
                                 width={"45%"}
-                                />
+                            />
                         </View>
                         <Input
                             mode='outlined'
@@ -335,4 +324,3 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
 });
-

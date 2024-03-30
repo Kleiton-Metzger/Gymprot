@@ -56,7 +56,6 @@ export const HomeScreen = () => {
     setSearchResults(filtered);
   }, [searchPhrase, videos]);
 
- console.log("\n \n", filteredVideos, "___________________________________")
 
   return (
     <View style={styles.container}>
