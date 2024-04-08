@@ -138,6 +138,7 @@ const styles = StyleSheet.create({
   userDataContainer: {
     alignItems: 'center',
     padding: 20,
+    marginVertical: 20,
   },
   userData: {
     flexDirection: 'row',
@@ -150,7 +151,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   userDataValue: {
-    fontSize: 16,
+    fontSize: 15,
     color: 'black',
   },
 });

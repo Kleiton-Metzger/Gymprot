@@ -17,7 +17,7 @@
     "@react-native-community/progress-view": "^1.4.2",
     "@react-native-firebase/firestore": "^19.0.0",
     "@react-native-firebase/storage": "^19.0.0",
-    "@react-native-picker/picker": "^2..4.10",
+    "@react-native-picker/picker": "^2.4.10",
     "@react-navigation/bottom-tabs": "^6.5.16",
     "@react-navigation/drawer": "^6.6.6",
     "@react-navigation/native": "^6.1.14",

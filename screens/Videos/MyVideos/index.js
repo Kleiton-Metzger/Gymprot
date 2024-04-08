@@ -15,8 +15,8 @@ export const MyVideos = () => {
                 value={value}
                 onValueChange={setValue}
                 buttons={[
-                    { value: 'public', label: 'Public', icon: 'earth',checkedColor: 'green', uncheckedColor: 'red' },
-                    { value: 'private', label: 'Private' , icon: 'lock' ,checkedColor: 'green', uncheckedColor: 'red' },
+                    { value: 'public', label: 'Public', icon: 'earth',checkedColor: '#581DB9', uncheckedColor: 'gray' },
+                    { value: 'private', label: 'Private' , icon: 'lock' ,checkedColor: '#581DB9', uncheckedColor: 'gray' },
                 ]}
                 
             />

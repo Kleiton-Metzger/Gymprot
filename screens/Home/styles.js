@@ -10,7 +10,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 20,
-    top: 15,
+    top: 20,
+    padding: 10,
   },
   searchBar: {
     flexDirection: "row",

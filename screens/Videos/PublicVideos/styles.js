@@ -4,7 +4,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    padding: 20,
   },  
   videoGridContainer: {
     marginTop: 20,
@@ -17,7 +16,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     margin: 5,
     borderRadius: 20,
-    padding: 10,
   },
   userName: {
     fontSize: 16,

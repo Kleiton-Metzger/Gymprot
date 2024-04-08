@@ -59,7 +59,7 @@ export const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.locationTxt}>Localização</Text>
+      <Text style={styles.locationTxt}>Ola, </Text>
       <View style={styles.searchBar}>
         <Feather name="search" size={20} color="black" style={styles.searchIcon} />
         <TextInput
@@ -105,7 +105,7 @@ const UserInfo = ({ userName, location, tipo, creatorAvatar }) => (
       <Text style={styles.userName}>{userName}</Text>
       <View style={styles.locationContainer}>
         <Feather name="map-pin" size={15} color="black" style={styles.locationIcon} />
-        <Text style={styles.location}>Localização: {location}</Text>
+        <Text style={styles.location}>{location}</Text>
       </View>
       <Text style={styles.tipo}>Tipo: {tipo}</Text>
     </View>

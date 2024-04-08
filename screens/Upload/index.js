@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
-import { getStorage, ref, uploadFile, getDownloadURL } from 'firebase/storage';
+import { getStorage, ref, uploadFile, getDownloadURL, uploadBytes } from 'firebase/storage';
 import { auth, db } from '../../storage/Firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
@@ -15,59 +15,62 @@ export const UploadScreen = () => {
             const document = await DocumentPicker.getDocumentAsync({ type: type });
             if (document.type === 'success') {
                 const { uri } = document;
-                if (type === 'video') {
-                    await uploadToFirebase(uri, 'video');
-                } else if (type === 'application/pdf') {
-                    await uploadToFirebase(uri, 'pdf');
-                }
+               
+                    await uploadToFirebase(uri);
+             
             }
         } catch (error) {
             console.error('Error picking file: ', error);
         }
     };
 
-    const uploadToFirebase = async (uri, fileType) => {
-        try {
-            const storage = getStorage();
-            const fileName = `${auth.currentUser.uid}-${uuidv4()}.${fileType}`;
-            const storageRef = ref(storage, `uploads/${fileName}`);
-            const uploadTask = uploadFile(storageRef, uri);
-
-            await uploadTask;
-            console.log(`${fileType.toUpperCase()} uploaded successfully`);
-            const downloadURL = await getDownloadURL(storageRef);
-
-            // Salvando a URL do documento e a referência do usuário no Firestore
-            await saveDocumentToFirestore(downloadURL, fileType);
-
-            console.log(`${fileType.toUpperCase()} URL:`, downloadURL);
-        } catch (error) {
-            console.error(`Error uploading ${fileType}: `, error);
-        }
-    };
-
-    const saveDocumentToFirestore = async (downloadURL, fileType) => {
-        try {
-            const userRef = doc(db, 'users', auth.currentUser.uid);
-            const userDoc = await getDoc(userRef);
-
-            if (userDoc.exists()) {
-                const userData = userDoc.data();
-
-                // Salvando a URL do documento e a referência do usuário
-                await setDoc(doc(db, 'uploads', uuidv4()), {
-                    userId: auth.currentUser.uid,
-                    userName: userData.name,
-                    downloadURL: downloadURL,
-                    fileType: fileType,
+    const uploadToFirebase = async (uri, type) => {
+        const storage = getStorage();
+        const userId = auth.currentUser.uid;
+        const uniqueId = uuidv4();
+        const storageRef = ref(storage, `${type}s/${userId}/${uniqueId}`);
+        const uploadTask = uploadFile(storageRef, uri);
+        uploadTask.on('state_changed',
+            (snapshot) => {
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                console.log(`Upload is ${progress}% done`);
+                switch (snapshot.state) {
+                    case 'paused':
+                        console.log('Upload is paused');
+                        break;
+                    case 'running':
+                        console.log('Upload is running');
+                        break;
+                }
+            },
+            (error) => {
+                console.error('Error uploading file: ', error);
+            },
+            () => {
+                getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
+                    console.log('File available at', downloadURL);
+                    await saveFileToFirestore(downloadURL, type, userId, uniqueId);
                 });
-            } else {
-                console.error('User data not found');
             }
+        );
+    };
+
+    const saveFileToFirestore = async (url, type, userId, uniqueId) => {
+        try {
+            const docRef = doc(db, 'files', uniqueId);
+            await setDoc(docRef, {
+                url: url,
+                type: type,
+                userId: userId,
+                createdAt: new Date()
+            });
+            console.log('File saved to Firestore');
         } catch (error) {
-            console.error('Error saving document to Firestore: ', error);
+            console.error('Error saving file to Firestore: ', error);
         }
     };
+
+   
 
     return (
         <View style={styles.container}>
