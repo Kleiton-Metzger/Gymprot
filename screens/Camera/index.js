@@ -12,6 +12,7 @@ import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 import { RadioButton, TextInput } from 'react-native-paper';
 import { Button,DismissKeyboard } from '../../components';
 import { Keyboard } from 'react-native';
+import { text } from '@fortawesome/fontawesome-svg-core';
 
 export const CameraScreen = ({}) => {
   const [hasPermission, setHasPermission] = useState(null);
@@ -183,6 +184,7 @@ export const CameraScreen = ({}) => {
     }
   };
 
+
   return (
     <View style={styles.container}>
       <Camera style={styles.camera} type={type} ref={cameraRef}>
@@ -212,6 +214,7 @@ export const CameraScreen = ({}) => {
         visible={showModal}
         onDismiss={() => setShowModal(false)}
         contentContainerStyle={styles.modalContainer}
+        setDescription={setDescription}
       >
         <DismissKeyboard>
         <View style={{padding:10}}>
@@ -222,14 +225,14 @@ export const CameraScreen = ({}) => {
           <Text style={styles.modalSubtitle}>Adicione informações adicionais ao vídeo</Text>
           <TextInput
             label="Descriição"
-            value={description}
             bordercolor="#581DB9"
             color="#581DB9"
             onChangeText={setDescription}
+            value={description}
             mode="outlined"
             placeholder="Adicione uma breve descrição ao vídeo"
-            style={styles.modalLabel}
-            multiline={true}
+            style={styles.descriptionInput}
+            multiline={true}            
           />
           <Text style={styles.modalLabel}>Status do Vídeo:</Text>
           <RadioButton.Group onValueChange={value => setStatus(value)} value={status}>
@@ -310,32 +313,41 @@ const styles = StyleSheet.create({
   modalContainer: {
     backgroundColor: 'white',
     padding: 20,
-    borderRadius: 1,
+    borderRadius: 10,
     height: '90%',
+    justifyContent:'center'
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     textAlign: 'center',
+    marginBottom:10
   },
   modalSubtitle: {
     fontSize: 15,
     textAlign: 'center',
     color: 'gray',
-    marginBottom: 10,
+    marginBottom: 20,
   },
   modalLabel: {
-    fontSize: 15,
+    fontSize: 16,
     color: 'black',
-    marginTop: 10,
+    marginTop: 20,
+    fontWeight: "bold",  
+    marginHorizontal:10
   },
   button: {
-    marginVertical: 10,
+    marginVertical: 20,
     paddingVertical: 10,
     backgroundColor: '#581DB9',
     borderRadius: 10,
     alignItems: 'center',
     width: '50%',
-    alignSelf: 'center',
+    alignSelf: 'center', 
+  },
+  descriptionInput: {
+    marginVertical: 10,
+    backgroundColor: 'white',
+    height: 60,
   },
 });

@@ -179,7 +179,7 @@ export const EditProfile = () => {
     return (
         <DismissKeyboard>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
-                <BackBtn label="Voltar" onPress={() => navigation.goBack()} />
+                <BackBtn label="Perfil" onPress={() => navigation.goBack()} />
                 <View style={styles.body}>
                     <TouchableOpacity onPress={pickImage} >
                         {avatar ? (
@@ -195,7 +195,7 @@ export const EditProfile = () => {
                     <View style={styles.inputContainer}>
                         <Input
                             mode='outlined'
-                            label='Name'
+                            label='Nome'
                             color='#581DB9'
                             underline='#581DB9'
                             returnKeyType='next'

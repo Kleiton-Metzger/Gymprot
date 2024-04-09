@@ -1,57 +1,40 @@
 import { StyleSheet } from 'react-native';
 
-const styles = StyleSheet.create({
+export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'white',
+        padding: 20,
+        backgroundColor: "#fff",
     },
-    container2: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'rgba(154, 151, 151, 1)',
-        width: 350,
-        height: '50%',
-        position: 'absolute',
-        top: '30%',
-        borderRadius: 25,
-        borderColor: 'black',
-        borderWidth: 1,
+    body: {
+        flex: 1,
+        padding: 5,
     },
-    text: {
-        fontSize: 40,
-        fontWeight: 'bold',
-        position: 'absolute',
-        padding: '20%',
-        top: 30,
-    },
-    subtext: {
-        fontSize: 15,
-        position: 'absolute',
-        padding: '15%',
-        top: 100,
-    },
-    buttonContainer: {
-        backgroundColor: 'rgba(88, 29, 185, 1)',
-        padding: 15,
-        width: 250,
-        alignItems: 'center',
-        borderRadius: 25,
-        top: 20,
-        borderColor: 'black',
-        borderWidth: 1,
-        marginBottom: 20,
-    },
-    buttonText: {
-        color: 'white',
+    title: {
         fontSize: 20,
+        fontWeight: "bold",
+        alignSelf: 'center',
+        marginTop: 20,
+        padding: 10,
     },
-    usrname: {
+    uploadButtonContainer: {
+        backgroundColor: '#581DB9',
         position: 'absolute',
-        padding: '5%',
-        top: 80,
+        right: 20,
+        bottom: 20,
+    },
+    list: {
+        padding: 10,
+    },
+    dialogTitle: {
+        fontSize: 15,
+        fontWeight: 'bold',
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: '#581DB9',
+        borderRadius: 5,
+        padding: 10,
+        marginTop: 10,
     },
 });
-
-export default styles;
