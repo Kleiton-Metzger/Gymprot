@@ -10,7 +10,7 @@ import { Accelerometer } from 'expo-sensors';
 import * as Location from 'expo-location';
 import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 import { RadioButton, TextInput } from 'react-native-paper';
-import { Button,DismissKeyboard } from '../../components';
+import { Button, DismissKeyboard } from '../../components';
 import { Keyboard } from 'react-native';
 import { text } from '@fortawesome/fontawesome-svg-core';
 
@@ -184,6 +184,12 @@ export const CameraScreen = ({}) => {
     }
   };
 
+  const handleModalClose = () => {
+    setDescription('');
+    setStatus('Public');
+    setTypeVideo(null);
+    setShowModal(false);
+  };
 
   return (
     <View style={styles.container}>
@@ -208,53 +214,52 @@ export const CameraScreen = ({}) => {
         </View>
       </View>
       <Modal 
-        onRequestClose={() => setShowModal(false)}
+        onRequestClose={handleModalClose}
         animationType="slide"
         presentationStyle="formSheet"
         visible={showModal}
-        onDismiss={() => setShowModal(false)}
+        onDismiss={handleModalClose}
         contentContainerStyle={styles.modalContainer}
-        setDescription={setDescription}
       >
-        <DismissKeyboard>
-        <View style={{padding:10}}>
-          <TouchableOpacity  style={{marginBottom:15}} onPress={() => setShowModal(false)}>
-          <Text style={{color:'#581DB9',fontSize:16,fontWeight:'600',textAlign:'right'}}>Fechar</Text>  
-         </TouchableOpacity>
-          <Text style={styles.modalTitle}>Informações do Vídeo</Text>
-          <Text style={styles.modalSubtitle}>Adicione informações adicionais ao vídeo</Text>
-          <TextInput
-            label="Descriição"
-            bordercolor="#581DB9"
-            color="#581DB9"
-            onChangeText={setDescription}
-            value={description}
-            mode="outlined"
-            placeholder="Adicione uma breve descrição ao vídeo"
-            style={styles.descriptionInput}
-            multiline={true}            
-          />
-          <Text style={styles.modalLabel}>Status do Vídeo:</Text>
-          <RadioButton.Group onValueChange={value => setStatus(value)} value={status}>
-            <RadioButton.Item label="Público" value="Public" color="green" />
-            <RadioButton.Item label="Privado" value="Private" color="red" />
-          </RadioButton.Group>
-          <Text style={styles.modalLabel}>Tipo de Exercício:</Text>
-          <RadioButton.Group onValueChange={value => setTypeVideo(value)} value={typeVideo}>
-            <RadioButton.Item label="Corrida" value="Running" color="#581DB9" />
-            <RadioButton.Item label="Bicicleta" value="Cycling" color="#581DB9" />
-            <RadioButton.Item label="Caminhada" value="Walking" color="#581DB9" />
-          </RadioButton.Group>
-          <Button
-            onPress={() => {
-              addVideo(videoUri);
-              setShowModal(false);
-            }}
-            label="Concluir"
-            style={styles.button}
-          />
-        </View>
-        </DismissKeyboard>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={{ padding: 10 }}>
+            <TouchableOpacity style={{ marginBottom: 15 }} onPress={handleModalClose}>
+              <Text style={{ color: '#581DB9', fontSize: 16, fontWeight: '600', textAlign: 'right' }}>Fechar</Text>
+            </TouchableOpacity>
+            <Text style={styles.modalTitle}>Informações do Vídeo</Text>
+            <Text style={styles.modalSubtitle}>Adicione informações adicionais ao vídeo</Text>
+            <TextInput
+              label="Descriição"
+              bordercolor="#581DB9"
+              color="#581DB9"
+              onChangeText={setDescription}
+              value={description}
+              mode="outlined"
+              placeholder="Adicione uma breve descrição ao vídeo"
+              style={styles.descriptionInput}
+              multiline={true}
+            />
+            <Text style={styles.modalLabel}>Status do Vídeo:</Text>
+            <RadioButton.Group onValueChange={value => setStatus(value)} value={status}>
+              <RadioButton.Item label="Público" value="Public" color="green" />
+              <RadioButton.Item label="Privado" value="Private" color="red" />
+            </RadioButton.Group>
+            <Text style={styles.modalLabel}>Tipo de Exercício:</Text>
+            <RadioButton.Group onValueChange={value => setTypeVideo(value)} value={typeVideo}>
+              <RadioButton.Item label="Corrida" value="Running" color="#581DB9" />
+              <RadioButton.Item label="Bicicleta" value="Cycling" color="#581DB9" />
+              <RadioButton.Item label="Caminhada" value="Walking" color="#581DB9" />
+            </RadioButton.Group>
+            <Button
+              onPress={() => {
+                addVideo(videoUri);
+                handleModalClose();
+              }}
+              label="Concluir"
+              style={styles.button}
+            />
+          </View>
+        </TouchableWithoutFeedback>
       </Modal>
     </View>
   );
@@ -315,13 +320,13 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     height: '90%',
-    justifyContent:'center'
+    justifyContent: 'center'
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom:10
+    marginBottom: 10
   },
   modalSubtitle: {
     fontSize: 15,
@@ -333,8 +338,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'black',
     marginTop: 20,
-    fontWeight: "bold",  
-    marginHorizontal:10
+    fontWeight: "bold",
+    marginHorizontal: 10
   },
   button: {
     marginVertical: 20,
@@ -343,7 +348,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     width: '50%',
-    alignSelf: 'center', 
+    alignSelf: 'center',
   },
   descriptionInput: {
     marginVertical: 10,

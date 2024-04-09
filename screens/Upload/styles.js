@@ -1,3 +1,4 @@
+// Style
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
@@ -26,15 +27,24 @@ export const styles = StyleSheet.create({
     list: {
         padding: 10,
     },
+    dialogContainer: {
+        backgroundColor: '#fff',
+
+    },
     dialogTitle: {
-        fontSize: 15,
+        fontSize: 20,
         fontWeight: 'bold',
+        color: '#581DB9',
+        padding: 10,
+        alignSelf: 'center',
     },
     input: {
-        borderWidth: 1,
-        borderColor: '#581DB9',
-        borderRadius: 5,
-        padding: 10,
+        backgroundColor: '#fff',
         marginTop: 10,
+    },
+    error: {
+        color: 'red',
+        marginTop: 5,
+        marginLeft: 5,
     },
 });
