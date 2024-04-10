@@ -1,18 +1,18 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, Platform, Modal, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, TouchableWithoutFeedback } from 'react-native';
 import { Camera } from 'expo-camera';
 import * as MediaLibrary from 'expo-media-library';
-import { StyleSheet } from 'react-native-web';
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
 import { app, db, auth } from '../../storage/Firebase';
 import { v4 as uuidv4 } from 'uuid';
 import { Accelerometer } from 'expo-sensors';
 import * as Location from 'expo-location';
 import { doc, setDoc, onSnapshot } from 'firebase/firestore';
-import { RadioButton, TextInput } from 'react-native-paper';
-import { Button, DismissKeyboard } from '../../components';
+import { RadioButton, TextInput, ProgressBar } from 'react-native-paper';
+import { Button } from '../../components';
 import { Keyboard } from 'react-native';
 import { text } from '@fortawesome/fontawesome-svg-core';
+import { styles } from './styles';
 
 export const CameraScreen = ({}) => {
   const [hasPermission, setHasPermission] = useState(null);
@@ -27,7 +27,7 @@ export const CameraScreen = ({}) => {
   const [showModal, setShowModal] = useState(false);
   const [isMoving, setIsMoving] = useState(false);
   const [typeVideo, setTypeVideo] = useState(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadProgress, setUploadProgress] = useState(0); 
 
   const cameraRef = useRef(null);
   const timerRef = useRef(null);
@@ -143,7 +143,20 @@ export const CameraScreen = ({}) => {
       const response = await fetch(uri);
       const blob = await response.blob();
       const storageRef = ref(storage, `Videos/${uuidv4()}.mp4`);
-      const uploadTask = await uploadBytesResumable(storageRef, blob);
+      const uploadTask = uploadBytesResumable(storageRef, blob);
+
+      uploadTask.on(
+        'state_changed',
+        snapshot => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          setUploadProgress(progress); 
+        },
+        error => {
+          console.log('Error uploading video:', error);
+        }
+      );
+
+      await uploadTask;
       const videoURL = await getDownloadURL(storageRef);
       return videoURL;
     } catch (error) {
@@ -152,7 +165,6 @@ export const CameraScreen = ({}) => {
   }
 
   const addVideo = async uri => {
-    // Ensure userData is not null before proceeding
     if (!userData) {
       console.log('User data is not available yet.');
       return;
@@ -171,7 +183,7 @@ export const CameraScreen = ({}) => {
         id: uuidv4(),
         videoURL,
         description,
-        createBy: userData.userId, // Ensure userData is not null before accessing its properties
+        createBy: userData.userId, 
         createAt: new Date().toISOString(),
         location: { cityName, latitude, longitude },
         speed,
@@ -194,9 +206,10 @@ export const CameraScreen = ({}) => {
   return (
     <View style={styles.container}>
       <Camera style={styles.camera} type={type} ref={cameraRef}>
-        <TouchableOpacity
+      <TouchableOpacity
           style={[styles.recordButton, { backgroundColor: isRecording ? 'red' : 'white' }]}
           onPress={isRecording ? stopRecording : startRecording}
+          disabled={uploadProgress > 0 && uploadProgress < 100} // Disable the button when upload is in progress
         />
         {isRecording && (
           <View style={styles.timerContainer}>
@@ -261,98 +274,10 @@ export const CameraScreen = ({}) => {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
+      {uploadProgress > 0 && uploadProgress < 100 && (
+        <ProgressBar progress={uploadProgress / 100} color={'#581DB9'} style={styles.progressBar} />
+      )}
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'transparent',
-  },
-  camera: {
-    flex: 1,
-    justifyContent: 'space-between',
-    position: 'relative',
-  },
-  recordButton: {
-    position: 'absolute',
-    bottom: 80,
-    alignSelf: 'center',
-    alignItems: 'center',
-    height: 80,
-    width: 80,
-    borderRadius: 35,
-    borderColor: 'black',
-    borderWidth: 3,
-  },
-  timerContainer: {
-    position: 'absolute',
-    top: '5%',
-    alignSelf: 'center',
-    backgroundColor: 'red',
-    padding: 5,
-    borderRadius: 10,
-  },
-  timerText: {
-    fontSize: 18,
-    color: 'white',
-  },
-  infoContainer: {
-    position: 'absolute',
-    top: '10%',
-    left: 0,
-    padding: 15,
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
-    width: 'auto',
-  },
-  infoTextContainer: {
-    justifyContent: 'center',
-  },
-  infoText: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: 'white',
-    margin: 5,
-  },
-  modalContainer: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-    height: '90%',
-    justifyContent: 'center'
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 10
-  },
-  modalSubtitle: {
-    fontSize: 15,
-    textAlign: 'center',
-    color: 'gray',
-    marginBottom: 20,
-  },
-  modalLabel: {
-    fontSize: 16,
-    color: 'black',
-    marginTop: 20,
-    fontWeight: "bold",
-    marginHorizontal: 10
-  },
-  button: {
-    marginVertical: 20,
-    paddingVertical: 10,
-    backgroundColor: '#581DB9',
-    borderRadius: 10,
-    alignItems: 'center',
-    width: '50%',
-    alignSelf: 'center',
-  },
-  descriptionInput: {
-    marginVertical: 10,
-    backgroundColor: 'white',
-    height: 60,
-  },
-});

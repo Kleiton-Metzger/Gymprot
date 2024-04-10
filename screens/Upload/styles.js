@@ -1,22 +1,18 @@
-// Style
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
         backgroundColor: "#fff",
-    },
-    body: {
-        flex: 1,
-        padding: 5,
+        padding: 20,
     },
     title: {
-        fontSize: 20,
+        fontSize: 24,
         fontWeight: "bold",
         alignSelf: 'center',
         marginTop: 20,
-        padding: 10,
+        color: '#581DB9',
+        padding: 20,
     },
     uploadButtonContainer: {
         backgroundColor: '#581DB9',
@@ -25,26 +21,41 @@ export const styles = StyleSheet.create({
         bottom: 20,
     },
     list: {
-        padding: 10,
+        flex: 1,
+        marginTop: 10,
     },
     dialogContainer: {
         backgroundColor: '#fff',
-
     },
     dialogTitle: {
         fontSize: 20,
         fontWeight: 'bold',
         color: '#581DB9',
-        padding: 10,
-        alignSelf: 'center',
+        paddingVertical: 10,
+        textAlign: 'center',
     },
     input: {
-        backgroundColor: '#fff',
+        backgroundColor: '#F5F5F5',
         marginTop: 10,
     },
-    error: {
-        color: 'red',
-        marginTop: 5,
-        marginLeft: 5,
+    subTitles: {
+        flexDirection: 'row',
+        borderBottomWidth: 2,
+        borderBottomColor: '#581DB9',
+        justifyContent: 'space-between',
+        marginBottom: 10,
+        paddingVertical: 10,
     },
+    fileName: {
+        fontWeight: 'bold',
+        fontSize: 16,
+        color: 'black',
+    },
+    fileData: {
+        fontWeight: 'bold',
+        fontSize: 16,
+        color: 'black',
+    },  
+     
+   
 });
