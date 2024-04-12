@@ -1,65 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, FlatList, Alert } from 'react-native';
-import { Feather } from "@expo/vector-icons";
-import { collection, onSnapshot, doc, getDoc } from 'firebase/firestore';
+import { Feather } from '@expo/vector-icons';
+import { collection, onSnapshot, doc, getDoc, where, query } from 'firebase/firestore';
 import { db } from '../../storage/Firebase';
 import { Video } from 'expo-av';
 import styles from './styles';
+import { useAuth } from '../../Hooks/useAuth';
 
 export const HomeScreen = () => {
   const [searchPhrase, setSearchPhrase] = useState('');
   const [videos, setVideos] = useState([]);
-  const [filteredVideos, setFilteredVideos] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
+  const { currentUser } = useAuth();
 
   useEffect(() => {
-    const unsubscribeVideos = onSnapshot(collection(db, 'videos'), (querySnapshot) => {
-      const fetchedVideos = [];
-      querySnapshot.forEach((doc) => {
-        const videoData = doc.data();
-        fetchedVideos.push({ id: doc.id, ...videoData });
+    const fetchUserVideos = async () => {
+      const q = query(collection(db, 'videos'), where('status', '==', 'Public'));
+
+      const unsubscribeVideos = onSnapshot(q, async querySnapshot => {
+        let fetchedVideos = [];
+        querySnapshot.forEach(doc => {
+          const videoData = doc.data();
+          fetchedVideos.push({ id: doc.id, ...videoData });
+        });
+        console.log(fetchedVideos?.length);
+        setVideos(fetchedVideos);
       });
-      setVideos(fetchedVideos);
-    });
-    return () => unsubscribeVideos();
+      return () => unsubscribeVideos();
+    };
+
+    fetchUserVideos();
   }, []);
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const userIds = new Set(videos.map(video => video.createBy));
-      const usersData = {};
-      for (const userId of userIds) {
-        const userDoc = await getDoc(doc(db, 'users', userId));
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          usersData[userId] = { name: userData.name, avatar: userData.photoURL };
-        } else {
-          usersData[userId] = { name: '', avatar: null };
-        }
-      }
-
-      const videosWithUserData = videos.map(video => ({
-        ...video,
-        creatorName: usersData[video.createBy].name,
-        creatorAvatar: usersData[video.createBy].avatar,
-      }));
-      setFilteredVideos(videosWithUserData);
-    };
-    fetchUserData();
-  }, [videos]);
-
-  useEffect(() => {
-    // Apply search filter when the search phrase changes
-    const filtered = filteredVideos.filter(video => 
-      video.location?.cityName?.toLowerCase().includes(searchPhrase.toLowerCase()) 
-    );
-    setSearchResults(filtered);
-  }, [searchPhrase, videos]);
-
-
+  let filteredVideos = videos;
   return (
     <View style={styles.container}>
-      <Text style={styles.locationTxt}>Ola, </Text>
+      <Text style={styles.locationTxt}>{`Olá, ${currentUser?.name}`} </Text>
       <View style={styles.searchBar}>
         <Feather name="search" size={20} color="black" style={styles.searchIcon} />
         <TextInput
@@ -75,24 +51,26 @@ export const HomeScreen = () => {
         ) : null}
       </View>
       <FlatList
-        data={searchPhrase ? searchResults : filteredVideos.filter(video => video.status === "Public")}
-        renderItem={({ item }) => (
-          <View style={styles.infoContainer}>
-          <UserInfo
-              userName={item.creatorName}
-              location={item.location?.cityName || ''}
-              tipo={item.type}
-              creatorAvatar={item.creatorAvatar}
-          />
-          <VideoItem video={item.videoURL} />
-      </View>
-        )}
+        data={filteredVideos}
+        renderItem={({ item }) => {
+          console.log(item?.creatorInfo?.avatar);
+
+          return (
+            <View style={styles.infoContainer}>
+              <UserInfo
+                userName={item?.creatorInfo?.name || ''}
+                location={item.location?.cityName || ''}
+                tipo={item.type}
+                creatorAvatar={item?.creatorInfo?.avatar}
+              />
+              <VideoItem video={item.videoURL} />
+            </View>
+          );
+        }}
         keyExtractor={item => item.id.toString()}
         contentContainerStyle={styles.videoGridContainer}
         removeClippedSubviews={true}
-        ListEmptyComponent={() => (
-          <Text style={styles.emptyText}>Nenhum vídeo encontrado nesta localização</Text>
-        )}
+        ListEmptyComponent={() => <Text style={styles.emptyText}>Nenhum vídeo encontrado nesta localização</Text>}
       />
     </View>
   );
@@ -100,7 +78,14 @@ export const HomeScreen = () => {
 
 const UserInfo = ({ userName, location, tipo, creatorAvatar }) => (
   <View style={styles.userInfoContainer}>
-    {creatorAvatar && <Image source={{ uri: creatorAvatar }} style={styles.avatar} />}
+    {creatorAvatar && (
+      <Image
+        style={styles.avatar}
+        size={150}
+        source={creatorAvatar ? { uri: creatorAvatar } : require('../../assets/avatar.png')}
+      />
+    )}
+
     <View style={styles.userInfoTextContainer}>
       <Text style={styles.userName}>{userName}</Text>
       <View style={styles.locationContainer}>
@@ -114,12 +99,6 @@ const UserInfo = ({ userName, location, tipo, creatorAvatar }) => (
 
 const VideoItem = ({ video }) => (
   <TouchableOpacity style={styles.videoItem}>
-  <Video
-      style={styles.video}
-      source={{ uri: video }}
-      useNativeControls
-      resizeMode="contain"
-      
-  />
-</TouchableOpacity>
+    <Video style={styles.video} source={{ uri: video }} useNativeControls resizeMode="contain" />
+  </TouchableOpacity>
 );

@@ -1,5 +1,4 @@
-import { StyleSheet } from "react-native";
-
+import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
   container: {
@@ -21,7 +20,6 @@ export const styles = StyleSheet.create({
     borderRadius: 35,
     borderColor: 'black',
     borderWidth: 3,
-    
   },
   timerContainer: {
     position: 'absolute',
@@ -57,13 +55,13 @@ export const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     height: '90%',
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 10
+    marginBottom: 10,
   },
   modalSubtitle: {
     fontSize: 15,
@@ -75,8 +73,8 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     color: 'black',
     marginTop: 20,
-    fontWeight: "bold",
-    marginHorizontal: 10
+    fontWeight: 'bold',
+    marginHorizontal: 10,
   },
   button: {
     marginVertical: 20,
@@ -97,14 +95,10 @@ export const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   progressBar: {
-  height: 10,
-  backgroundColor: '#E0E0E0', 
-  width: '100%',
-  borderRadius: 5, 
-  marginVertical: 10,
-    
+    height: 10,
+    backgroundColor: '#E0E0E0',
+    width: '100%',
+    borderRadius: 5,
+    marginVertical: 10,
   },
-
-
 });
-

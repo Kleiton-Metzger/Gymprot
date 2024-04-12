@@ -1,30 +1,30 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     padding: 20,
   },
   locationTxt: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 20,
     top: 20,
     padding: 10,
   },
   searchBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f2f2f2",
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f2f2f2',
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: "#000000",
+    borderColor: '#000000',
   },
   searchBarClicked: {
-    borderColor: "#581DB9",
+    borderColor: '#581DB9',
   },
   searchIcon: {
     marginRight: 10,
@@ -35,33 +35,33 @@ const styles = StyleSheet.create({
   },
   cancelText: {
     marginLeft: 10,
-    color: "#581DB9",
+    color: '#581DB9',
     fontSize: 16,
   },
   searchButton: {
     marginLeft: 10,
-    color: "#007AFF",
+    color: '#007AFF',
     fontSize: 16,
   },
   videoGridContainer: {
     marginTop: 20,
   },
   videoItem: {
-    backgroundColor: "#ccc",
-    width: "100%",
+    backgroundColor: '#ccc',
+    width: '100%',
     height: 200,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     margin: 5,
     borderRadius: 20,
     padding: 10,
   },
   userName: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 5,
   },
-  
+
   location: {
     fontSize: 14,
     color: 'gray',
@@ -71,6 +71,7 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 20,
     marginRight: 10,
+    backgroundColor: 'darkgray',
   },
   infoContainer: {
     flex: 1,
@@ -113,11 +114,9 @@ const styles = StyleSheet.create({
   },
   video: {
     width: 300,
-    height: "100%",
+    height: '100%',
     borderRadius: 20,
   },
-  
-
 });
 
 export default styles;

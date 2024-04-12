@@ -1,92 +1,61 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import React from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { doc, onSnapshot } from 'firebase/firestore';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { db, auth } from '../../storage/Firebase';
-import {Button } from '../../components'
-import { getUSerSex } from '../../utils';
-import { Avatar } from 'react-native-paper';
+import { Avatar, ActivityIndicator } from 'react-native-paper';
+import { useAuth } from '../../Hooks/useAuth';
+import { Button } from '../../components';
+import { getUSerSex } from '../../utils/gender';
+import { styles } from './ProfStyle';
+import { FontAwesome5 } from '@expo/vector-icons';
 
 export const Profile = () => {
   const navigation = useNavigation();
-  const [userData, setUserData] = useState(null);
+  const { currentUser, signOut } = useAuth();
 
-  useEffect(() => {
-    const loadUserData = async () => {
-      try {
-        const cachedUserData = await AsyncStorage.getItem('userData');
-        if (cachedUserData) {
-          setUserData(JSON.parse(cachedUserData));
-        }
-      } catch (error) {
-        console.error('Error loading user data from cache:', error);
-      }
-    };
-
-    loadUserData();
-
-    const unsubscribe = onSnapshot(doc(db, 'users', auth.currentUser.uid), (docSnap) => {
-      if (docSnap.exists()) {
-        const userData = docSnap.data();
-        setUserData(userData);
-        // Salvar os dados do usuário em cache
-        AsyncStorage.setItem('userData', JSON.stringify(userData));
-      } else {
-        console.log('No such document!');
-      }
-    });
-
-    // Clean up the listener when the component unmounts
-    return () => unsubscribe();
-    
-  }, []);
-
-
-
-  useEffect(() => {
-    if (userData) {
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigation.replace('Login');
+    } catch (error) {
+      console.log('Error signing out:', error.message);
     }
-  }, [userData]);
-
-
-
-  const handleSignOut = () => {
-    auth
-      .signOut()
-      .then(() => {
-        navigation.replace('Login');
-      })
-      .catch(error => alert(error.message));
   };
 
-  const handleMenuPress = () => {
-    navigation.navigate('EditProfileScreen');
-  };
+  if (!currentUser) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.editContainer} onPress={handleMenuPress}>
-        <Image source={require('../../assets/edit.png')} style={styles.editIcon} />
+      <TouchableOpacity style={styles.editContainer} onPress={() => navigation.navigate('EditProfileScreen')}>
+        <FontAwesome5 name="edit" size={24} color="black" />
       </TouchableOpacity>
-     
-      
-       {userData && userData.photoURL ?
-        (<Avatar.Image size={150} source={{ uri: userData.photoURL }} /> ) :
-        ( <Avatar.Image size={150} source={require('../../assets/avatar.png')} />)}
-       
 
-      {userData && (
+      {/*{currentUser?.avatar ? (
+        <Avatar.Image size={150} source={{ uri: currentUser.avatar }} />
+      ) : (
+        <Avatar.Image size={150} source={require('../../assets/avatar.png')} />
+      )}*/}
+
+      <Avatar.Image
+        style={{ backgroundColor: 'gray' }}
+        size={150}
+        source={currentUser?.avatar ? { uri: currentUser.avatar } : require('../../assets/avatar.png')}
+      />
+      {currentUser && (
         <View style={styles.userDataContainer}>
-          <UserData label="Nome" value={userData.name} />
-          <UserData label="Email" value={userData.email} />
-          <UserData label="Idade" value={userData.age} />
-          <UserData label="Sexo" value={getUSerSex(userData.gender)} />
+          <UserData label="Nome" value={currentUser.name} />
+          <UserData label="Email" value={currentUser.email} />
+          <UserData label="Idade" value={currentUser.age} />
+          <UserData label="Sexo" value={getUSerSex(currentUser.gender)} />
         </View>
-        
       )}
 
-      <Button onPress={handleSignOut} label="Logout" style={styles.buttonContainer} />  
+      <Button onPress={handleSignOut} label="Logout" style={styles.buttonContainer} />
     </View>
   );
 };
@@ -97,61 +66,3 @@ const UserData = ({ label, value }) => (
     <Text style={styles.userDataValue}>{value}</Text>
   </View>
 );
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'white',
-  },
-  editContainer: {
-    position: 'absolute',
-    top: 50,
-    right: 20,
-  },
-  editIcon: {
-    width: 30,
-    height: 30,
-  },
-  deltContainer: {
-    position: 'absolute',
-    top: 50,
-    left: 20,
-  },
-  dltText: {
-    color: 'red',
-    fontSize: 15,
-  },
-  buttonContainer: {
-    backgroundColor: 'rgba(88, 29, 185, 1)',
-    padding: 10,
-    width: '40%',
-    alignItems: 'center',
-    borderRadius: 5,
-    marginVertical: 10,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 15,
-  },
-  userDataContainer: {
-    alignItems: 'center',
-    padding: 20,
-    marginVertical: 20,
-  },
-  userData: {
-    flexDirection: 'row',
-    marginBottom: 10,
-  },
-  userDataLabel: {
-    fontSize: 16,
-    marginRight: 5,
-    color: 'black',
-    fontWeight: 'bold',
-  },
-  userDataValue: {
-    fontSize: 15,
-    color: 'black',
-  },
-});

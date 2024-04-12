@@ -13,8 +13,11 @@ import { Button } from '../../components';
 import { Keyboard } from 'react-native';
 import { text } from '@fortawesome/fontawesome-svg-core';
 import { styles } from './styles';
+import { useAuth } from '../../Hooks/useAuth';
 
 export const CameraScreen = ({}) => {
+  const { currentUser } = useAuth();
+
   const [hasPermission, setHasPermission] = useState(null);
   const [type] = useState(Camera.Constants.Type.back);
   const [isRecording, setIsRecording] = useState(false);
@@ -27,7 +30,7 @@ export const CameraScreen = ({}) => {
   const [showModal, setShowModal] = useState(false);
   const [isMoving, setIsMoving] = useState(false);
   const [typeVideo, setTypeVideo] = useState(null);
-  const [uploadProgress, setUploadProgress] = useState(0); 
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const cameraRef = useRef(null);
   const timerRef = useRef(null);
@@ -37,21 +40,6 @@ export const CameraScreen = ({}) => {
     const newSpeed = Math.sqrt(x * x + y * y + z * z);
     return newSpeed;
   };
-
-  const [userData, setUserData] = useState(null);
-
-  useEffect(() => {
-    const unsubscribe = onSnapshot(doc(db, 'users', auth.currentUser.uid), docSnap => {
-      if (docSnap.exists()) {
-        const userData = docSnap.data();
-        setUserData(userData);
-      } else {
-        console.log('No such document!');
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
 
   useEffect(() => {
     (async () => {
@@ -149,11 +137,11 @@ export const CameraScreen = ({}) => {
         'state_changed',
         snapshot => {
           const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          setUploadProgress(progress); 
+          setUploadProgress(progress);
         },
         error => {
           console.log('Error uploading video:', error);
-        }
+        },
       );
 
       await uploadTask;
@@ -165,7 +153,7 @@ export const CameraScreen = ({}) => {
   }
 
   const addVideo = async uri => {
-    if (!userData) {
+    if (!currentUser) {
       console.log('User data is not available yet.');
       return;
     }
@@ -183,7 +171,8 @@ export const CameraScreen = ({}) => {
         id: uuidv4(),
         videoURL,
         description,
-        createBy: userData.userId, 
+        createBy: currentUser.userId,
+        creatorInfo: { name: currentUser.name, avatar: currentUser.avatar },
         createAt: new Date().toISOString(),
         location: { cityName, latitude, longitude },
         speed,
@@ -206,7 +195,7 @@ export const CameraScreen = ({}) => {
   return (
     <View style={styles.container}>
       <Camera style={styles.camera} type={type} ref={cameraRef}>
-      <TouchableOpacity
+        <TouchableOpacity
           style={[styles.recordButton, { backgroundColor: isRecording ? 'red' : 'white' }]}
           onPress={isRecording ? stopRecording : startRecording}
           disabled={uploadProgress > 0 && uploadProgress < 100} // Disable the button when upload is in progress
@@ -226,7 +215,7 @@ export const CameraScreen = ({}) => {
           <Text style={styles.infoText}>Distance:</Text>
         </View>
       </View>
-      <Modal 
+      <Modal
         onRequestClose={handleModalClose}
         animationType="slide"
         presentationStyle="formSheet"
@@ -280,4 +269,3 @@ export const CameraScreen = ({}) => {
     </View>
   );
 };
-
