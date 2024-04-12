@@ -35,12 +35,6 @@ export const Profile = () => {
         <FontAwesome5 name="edit" size={24} color="black" />
       </TouchableOpacity>
 
-      {/*{currentUser?.avatar ? (
-        <Avatar.Image size={150} source={{ uri: currentUser.avatar }} />
-      ) : (
-        <Avatar.Image size={150} source={require('../../assets/avatar.png')} />
-      )}*/}
-
       <Avatar.Image
         style={{ backgroundColor: 'gray' }}
         size={150}

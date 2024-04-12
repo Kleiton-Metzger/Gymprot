@@ -1,9 +1,9 @@
 import { Dimensions, StyleSheet, useWindowDimensions } from 'react-native';
-const { width, height } = Dimensions.get('window'); //pegar a largura e altura da tela
+const { width, height } = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f2f2f2',
   },
 
   videoItem: {
@@ -18,6 +18,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 5,
+    color: '#581DB9',
   },
 
   location: {
@@ -29,6 +30,7 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 20,
     marginRight: 10,
+    backgroundColor: 'darkgray',
   },
   infoContainer: {
     flex: 1,
@@ -38,6 +40,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width,
+    alignSelf: 'center',
   },
   userInfoContainer: {
     flexDirection: 'row',
@@ -75,6 +78,9 @@ const styles = StyleSheet.create({
     height: '100%',
     overflow: 'hidden',
     borderRadius: 20,
+  },
+  videoGridContainer: {
+    paddingBottom: 80,
   },
 });
 

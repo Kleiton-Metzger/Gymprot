@@ -39,10 +39,10 @@ export const AuthProvider = ({ children }) => {
         setCurrentUser(doc.data());
       });
     } catch (error) {
-      console.log(error);
+      // console.log('Error getting user data: ', error);
     }
   }, [user]);
-  console.log(currentUser);
+  //console.log('currentUser', currentUser);
 
   const memoedValue = useMemo(
     () => ({

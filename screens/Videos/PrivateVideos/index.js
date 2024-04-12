@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, FlatList, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, Image, FlatList, TouchableOpacity, Dimensions, LogBox } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { collection, onSnapshot, query, where, getDoc, doc } from 'firebase/firestore';
 import { db, auth } from '../../../storage/Firebase';
 import { Video } from 'expo-av';
-import styles from './styles';
-
-const { width, height } = Dimensions.get('window'); //pegar a largura e altura da tela
+import styles from '../styles';
+const { width, height } = Dimensions.get('window');
+LogBox.ignoreLogs(['Sending `onAnimatedValueUpdate` with no listeners registered.']);
 
 export const PrivateScreen = () => {
   const [filteredVideos, setFilteredVideos] = useState([]);
@@ -78,7 +78,7 @@ const UserInfo = ({ userName, location, tipo, creatorAvatar }) => (
 );
 
 const VideoItem = ({ video }) => (
-  <TouchableOpacity style={styles.videoItem}>
+  <TouchableOpacity style={styles.videoItem} activeOpacity={0.8}>
     <Video resizeMode="cover" style={styles.video} source={{ uri: video }} useNativeControls isLooping />
   </TouchableOpacity>
 );

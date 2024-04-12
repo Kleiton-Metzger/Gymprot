@@ -4,7 +4,7 @@ const { width, height } = Dimensions.get('window'); //pegar a largura e altura d
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'white',
   },
   headerContainer: {
     flexDirection: 'row',
@@ -13,15 +13,24 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   header: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '500',
     color: '#000000',
-    marginLeft: 20,
+    marginLeft: 5,
+    top: 10,
   },
   userNameH: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '600',
     color: '#581DB9',
+    top: 10,
+  },
+  uavatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'darkgray',
+    marginLeft: 13,
   },
   filterIcon: {
     right: 25,
@@ -29,7 +38,7 @@ const styles = StyleSheet.create({
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f2f2f2',
+    backgroundColor: '#f3f3f3',
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 10,
@@ -58,7 +67,9 @@ const styles = StyleSheet.create({
     color: '#007AFF',
     fontSize: 16,
   },
-  videoGridContainer: {},
+  videoGridContainer: {
+    backgroundColor: '#f9f9f9',
+  },
   videoItem: {
     width: '100%',
     height: 200,
@@ -93,6 +104,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width,
+    alignSelf: 'center',
   },
   userInfoContainer: {
     flexDirection: 'row',

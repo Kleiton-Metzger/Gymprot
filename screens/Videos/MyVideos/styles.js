@@ -6,12 +6,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     height: '100%',
-    backgroundColor: '#fff',
-  },
-  segmentedButtons: {
-    width: '90%',
-    margin: 10,
-    padding: 10,
+    backgroundColor: '#f2f2f2',
   },
 });
 

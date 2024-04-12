@@ -21,6 +21,7 @@ import {
 import { getTabIconName } from './utils';
 import { LogBox, StatusBar } from 'react-native';
 import { AuthProvider } from './Hooks/useAuth';
+import TabNav from './components/TabNav';
 
 LogBox.ignoreLogs(['Sending `onAnimatedValueUpdate` with no listeners registered.']);
 
@@ -46,7 +47,7 @@ export default function App() {
         <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Home', headerShown: false }} />
         <Tab.Screen name="Upload" component={UploadScreen} options={{ title: 'Upload', headerShown: false }} />
         <Tab.Screen name="Camera" component={CameraScreen} options={{ title: 'Camera', headerShown: false }} />
-        <Tab.Screen name="MyVideos" component={MyVideos} options={{ title: 'My Videos', headerShown: false }} />
+        <Tab.Screen name="MyVideos" component={TabNav} options={{ title: 'My Videos', headerShown: false }} />
         <Tab.Screen name="Profile" component={Profile} options={{ title: 'Profile', headerShown: false }} />
       </Tab.Navigator>
     );

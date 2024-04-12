@@ -50,6 +50,10 @@ export const HomeScreen = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Image
+            source={currentUser?.avatar ? { uri: currentUser.avatar } : require('../../assets/avatar.png')}
+            style={styles.uavatar}
+          />
           <Text style={styles.header}>Olá, </Text>
           <Text style={styles.userNameH}>{currentUser?.name}</Text>
         </View>
@@ -144,7 +148,7 @@ const UserInfo = ({ userName, location, tipo, creatorAvatar }) => (
 );
 
 const VideoItem = ({ video }) => (
-  <TouchableOpacity style={styles.videoItem}>
+  <TouchableOpacity style={styles.videoItem} activeOpacity={0.8}>
     <Video style={styles.video} source={{ uri: video }} useNativeControls isLooping resizeMode="cover" />
   </TouchableOpacity>
 );

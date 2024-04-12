@@ -129,7 +129,31 @@ export const EditProfile = () => {
 
   const handleDeleteAvatar = async () => {
     try {
-      await deleteOldAvatar(auth.currentUser.uid);
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        console.error('User not signed in');
+        return;
+      }
+
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      const userDocSnap = await getDoc(userDocRef);
+      if (!userDocSnap.exists()) {
+        console.error('User document does not exist');
+        return;
+      }
+
+      const userData = userDocSnap.data();
+      const oldPhotoURL = userData.avatar;
+      console.log('Old Photo URL:', oldPhotoURL);
+
+      await setDoc(userDocRef, { avatar: null }, { merge: true });
+
+      if (oldPhotoURL) {
+        const storage = getStorage();
+        const oldAvatarRef = ref(storage, oldPhotoURL);
+        await deleteObject(oldAvatarRef);
+        console.log('Avatar deleted from storage successfully');
+      }
 
       setAvatar(null);
       console.log('Avatar deleted successfully');
