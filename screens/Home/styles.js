@@ -1,17 +1,30 @@
-import { StyleSheet } from 'react-native';
+import { Dimensions, StyleSheet, useWindowDimensions } from 'react-native';
+const { width, height } = Dimensions.get('window'); //pegar a largura e altura da tela
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    padding: 20,
   },
-  locationTxt: {
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    justifyContent: 'space-between',
+  },
+  header: {
     fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    top: 20,
-    padding: 10,
+    fontWeight: '500',
+    color: '#000000',
+    marginLeft: 20,
+  },
+  userNameH: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#581DB9',
+  },
+  filterIcon: {
+    right: 25,
   },
   searchBar: {
     flexDirection: 'row',
@@ -21,7 +34,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#000000',
+    borderColor: 'darkgrey',
+    marginHorizontal: 20,
+    marginBottom: 5,
   },
   searchBarClicked: {
     borderColor: '#581DB9',
@@ -36,30 +51,27 @@ const styles = StyleSheet.create({
   cancelText: {
     marginLeft: 10,
     color: '#581DB9',
-    fontSize: 16,
+    fontSize: 13,
   },
   searchButton: {
     marginLeft: 10,
     color: '#007AFF',
     fontSize: 16,
   },
-  videoGridContainer: {
-    marginTop: 20,
-  },
+  videoGridContainer: {},
   videoItem: {
-    backgroundColor: '#ccc',
     width: '100%',
     height: 200,
     justifyContent: 'center',
     alignItems: 'center',
     margin: 5,
     borderRadius: 20,
-    padding: 10,
   },
   userName: {
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 5,
+    color: '#581DB9',
   },
 
   location: {
@@ -78,9 +90,9 @@ const styles = StyleSheet.create({
     margin: 5,
     padding: 10,
     borderRadius: 20,
-    backgroundColor: '#f2f2f2',
     justifyContent: 'center',
     alignItems: 'center',
+    width,
   },
   userInfoContainer: {
     flexDirection: 'row',
@@ -113,8 +125,9 @@ const styles = StyleSheet.create({
     color: 'gray',
   },
   video: {
-    width: 300,
+    width: '100%',
     height: '100%',
+    overflow: 'hidden',
     borderRadius: 20,
   },
 });
