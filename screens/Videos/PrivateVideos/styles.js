@@ -1,28 +1,25 @@
-import { StyleSheet } from "react-native";
-
+import { Dimensions, StyleSheet, useWindowDimensions } from 'react-native';
+const { width, height } = Dimensions.get('window'); //pegar a largura e altura da tela
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-  },  
-  videoGridContainer: {
-    marginTop: 20,
+    backgroundColor: '#fff',
   },
+
   videoItem: {
-    backgroundColor: "#ccc",
-    width: "100%",
+    width: '100%',
     height: 200,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     margin: 5,
     borderRadius: 20,
   },
   userName: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 5,
   },
-  
+
   location: {
     fontSize: 14,
     color: 'gray',
@@ -38,9 +35,9 @@ const styles = StyleSheet.create({
     margin: 5,
     padding: 10,
     borderRadius: 20,
-    backgroundColor: '#f2f2f2',
     justifyContent: 'center',
     alignItems: 'center',
+    width,
   },
   userInfoContainer: {
     flexDirection: 'row',
@@ -74,11 +71,11 @@ const styles = StyleSheet.create({
     color: 'gray',
   },
   video: {
-    width: 300,
-    height: "100%",
+    width: '100%',
+    height: '100%',
+    overflow: 'hidden',
     borderRadius: 20,
-  }, 
-
+  },
 });
 
 export default styles;
