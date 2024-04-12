@@ -1,29 +1,9 @@
-import { TouchableOpacity, StyleSheet, Text,Image } from 'react-native';
+import React from 'react';
+import { TouchableOpacity } from 'react-native';
+import { FontAwesome5 } from '@expo/vector-icons';
 
-const BackBtn = ({ label, ...props }) => {
-  return (
-    <TouchableOpacity style={styles.container} {...props} >
-        <Image source={require('../../assets/back.png')} style={styles.backBtn} />
-        <Text style={styles.text}>{label}</Text>
-    </TouchableOpacity>
-  )
-}
-
-const styles = StyleSheet.create({
-    container: {
-        alignSelf: 'flex-start',
-        flexDirection: 'row',
-        alignItems: 'center',},
-    backBtn: {
-        width: 40,
-        height: 40,
-        marginRight: 5,
-    },
-    text: {
-        fontWeight: 'bold',
-        fontSize: 16,
-    },
-
-    });
-
-export  { BackBtn}
+export const BackBtn = ({ goBack }) => (
+  <TouchableOpacity onPress={goBack} style={{ position: 'absolute', left: 20, top: 0 }}>
+    <FontAwesome5 name="arrow-left" size={24} color="black" />
+  </TouchableOpacity>
+);
