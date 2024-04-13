@@ -17,9 +17,12 @@ import { Video } from 'expo-av';
 import styles from './styles';
 import { useAuth } from '../../Hooks/useAuth';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
-const { width, height } = Dimensions.get('window'); //pegar a largura e altura da tela
+const { width, height } = Dimensions.get('window');
 export const HomeScreen = () => {
+  const navigation = useNavigation();
+
   const [searchPhrase, setSearchPhrase] = useState('');
   const [videos, setVideos] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
@@ -108,12 +111,28 @@ export const HomeScreen = () => {
         data={filteredVideos}
         renderItem={({ item }) => (
           <View style={styles.infoContainer}>
-            <UserInfo
-              userName={item?.creatorInfo?.name || ''}
-              location={item.location?.cityName || ''}
-              tipo={item.type}
-              creatorAvatar={item?.creatorInfo?.avatar}
-            />
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate('FolowerProfile', {
+                  userName: item?.creatorInfo?.name || '',
+                  creatorAvatar: item?.creatorInfo?.avatar,
+                  location: item.location?.cityName || '',
+                  tipo: item.type,
+                  userBio: item?.creatorInfo?.userBio,
+                })
+              }
+              style={styles.infoContainer}
+            >
+              <UserInfo
+                userName={item?.creatorInfo?.name || ''}
+                location={item.location?.cityName || ''}
+                tipo={item.type}
+                creatorAvatar={item?.creatorInfo?.avatar}
+                bio={item?.creatorInfo?.userBio}
+                description={item.description}
+                video={item.videoURL}
+              />
+            </TouchableOpacity>
             <VideoItem video={item.videoURL} />
           </View>
         )}
@@ -125,8 +144,10 @@ export const HomeScreen = () => {
     </SafeAreaView>
   );
 };
+{
+}
 
-const UserInfo = ({ userName, location, tipo, creatorAvatar }) => (
+const UserInfo = ({ userName, location, tipo, creatorAvatar, bio, description, video }) => (
   <View style={styles.userInfoContainer}>
     {creatorAvatar && (
       <Image
@@ -143,6 +164,7 @@ const UserInfo = ({ userName, location, tipo, creatorAvatar }) => (
         <Text style={styles.location}>{location}</Text>
       </View>
       <Text style={styles.tipo}>Tipo: {tipo}</Text>
+      <Text style={styles.videoDescription}>Descrição: {description}</Text>
     </View>
   </View>
 );

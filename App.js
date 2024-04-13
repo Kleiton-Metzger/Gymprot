@@ -17,6 +17,7 @@ import {
   PublicScreen,
   EditProfile,
   ForgotPassword,
+  FolowerProfile,
 } from './screens';
 import { getTabIconName } from './utils';
 import { LogBox, StatusBar } from 'react-native';
@@ -80,6 +81,11 @@ export default function App() {
             <Stack.Screen
               name="EditProfileScreen"
               component={EditProfile}
+              options={{ headerShown: false, gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="FolowerProfile"
+              component={FolowerProfile}
               options={{ headerShown: false, gestureEnabled: false }}
             />
           </Stack.Navigator>

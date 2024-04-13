@@ -172,7 +172,7 @@ export const CameraScreen = ({}) => {
         videoURL,
         description,
         createBy: currentUser.userId,
-        creatorInfo: { name: currentUser.name, avatar: currentUser.avatar },
+        creatorInfo: { name: currentUser.name, avatar: currentUser.avatar, userBio: currentUser.bio },
         createAt: new Date().toISOString(),
         location: { cityName, latitude, longitude },
         speed,

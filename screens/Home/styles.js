@@ -118,6 +118,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'gray',
   },
+  bio: {
+    fontSize: 14,
+    color: 'gray',
+  },
   emptyText: {
     textAlign: 'center',
     marginTop: 20,

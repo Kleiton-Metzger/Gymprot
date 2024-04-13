@@ -32,6 +32,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const fetchUserVideos = async () => {
+    const q = query(collection(db, 'videos'), where('creatorId', '==', user?.uid));
+
+    const querySnapshot = await getDocs(q);
+    let fetchedVideos = [];
+    querySnapshot.forEach(doc => {
+      const videoData = doc.data();
+      fetchedVideos.push({ id: doc.id, ...videoData });
+    });
+    setVideos(fetchedVideos);
+  };
+
   //}, [videos]);
   useEffect(() => {
     try {

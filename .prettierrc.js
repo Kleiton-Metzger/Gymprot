@@ -34,6 +34,7 @@ module.exports = {
             "prettier.semi": false,
             "prettier.singleQuote": true,
             "prettier.trailingComma": "all"
+
         },
         {
             files: "*.js",
