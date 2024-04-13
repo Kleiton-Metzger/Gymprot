@@ -12,7 +12,13 @@ const styles = StyleSheet.create({
     color: 'black',
     textAlign: 'center',
     width,
-    height: 30,
+    height: 40,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'black',
+    textAlign: 'center',
   },
 
   bckButton: {
@@ -23,9 +29,10 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: 'black',
-    width,
-    height: 30,
+    textAlign: 'center',
+    position: 'absolute',
     left: 50,
+    top: 25,
   },
   body: {
     justifyContent: 'center',

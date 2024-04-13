@@ -9,7 +9,7 @@ import styles from '../styles';
 const { width, height } = Dimensions.get('window'); //pegar a largura e altura da tela
 LogBox.ignoreLogs(['Sending `onAnimatedValueUpdate` with no listeners registered.']);
 
-export const PublicScreen = () => {
+export const PublicScreen = ({ navigation }) => {
   const [filteredVideos, setFilteredVideos] = useState([]);
   useEffect(() => {
     const fetchUserVideos = async () => {
@@ -52,6 +52,7 @@ export const PublicScreen = () => {
               location={item.location?.cityName || ''}
               tipo={item.type}
               creatorAvatar={item?.creatorInfo?.avatar}
+              navigation={navigation} // Pass navigation as a prop
             />
             <VideoItem video={item.videoURL} />
           </View>
@@ -66,9 +67,11 @@ export const PublicScreen = () => {
   );
 };
 
-const UserInfo = ({ userName, location, tipo, creatorAvatar }) => (
+const UserInfo = ({ userName, location, tipo, creatorAvatar, navigation }) => (
   <View style={styles.userInfoContainer}>
-    {creatorAvatar && <Image source={{ uri: creatorAvatar }} style={styles.avatar} />}
+    <TouchableOpacity onPress={() => navigation.navigate('Profile')} activeOpacity={0.8}>
+      {creatorAvatar && <Image source={{ uri: creatorAvatar }} style={styles.avatar} />}
+    </TouchableOpacity>
     <View style={styles.userInfoTextContainer}>
       <Text style={styles.userName}>{userName}</Text>
       <View style={styles.locationContainer}>

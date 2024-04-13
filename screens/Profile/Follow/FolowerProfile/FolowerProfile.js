@@ -36,8 +36,10 @@ export const FolowerProfile = () => {
     <SafeAreaView>
       <View style={styles.container}>
         <View style={styles.header}>
+          <Text style={styles.title}>Perfil</Text>
+          <Text style={styles.hometxt}>Home</Text>
+
           <TouchableOpacity onPress={handleback}>
-            <Text style={styles.hometxt}>Home</Text>
             <FontAwesome5 style={styles.bckButton} name="arrow-left" size={24} color="black" />
           </TouchableOpacity>
         </View>

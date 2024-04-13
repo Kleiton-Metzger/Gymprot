@@ -191,7 +191,11 @@ export const EditProfile = () => {
   return (
     <DismissKeyboard>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={{ position: 'absolute', left: 20, top: 15 }}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={{ position: 'absolute', left: 20, top: 15 }}
+          activeOpacity={0.8}
+        >
           <FontAwesome5 name="arrow-left" size={24} color="black" />
         </TouchableOpacity>
         <View style={styles.body}>
@@ -272,7 +276,7 @@ export const EditProfile = () => {
               keyboardType="default"
               multiline
               numberOfLines={4}
-              style={styles.bioInput} // Ajuste a altura conforme necessário
+              style={styles.bioInput}
             />
             <Input
               mode="outlined"

@@ -31,7 +31,11 @@ export const Profile = () => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.editContainer} onPress={() => navigation.navigate('EditProfileScreen')}>
+      <TouchableOpacity
+        style={styles.editContainer}
+        onPress={() => navigation.navigate('EditProfileScreen')}
+        activeOpacity={0.9}
+      >
         <Text>Editar</Text>
         <FontAwesome5 name="edit" size={24} color="black" />
       </TouchableOpacity>

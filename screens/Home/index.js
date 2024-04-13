@@ -53,10 +53,12 @@ export const HomeScreen = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Image
-            source={currentUser?.avatar ? { uri: currentUser.avatar } : require('../../assets/avatar.png')}
-            style={styles.uavatar}
-          />
+          <TouchableOpacity onPress={() => navigation.navigate('Profile')} activeOpacity={0.8}>
+            <Image
+              source={currentUser?.avatar ? { uri: currentUser.avatar } : require('../../assets/avatar.png')}
+              style={styles.uavatar}
+            />
+          </TouchableOpacity>
           <Text style={styles.header}>Olá, </Text>
           <Text style={styles.userNameH}>{currentUser?.name}</Text>
         </View>
@@ -111,28 +113,16 @@ export const HomeScreen = () => {
         data={filteredVideos}
         renderItem={({ item }) => (
           <View style={styles.infoContainer}>
-            <TouchableOpacity
-              onPress={() =>
-                navigation.navigate('FolowerProfile', {
-                  userName: item?.creatorInfo?.name || '',
-                  creatorAvatar: item?.creatorInfo?.avatar,
-                  location: item.location?.cityName || '',
-                  tipo: item.type,
-                  userBio: item?.creatorInfo?.userBio,
-                })
-              }
-              style={styles.infoContainer}
-            >
-              <UserInfo
-                userName={item?.creatorInfo?.name || ''}
-                location={item.location?.cityName || ''}
-                tipo={item.type}
-                creatorAvatar={item?.creatorInfo?.avatar}
-                bio={item?.creatorInfo?.userBio}
-                description={item.description}
-                video={item.videoURL}
-              />
-            </TouchableOpacity>
+            <UserInfo
+              userName={item?.creatorInfo?.name || ''}
+              location={item.location?.cityName || ''}
+              tipo={item.type}
+              creatorAvatar={item?.creatorInfo?.avatar}
+              bio={item?.creatorInfo?.userBio}
+              description={item.description}
+              video={item.videoURL}
+              navigation={navigation}
+            />
             <VideoItem video={item.videoURL} />
           </View>
         )}
@@ -144,18 +134,29 @@ export const HomeScreen = () => {
     </SafeAreaView>
   );
 };
-{
-}
 
-const UserInfo = ({ userName, location, tipo, creatorAvatar, bio, description, video }) => (
+const UserInfo = ({ userName, location, tipo, creatorAvatar, bio, description, video, navigation }) => (
   <View style={styles.userInfoContainer}>
-    {creatorAvatar && (
-      <Image
-        style={styles.avatar}
-        size={150}
-        source={creatorAvatar ? { uri: creatorAvatar } : require('../../assets/avatar.png')}
-      />
-    )}
+    <TouchableOpacity
+      onPress={() =>
+        navigation.navigate('FolowerProfile', {
+          userName: userName || '',
+          creatorAvatar: creatorAvatar,
+          location: location || '',
+          tipo: tipo,
+          userBio: bio,
+        })
+      }
+      activeOpacity={0.8}
+    >
+      {creatorAvatar && (
+        <Image
+          style={styles.avatar}
+          size={150}
+          source={creatorAvatar ? { uri: creatorAvatar } : require('../../assets/avatar.png')}
+        />
+      )}
+    </TouchableOpacity>
 
     <View style={styles.userInfoTextContainer}>
       <Text style={styles.userName}>{userName}</Text>
@@ -164,7 +165,7 @@ const UserInfo = ({ userName, location, tipo, creatorAvatar, bio, description, v
         <Text style={styles.location}>{location}</Text>
       </View>
       <Text style={styles.tipo}>Tipo: {tipo}</Text>
-      <Text style={styles.videoDescription}>Descrição: {description}</Text>
+      {/*<Text style={styles.videoDescription}>Descrição: {description}</Text>*/}
     </View>
   </View>
 );
