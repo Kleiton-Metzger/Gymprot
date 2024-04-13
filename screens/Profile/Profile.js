@@ -32,24 +32,34 @@ export const Profile = () => {
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.editContainer} onPress={() => navigation.navigate('EditProfileScreen')}>
+        <Text>Editar</Text>
         <FontAwesome5 name="edit" size={24} color="black" />
       </TouchableOpacity>
-
-      <Avatar.Image
-        style={{ backgroundColor: 'gray' }}
-        size={150}
-        source={currentUser?.avatar ? { uri: currentUser.avatar } : require('../../assets/avatar.png')}
-      />
-      {currentUser && (
-        <View style={styles.userDataContainer}>
-          <UserData label="Nome" value={currentUser.name} />
-          <UserData label="Email" value={currentUser.email} />
-          <UserData label="Idade" value={currentUser.age} />
-          <UserData label="Sexo" value={getUSerSex(currentUser.gender)} />
+      <View style={styles.userInfoContainer}>
+        <View style={styles.avatarContainer}>
+          <Avatar.Image
+            style={{ backgroundColor: 'gray', marginBottom: 10 }}
+            size={120}
+            source={currentUser?.avatar ? { uri: currentUser.avatar } : require('../../assets/avatar.png')}
+          />
         </View>
-      )}
-
-      <Button onPress={handleSignOut} label="Logout" style={styles.buttonContainer} />
+        <View style={styles.infoContainer}>
+          <Text style={styles.name}>{currentUser?.name}</Text>
+          <Text style={styles.email}>{currentUser?.email}</Text>
+        </View>
+      </View>
+      <View style={styles.infoContainerSeg}>
+        <View style={styles.allinfoContainer}>
+          <Text style={styles.infoSeguidr}>Seguidores</Text>
+          <Text style={styles.txtSeguidr}>110</Text>
+          <Text style={styles.divider}>|</Text>
+          <Text style={styles.infoSeguind}>Seguindo</Text>
+          <Text style={styles.txtSeguind}>11</Text>
+          <View style={styles.dadoGraf}>
+            <Text style={styles.dadsInfo}>Publicações</Text>
+          </View>
+        </View>
+      </View>
     </View>
   );
 };

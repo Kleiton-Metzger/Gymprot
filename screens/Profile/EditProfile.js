@@ -22,6 +22,7 @@ export const EditProfile = () => {
   const [newHeight, setHeight] = useState(currentUser.height);
   const [newGender, setGender] = useState(currentUser.gender);
   const [newAvatar, setAvatar] = useState(currentUser.avatar);
+  const [newBio, setBio] = useState(currentUser.bio); // Adicionando estado para a bio
   const [visible, setVisible] = useState(false);
   const [password, setPassword] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -67,6 +68,7 @@ export const EditProfile = () => {
       if (newWeight.trim() !== '' && newWeight !== currentUser.weight) updates.weight = newWeight.trim();
       if (newHeight.trim() !== '' && newHeight !== currentUser.height) updates.height = newHeight.trim();
       if (newGender.trim() !== currentUser.gender) updates.gender = newGender.trim();
+      if (newBio.trim() !== '' && newBio !== currentUser.bio) updates.bio = newBio.trim(); // Adicionando atualização para a bio
 
       if (password.trim() !== '') {
         try {
@@ -256,6 +258,21 @@ export const EditProfile = () => {
               autoCapitalize="none"
               textContentType="none"
               keyboardType="numeric"
+            />
+            <Input
+              mode="outlined"
+              label="Bio"
+              color="#581DB9"
+              underline="#581DB9"
+              returnKeyType="next"
+              value={newBio}
+              onChangeText={setBio}
+              autoCapitalize="sentences"
+              textContentType="none"
+              keyboardType="default"
+              multiline
+              numberOfLines={4}
+              style={styles.bioInput} // Ajuste a altura conforme necessário
             />
             <Input
               mode="outlined"

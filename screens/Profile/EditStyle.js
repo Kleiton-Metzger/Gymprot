@@ -21,16 +21,15 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
-    marginBottom: 20,
   },
   buttonContainer: {
     backgroundColor: 'rgba(88, 29, 185, 1)',
     padding: 10,
     width: '50%',
+    height: 50,
     alignItems: 'center',
     borderRadius: 5,
-    marginVertical: 10,
-    top: 15,
+    marginVertical: 15,
   },
   genderButton: {
     marginTop: 10,
@@ -50,6 +49,20 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 10,
   },
+  bioInput: {
+    width: '100%',
+    height: 50,
+    borderRadius: 5,
+    padding: 10,
+    textAlignVertical: 'top',
+    marginBottom: 20,
+  },
+  bioTxt: {
+    color: 'black',
+    fontSize: 16,
+    marginTop: 10,
+  },
+
   deleteButton: {
     marginTop: 5,
     borderColor: 'red',
