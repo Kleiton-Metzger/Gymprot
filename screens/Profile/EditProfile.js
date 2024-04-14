@@ -201,9 +201,9 @@ export const EditProfile = () => {
         <View style={styles.body}>
           <TouchableOpacity onPress={pickImage}>
             {newAvatar ? (
-              <Avatar.Image size={150} source={{ uri: newAvatar }} />
+              <Avatar.Image size={140} source={{ uri: newAvatar }} />
             ) : (
-              <Avatar.Image size={150} source={require('../../assets/avatar.png')} />
+              <Avatar.Image size={130} source={require('../../assets/avatar.png')} />
             )}
           </TouchableOpacity>
           <TouchableOpacity onPress={handleDeleteAvatar} style={styles.deleteButton}>
@@ -274,8 +274,8 @@ export const EditProfile = () => {
               autoCapitalize="sentences"
               textContentType="none"
               keyboardType="default"
-              multiline
               numberOfLines={4}
+              multiline={true}
               style={styles.bioInput}
             />
             <Input

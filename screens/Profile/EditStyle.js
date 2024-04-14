@@ -23,7 +23,7 @@ export const styles = StyleSheet.create({
     width: '100%',
   },
   buttonContainer: {
-    backgroundColor: 'rgba(88, 29, 185, 1)',
+    backgroundColor: '#581DB9',
     padding: 10,
     width: '50%',
     height: 50,
@@ -50,17 +50,13 @@ export const styles = StyleSheet.create({
     marginTop: 10,
   },
   bioInput: {
-    width: '100%',
     height: 50,
-    borderRadius: 5,
-    padding: 10,
-    textAlignVertical: 'top',
     marginBottom: 20,
+    width: '100%',
   },
   bioTxt: {
-    color: 'black',
+    color: 'blue',
     fontSize: 16,
-    marginTop: 10,
   },
 
   deleteButton: {

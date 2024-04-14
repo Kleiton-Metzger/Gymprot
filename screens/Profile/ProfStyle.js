@@ -1,132 +1,114 @@
 import { StyleSheet } from 'react-native';
 import { Dimensions } from 'react-native';
+import { Avatar } from 'react-native-paper';
 
 const { width, height } = Dimensions.get('window');
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
-    alignItems: 'center',
-    justifyContent: 'center',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    top: 60,
+    marginHorizontal: 10,
+    height: 50,
+    marginBottom: 10,
   },
   editContainer: {
-    position: 'absolute',
-    top: 70,
-    left: 20,
+    width: '50%',
   },
   editIcon: {
-    width: 30,
-    height: 30,
+    left: 10,
+    width: 40,
   },
-  userInfoContainer: {
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-    position: 'absolute',
-    top: 100,
-    flexDirection: 'row',
-    right: 30,
+  buttonContainer: {
+    height: 35,
+    width: 80,
+    top: 5,
+    backgroundColor: '#581DB9',
+    borderRadius: 10,
+    right: 10,
   },
-  avatarContainer: {
+
+  userDataContainer: {
+    top: 60,
     padding: 10,
+    flexDirection: 'row',
+    marginTop: 5,
+    width: '100%',
+    // backgroundColor: 'red',
+  },
+  avatar: {
+    width: 100,
+    height: 100,
+    borderColor: '#581DB9',
+    borderWidth: 3,
     borderRadius: 100,
-    marginRight: 20,
+    marginRight: 10,
   },
-  infoContainer: {
-    alignItems: 'center',
-    marginTop: 20,
-    right: 20,
+  userDatas: {
+    width: '65%',
+    height: 100,
+    justifyContent: 'center',
+    alignSelf: 'flex-start',
+    padding: 10,
   },
-  name: {
+  userName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#581DB9',
+  },
+  userEmail: {
+    fontSize: 14,
+    color: 'black',
+    top: 5,
+  },
+  userFollow: {
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'space-between',
+    top: 15,
+  },
+  seguidoresContainer: {
+    flexDirection: 'column',
+    width: '50%',
+  },
+  segdrTxt: {
+    color: 'darkgray',
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  segdrNum: {
+    color: 'black',
+    fontWeight: 'bold',
+    left: 20,
+  },
+  bioContainer: {
+    top: 60,
+    padding: 10,
+    width: '100%',
+    height: '20%',
+  },
+
+  bioText: {
+    fontSize: 14,
+    color: 'gray',
+    top: 5,
+    textAlign: 'justify',
+  },
+  bodyContainer: {
+    width,
+    height,
+    backgroundColor: 'lightgray',
+    top: 10,
+  },
+  bodyTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: 'black',
-    marginRight: 60,
-  },
-  email: {
-    fontSize: 14,
-    color: 'darkgray',
-    marginRight: 20,
-    color: '#581DB9',
-  },
-  userData: {
-    flexDirection: 'row',
-    marginVertical: 5,
-  },
-  allinfoContainer: {
-    width,
-    height: 70,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    marginTop: 20,
-  },
-  userDataLabel: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: 'black',
-    marginRight: 10,
-  },
-  userDataValue: {
-    fontSize: 15,
-    color: 'black',
-    fontWeight: 'bold',
-  },
-  infoContainerSeg: {
-    width,
-    height: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'absolute',
-    top: 270,
-  },
-  infoSeguidr: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: 'gray',
-    marginRight: 50,
-  },
-  infoSeguind: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: 'gray',
-    marginRight: 10,
-    marginLeft: 70,
-  },
-  txtSeguidr: {
-    fontSize: 15,
-    color: 'black',
-    fontWeight: 'bold',
-    marginRight: 20,
-    right: 110,
+    textAlign: 'center',
     top: 20,
-  },
-  txtSeguind: {
-    fontSize: 15,
-    color: 'black',
-    fontWeight: 'bold',
-    right: 70,
-    top: 20,
-  },
-  divider: {
-    width: 3,
-    height: 30,
-    backgroundColor: '#581DB9',
-  },
-  dadoGraf: {
-    position: 'absolute',
-    top: 70,
-    backgroundColor: 'lightgray',
-    height,
-    width,
-  },
-  dadsInfo: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: 'gray',
-    marginLeft: 20,
-    alignSelf: 'center',
-    top: 10,
   },
 });
