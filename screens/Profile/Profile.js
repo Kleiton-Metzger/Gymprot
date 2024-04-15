@@ -28,6 +28,7 @@ export const Profile = () => {
     );
   }
 
+  console.log(currentUser);
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -49,11 +50,11 @@ export const Profile = () => {
           <View style={styles.userFollow}>
             <View style={styles.seguidoresContainer}>
               <Text style={styles.segdrTxt}> Seguidores</Text>
-              <Text style={styles.segdrNum}> 110</Text>
+              <Text style={styles.segdrNum}> {currentUser.seguidores ? currentUser.seguidores.length : 0}</Text>
             </View>
             <View>
               <Text style={styles.segdrTxt}> Seguindo</Text>
-              <Text style={styles.segdrNum}> 110</Text>
+              <Text style={styles.segdrNum}> {currentUser.seguindo ? currentUser.seguindo.length : 0}</Text>
             </View>
           </View>
         </View>
