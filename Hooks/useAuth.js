@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
   // useEffect(() => {
   const fetchUserData = async () => {
     const usersData = {};
-    for (const userId of userIds) {
+    for (const userId of userId) {
       const userDoc = await getDoc(doc(db, 'users', userId));
       if (userDoc.exists()) {
         const userData = userDoc.data();

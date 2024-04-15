@@ -114,6 +114,7 @@ export const HomeScreen = () => {
         renderItem={({ item }) => (
           <View style={styles.infoContainer}>
             <UserInfo
+              userId={item?.createBy || ''}
               userName={item?.creatorInfo?.name || ''}
               location={item.location?.cityName || ''}
               tipo={item.type}
@@ -135,7 +136,7 @@ export const HomeScreen = () => {
   );
 };
 
-const UserInfo = ({ userName, location, tipo, creatorAvatar, bio, description, video, navigation }) => (
+const UserInfo = ({ userName, location, tipo, creatorAvatar, bio, description, video, navigation, userId }) => (
   <View style={styles.userInfoContainer}>
     <TouchableOpacity
       onPress={() =>
@@ -145,6 +146,7 @@ const UserInfo = ({ userName, location, tipo, creatorAvatar, bio, description, v
           location: location || '',
           tipo: tipo,
           userBio: bio,
+          createBy: userId,
         })
       }
       activeOpacity={0.8}
