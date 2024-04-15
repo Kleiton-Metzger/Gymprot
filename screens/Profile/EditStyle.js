@@ -51,12 +51,6 @@ export const styles = StyleSheet.create({
   },
   bioInput: {
     height: 50,
-    marginBottom: 20,
-    width: '100%',
-  },
-  bioTxt: {
-    color: 'blue',
-    fontSize: 16,
   },
 
   deleteButton: {

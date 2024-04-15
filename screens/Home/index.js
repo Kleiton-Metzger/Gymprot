@@ -20,9 +20,9 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
 const { width, height } = Dimensions.get('window');
+
 export const HomeScreen = () => {
   const navigation = useNavigation();
-
   const [searchPhrase, setSearchPhrase] = useState('');
   const [videos, setVideos] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
@@ -37,7 +37,10 @@ export const HomeScreen = () => {
         let fetchedVideos = [];
         querySnapshot.forEach(doc => {
           const videoData = doc.data();
-          fetchedVideos.push({ id: doc.id, ...videoData });
+
+          if (videoData.createBy !== currentUser.userId) {
+            fetchedVideos.push({ id: doc.id, ...videoData });
+          }
         });
         setVideos(fetchedVideos);
       });
@@ -123,6 +126,7 @@ export const HomeScreen = () => {
               description={item.description}
               video={item.videoURL}
               navigation={navigation}
+              currentUser={currentUser} // Passando o currentUser para a UserInfo
             />
             <VideoItem video={item.videoURL} />
           </View>
@@ -136,19 +140,34 @@ export const HomeScreen = () => {
   );
 };
 
-const UserInfo = ({ userName, location, tipo, creatorAvatar, bio, description, video, navigation, userId }) => (
+const UserInfo = ({
+  userName,
+  location,
+  tipo,
+  creatorAvatar,
+  bio,
+  description,
+  video,
+  navigation,
+  userId,
+  currentUser,
+}) => (
   <View style={styles.userInfoContainer}>
     <TouchableOpacity
-      onPress={() =>
-        navigation.navigate('FolowerProfile', {
-          userName: userName || '',
-          creatorAvatar: creatorAvatar,
-          location: location || '',
-          tipo: tipo,
-          userBio: bio,
-          createBy: userId,
-        })
-      }
+      onPress={() => {
+        if (currentUser?.userId === userId) {
+          navigation.navigate('Profile');
+        } else {
+          navigation.navigate('FolowerProfile', {
+            userName: userName || '',
+            creatorAvatar: creatorAvatar,
+            location: location || '',
+            tipo: tipo,
+            userBio: bio,
+            createBy: userId,
+          });
+        }
+      }}
       activeOpacity={0.8}
     >
       {creatorAvatar && (

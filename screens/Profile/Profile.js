@@ -28,7 +28,6 @@ export const Profile = () => {
     );
   }
 
-  console.log(currentUser);
   return (
     <View style={styles.container}>
       <View style={styles.header}>
