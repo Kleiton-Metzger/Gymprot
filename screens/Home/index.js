@@ -38,7 +38,7 @@ export const HomeScreen = () => {
         querySnapshot.forEach(doc => {
           const videoData = doc.data();
 
-          if (videoData.createBy !== currentUser.userId) {
+          if (videoData.createBy !== currentUser?.userId) {
             fetchedVideos.push({ id: doc.id, ...videoData });
           }
         });
@@ -48,7 +48,7 @@ export const HomeScreen = () => {
     };
 
     fetchUserVideos();
-  }, []);
+  }, [currentUser]);
 
   let filteredVideos = videos;
 
@@ -126,7 +126,7 @@ export const HomeScreen = () => {
               description={item.description}
               video={item.videoURL}
               navigation={navigation}
-              currentUser={currentUser} // Passando o currentUser para a UserInfo
+              currentUser={currentUser}
             />
             <VideoItem video={item.videoURL} />
           </View>
@@ -155,7 +155,7 @@ const UserInfo = ({
   <View style={styles.userInfoContainer}>
     <TouchableOpacity
       onPress={() => {
-        if (currentUser?.userId === userId) {
+        if (currentUser && currentUser.userId === userId) {
           navigation.navigate('Profile');
         } else {
           navigation.navigate('FolowerProfile', {
@@ -186,7 +186,6 @@ const UserInfo = ({
         <Text style={styles.location}>{location}</Text>
       </View>
       <Text style={styles.tipo}>Tipo: {tipo}</Text>
-      {/*<Text style={styles.videoDescription}>Descrição: {description}</Text>*/}
     </View>
   </View>
 );

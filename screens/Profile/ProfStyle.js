@@ -1,8 +1,7 @@
-import { StyleSheet } from 'react-native';
-import { Dimensions } from 'react-native';
-import { Avatar } from 'react-native-paper';
+import { StyleSheet, Dimensions } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
+
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -11,10 +10,8 @@ export const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    top: 60,
     marginHorizontal: 10,
-    height: 50,
-    marginBottom: 10,
+    marginBottom: 5,
   },
   editContainer: {
     width: '50%',
@@ -24,21 +21,18 @@ export const styles = StyleSheet.create({
     width: 40,
   },
   buttonContainer: {
-    height: 35,
-    width: 80,
-    top: 5,
+    height: 40,
+    width: 100,
     backgroundColor: '#581DB9',
     borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
     right: 10,
   },
-
   userDataContainer: {
-    top: 60,
     padding: 10,
     flexDirection: 'row',
-    marginTop: 5,
     width: '100%',
-    // backgroundColor: 'red',
   },
   avatar: {
     width: 100,
@@ -47,6 +41,7 @@ export const styles = StyleSheet.create({
     borderWidth: 3,
     borderRadius: 100,
     marginRight: 10,
+    marginBottom: 10,
   },
   userDatas: {
     width: '65%',
@@ -62,7 +57,7 @@ export const styles = StyleSheet.create({
   },
   userEmail: {
     fontSize: 14,
-    color: 'black',
+    color: 'lightblue',
     top: 5,
   },
   userFollow: {
@@ -86,29 +81,32 @@ export const styles = StyleSheet.create({
     left: 20,
   },
   bioContainer: {
-    top: 60,
+    padding: 10,
+    width,
+    marginBottom: 10,
+  },
+  bioContainer: {
     padding: 10,
     width: '100%',
-    height: '20%',
+    height: 110,
   },
-
   bioText: {
     fontSize: 14,
-    color: 'gray',
-    top: 5,
+    color: '#818589',
+    marginTop: 5,
     textAlign: 'justify',
+    alignSelf: 'center',
   },
   bodyContainer: {
-    width,
+    flex: 1,
+    width: '100%',
     height,
-    backgroundColor: 'lightgray',
-    top: 10,
   },
   bodyTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: 'black',
-    textAlign: 'center',
-    top: 20,
+    color: '#581DB9',
+    alignSelf: 'center',
+    marginTop: 10,
   },
 });

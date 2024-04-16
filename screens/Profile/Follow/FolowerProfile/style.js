@@ -1,4 +1,5 @@
-import { Dimensions, StyleSheet, useWindowDimensions } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
+
 const { width, height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
@@ -10,10 +11,10 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     height: 40,
-    width,
+    width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
-    // backgroundColor: 'red',
+    paddingLeft: 10,
   },
   bckButton: {
     width: '15%',
@@ -25,15 +26,14 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: 'black',
-    width: '50%',
+    width: '70%',
     textAlign: 'center',
-    left: 40,
   },
   profileContainer: {
-    width,
+    width: '100%',
     height: 200,
     alignItems: 'center',
-    // backgroundColor: 'yellow',
+    justifyContent: 'center',
   },
   avatar: {
     width: 100,
@@ -41,20 +41,20 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     borderColor: '#581DB9',
     borderWidth: 3,
-    backgroundColor: 'gray',
-    top: 10,
+    // backgroundColor: 'gray',
+    marginTop: 10,
   },
   userName: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#581DB9',
-    top: 15,
+    marginTop: 15,
   },
   userFollow: {
     flexDirection: 'row',
     width: '80%',
     justifyContent: 'space-between',
-    top: 20,
+    marginTop: 20,
   },
   seguidoresContainer: {
     flexDirection: 'column',
@@ -68,39 +68,103 @@ const styles = StyleSheet.create({
   segdrNum: {
     color: 'black',
     fontWeight: 'bold',
-    left: 20,
+    marginLeft: 20,
   },
   buttonContainer: {
     height: 40,
     width: 10,
-    right: 85,
-    top: 10,
+    marginLeft: '5%',
+    right: 100,
   },
   bioContainer: {
     padding: 10,
     width: '100%',
-    height: 130,
-    // backgroundColor: 'lightgray',
+    height: 110,
   },
-
   bioText: {
     fontSize: 14,
-    color: 'gray',
-    top: 5,
+    color: '#818589',
+    marginTop: 5,
     textAlign: 'justify',
-    alignItems: 'center',
+    alignSelf: 'center',
   },
   bodyContainer: {
-    width,
-    height,
-    backgroundColor: 'lightgray',
+    flex: 1,
+    width: '100%',
+    marginTop: 10,
   },
-  bodyTitle: {
-    fontSize: 20,
+  userNameU: {
+    fontSize: 16,
     fontWeight: 'bold',
-    color: 'black',
+    marginBottom: 5,
+    color: '#581DB9',
+  },
+  location: {
+    fontSize: 14,
+    color: 'gray',
+  },
+  avatarUser: {
+    width: 50,
+    height: 50,
+    borderRadius: 20,
+    marginRight: 10,
+    backgroundColor: 'darkgray',
+  },
+  infoContainer: {
+    flex: 1,
+    margin: 5,
+    padding: 10,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
+    width: '100%',
+  },
+  userInfoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    left: 5,
+  },
+  userInfoTextContainer: {
+    flex: 1,
+  },
+  creatorName: {
+    fontSize: 14,
+    color: 'gray',
+  },
+  emptyText: {
     textAlign: 'center',
-    top: 20,
+    marginTop: 20,
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#581DB9',
+  },
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  locationIcon: {
+    marginRight: 5,
+  },
+  tipo: {
+    fontSize: 14,
+    color: 'gray',
+  },
+  video: {
+    width: '100%',
+    height: '100%',
+    overflow: 'hidden',
+    borderRadius: 20,
+  },
+  videoGridContainer: {
+    paddingBottom: 80,
+  },
+  videoItem: {
+    width: '100%',
+    height: 200,
+    marginBottom: 10,
   },
 });
 
