@@ -28,49 +28,79 @@ export const ForgotPassword = ({ navigation, navigation: { goBack } }) => {
   };
 
   return (
-    <DismissKeyboard>
-      <SafeAreaView style={styles.container}>
-        <TouchableOpacity onPress={goBack} style={{ position: 'absolute', left: 20, top: 0 }}>
-          <FontAwesome5 name="arrow-left" size={24} color="black" />
-        </TouchableOpacity>
-        <Logo />
-        <Header>Reset Password</Header>
-        <View style={styles.body}>
-          <Input
-            mode="outlined"
-            label="Email"
-            color="#581DB9"
-            underline="#581DB9"
-            returnKeyType="next"
-            value={email}
-            onChangeText={setEmail}
-            errorText={emailError}
-            autoCapitalize="none"
-            textContentType="emailAddress"
-            keyboardType="email-address"
-          />
+    <SafeAreaView style={styles.container}>
+      <DismissKeyboard>
+        <View>
+          <View style={styles.hederContainer}>
+            <TouchableOpacity onPress={goBack} style={{ position: 'absolute', left: 20, top: 0 }}>
+              <FontAwesome5 name="arrow-left" size={24} color="black" />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.logoContainer}>
+            <Logo style={styles.logo} />
+            <Header>Reset Password</Header>
+          </View>
+          <View style={styles.inputContainer}>
+            <Input
+              mode="outlined"
+              label="Email"
+              color="#581DB9"
+              underline="#581DB9"
+              returnKeyType="next"
+              value={email}
+              onChangeText={setEmail}
+              errorText={emailError}
+              style={styles.input}
+            />
+          </View>
+          <View style={styles.btnContainer}>
+            <Button style={styles.button} onPress={handleResetPassword} label="Reset Password" />
+          </View>
         </View>
-        <View style={styles.btn}>
-          <Button onPress={handleResetPassword} label="Reset Password" />
-        </View>
-      </SafeAreaView>
-    </DismissKeyboard>
+      </DismissKeyboard>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+    backgroundColor: 'white',
+  },
+  hederContainer: {
+    height: 50,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  logoContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: 10,
   },
-  body: {
+  inputContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
-    paddingLeft: '10%',
-    paddingRight: '10%',
+    paddingLeft: 10,
+    paddingRight: 10,
   },
-  btn: {
+  input: {
+    marginTop: 20,
+    marginBottom: 20,
+    backgroundColor: 'white',
+  },
+  btnContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 30,
+  },
+  button: {
     width: '50%',
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#581DB9',
+    borderRadius: 15,
   },
 });

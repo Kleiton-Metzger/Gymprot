@@ -19,6 +19,7 @@ const styles = StyleSheet.create({
   bckButton: {
     width: '15%',
     height: 40,
+    right: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -26,7 +27,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: 'black',
-    width: '70%',
+    width: '68%',
     textAlign: 'center',
   },
   profileContainer: {
@@ -41,15 +42,9 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     borderColor: '#581DB9',
     borderWidth: 3,
-    // backgroundColor: 'gray',
-    marginTop: 10,
+    marginBottom: 10,
   },
-  userName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#581DB9',
-    marginTop: 15,
-  },
+
   userFollow: {
     flexDirection: 'row',
     width: '80%',
@@ -84,7 +79,6 @@ const styles = StyleSheet.create({
   bioText: {
     fontSize: 14,
     color: '#818589',
-    marginTop: 5,
     textAlign: 'justify',
     alignSelf: 'center',
   },

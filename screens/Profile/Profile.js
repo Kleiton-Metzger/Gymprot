@@ -6,7 +6,7 @@ import { useAuth } from '../../Hooks/useAuth';
 import { getUSerSex } from '../../utils/gender';
 import { styles } from './ProfStyle';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-
+import { Octicons } from '@expo/vector-icons';
 export const Profile = () => {
   const navigation = useNavigation();
   const { currentUser, signOut } = useAuth();
@@ -33,12 +33,16 @@ export const Profile = () => {
       <View style={styles.header}>
         <View style={styles.editContainer}>
           <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('EditProfileScreen')}>
-            <MaterialCommunityIcons name="account-edit-outline" size={40} color="black" style={styles.editIcon} />
+            <MaterialCommunityIcons name="account-edit-outline" size={35} color="black" style={styles.editIcon} />
           </TouchableOpacity>
         </View>
-
+        <View style={styles.perfilTextContainer}>
+          <Text style={styles.perfilText}>Perfil</Text>
+        </View>
         <View style={styles.buttonContainer}>
-          <Button title="Sair" onPress={handleSignOut} color="white" />
+          <TouchableOpacity onPress={handleSignOut} activeOpacity={0.7}>
+            <MaterialCommunityIcons name="logout" size={25} color="black" style={styles.logoutbtn} />
+          </TouchableOpacity>
         </View>
       </View>
       <View style={{ height: 1, backgroundColor: 'lightgray', width: '100%' }} />

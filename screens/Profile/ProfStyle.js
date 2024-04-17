@@ -1,6 +1,6 @@
 import { StyleSheet, Dimensions } from 'react-native';
 
-const { width, height } = Dimensions.get('window');
+const { height } = Dimensions.get('window');
 
 export const styles = StyleSheet.create({
   container: {
@@ -14,18 +14,31 @@ export const styles = StyleSheet.create({
     marginBottom: 5,
   },
   editContainer: {
-    width: '50%',
+    width: '30%',
+    alignSelf: 'center',
   },
   editIcon: {
-    left: 10,
     width: 40,
+    top: 3,
+    left: 10,
+  },
+  perfilTextContainer: {
+    width: '40%',
+    alignSelf: 'center',
+  },
+  perfilText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'black',
+    alignSelf: 'center',
   },
   buttonContainer: {
-    height: 40,
-    width: 100,
-    backgroundColor: '#581DB9',
-    borderRadius: 10,
-    justifyContent: 'center',
+    width: '30%',
+    alignItems: 'flex-end',
+    marginTop: 10,
+  },
+  logoutbtn: {
+    width: '30%',
     alignItems: 'center',
     right: 10,
   },
@@ -33,6 +46,7 @@ export const styles = StyleSheet.create({
     padding: 10,
     flexDirection: 'row',
     width: '100%',
+    marginTop: 10,
   },
   avatar: {
     width: 100,
@@ -57,7 +71,7 @@ export const styles = StyleSheet.create({
   },
   userEmail: {
     fontSize: 14,
-    color: 'lightblue',
+    color: 'black',
     top: 5,
   },
   userFollow: {
@@ -78,12 +92,7 @@ export const styles = StyleSheet.create({
   segdrNum: {
     color: 'black',
     fontWeight: 'bold',
-    left: 20,
-  },
-  bioContainer: {
-    padding: 10,
-    width,
-    marginBottom: 10,
+    marginLeft: 20, // Changed from left: 20
   },
   bioContainer: {
     padding: 10,
@@ -94,8 +103,7 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     color: '#818589',
     marginTop: 5,
-    textAlign: 'justify',
-    alignSelf: 'center',
+    textAlign: 'justify', // Removed alignSelf: 'center'
   },
   bodyContainer: {
     flex: 1,

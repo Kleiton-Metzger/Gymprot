@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Image, SafeAreaView } from 'react-native';
 import { StyleSheet } from 'react-native-web';
 import { useNavigation } from '@react-navigation/native';
 import { auth, createUserWithEmailAndPassword } from '../../storage/Firebase';
@@ -82,68 +82,74 @@ export const Register = ({ navigation, navigation: { goBack } }) => {
   if (loading) return null;
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-      <DismissKeyboard>
-        <View style={styles.container}>
-          <TouchableOpacity onPress={goBack} style={{ position: 'absolute', left: 20, top: 0 }}>
-            <FontAwesome5 name="arrow-left" size={24} color="black" />
-          </TouchableOpacity>
-          <Logo />
-          <Header>Register</Header>
-          <View style={styles.inputContainer}>
-            <Input
-              mode="outlined"
-              label="Name"
-              color="#581DB9"
-              underline="#581DB9"
-              returnKeyType="next"
-              value={name}
-              onChangeText={setName}
-              errorText={nameError}
-            />
-            <Input
-              mode="outlined"
-              label="Email"
-              color="#581DB9"
-              underline="#581DB9"
-              returnKeyType="next"
-              value={email}
-              onChangeText={setEmail}
-              errorText={emailError}
-            />
-            <Input
-              mode="outlined"
-              label="Password"
-              color="#581DB9"
-              underline="#581DB9"
-              textContentType="password"
-              returnKeyType="next"
-              value={password}
-              onChangeText={setPassword}
-              errorText={passwordError}
-            />
-            <Input
-              mode="outlined"
-              label="Confirm Password"
-              color="#581DB9"
-              underline="#581DB9"
-              textContentType="password"
-              returnKeyType="done"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              errorText={confirmPasswordError}
-            />
-            <Button onPress={handleSignUp} label="Register" />
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: '5%' }}>
-              <Text>Already have an account? </Text>
-              <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                <Text style={styles.register}>Login</Text>
-              </TouchableOpacity>
+    <SafeAreaView>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <DismissKeyboard>
+          <View style={styles.container}>
+            <TouchableOpacity onPress={goBack} style={{ position: 'absolute', left: 20, top: 10 }}>
+              <FontAwesome5 name="arrow-left" size={24} color="black" />
+            </TouchableOpacity>
+            <View style={styles.logoContainer}>
+              <Logo />
+            </View>
+            <View style={styles.titleContainer}>
+              <Header>Register</Header>
+            </View>
+            <View style={styles.inputContainer}>
+              <Input
+                mode="outlined"
+                label="Name"
+                color="#581DB9"
+                underline="#581DB9"
+                returnKeyType="next"
+                value={name}
+                onChangeText={setName}
+                errorText={nameError}
+              />
+              <Input
+                mode="outlined"
+                label="Email"
+                color="#581DB9"
+                underline="#581DB9"
+                returnKeyType="next"
+                value={email}
+                onChangeText={setEmail}
+                errorText={emailError}
+              />
+              <Input
+                mode="outlined"
+                label="Password"
+                color="#581DB9"
+                underline="#581DB9"
+                textContentType="password"
+                returnKeyType="next"
+                value={password}
+                onChangeText={setPassword}
+                errorText={passwordError}
+              />
+              <Input
+                mode="outlined"
+                label="Confirm Password"
+                color="#581DB9"
+                underline="#581DB9"
+                textContentType="password"
+                returnKeyType="done"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                errorText={confirmPasswordError}
+              />
+              <Button onPress={handleSignUp} label="Register" />
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: '5%' }}>
+                <Text>Already have an account? </Text>
+                <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                  <Text style={styles.register}>Login</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
-      </DismissKeyboard>
-    </KeyboardAvoidingView>
+        </DismissKeyboard>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
@@ -151,7 +157,6 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: '10%',
   },
   inputContainer: {
     alignItems: 'center',
@@ -159,6 +164,15 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingLeft: '10%',
     paddingRight: '10%',
+  },
+  logoContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: '10%',
+  },
+  titleContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   button: {
     width: '100%',

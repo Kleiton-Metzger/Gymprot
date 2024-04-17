@@ -1,23 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Image,
-  FlatList,
-  Alert,
-  Dimensions,
-  SafeAreaView,
-} from 'react-native';
+import { View, Text, TouchableOpacity, Image, FlatList, SafeAreaView, Dimensions } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { collection, onSnapshot, doc, getDoc, where, query } from 'firebase/firestore';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '../../storage/Firebase';
 import { Video } from 'expo-av';
-import styles from './styles';
 import { useAuth } from '../../Hooks/useAuth';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { Searchbar } from 'react-native-paper';
+import styles from './styles';
 
 const { width, height } = Dimensions.get('window');
 
@@ -28,29 +19,47 @@ export const HomeScreen = () => {
   const [searchResults, setSearchResults] = useState([]);
   const { currentUser } = useAuth();
   const [categoria, setCategoria] = useState('');
+  const [localizacao, setLocalizacao] = useState(''); // Adicionando estado para localização
 
   useEffect(() => {
     const fetchUserVideos = async () => {
-      const q = query(collection(db, 'videos'), where('status', '==', 'Public'));
+      let q = collection(db, 'videos');
+      q = query(q, where('status', '==', 'Public'));
+
+      // Aplicando filtro da categoria
+      if (categoria !== '') {
+        q = query(q, where('type', '==', categoria));
+      }
+
+      // Aplicando filtro da localização
+      if (localizacao !== '') {
+        q = query(q, where('location.cityName', '==', localizacao));
+      }
 
       const unsubscribeVideos = onSnapshot(q, async querySnapshot => {
         let fetchedVideos = [];
         querySnapshot.forEach(doc => {
           const videoData = doc.data();
-
           if (videoData.createBy !== currentUser?.userId) {
             fetchedVideos.push({ id: doc.id, ...videoData });
           }
         });
         setVideos(fetchedVideos);
       });
+
       return () => unsubscribeVideos();
     };
 
     fetchUserVideos();
-  }, [currentUser]);
+  }, [categoria, localizacao, currentUser]);
 
-  let filteredVideos = videos;
+  // Atualizando a localização digitada no Searchbar
+  const handleSearch = text => {
+    setSearchPhrase(text);
+    setLocalizacao(text); // Atualizando o estado da localização ao digitar na barra de pesquisa
+  };
+
+  let filteredVideos = [...videos];
 
   return (
     <SafeAreaView style={styles.container}>
@@ -62,58 +71,63 @@ export const HomeScreen = () => {
               style={styles.uavatar}
             />
           </TouchableOpacity>
-          <Text style={styles.header}>Olá, </Text>
-          <Text style={styles.userNameH}>{currentUser?.name}</Text>
         </View>
+
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <TouchableOpacity onPress={() => setCategoria(categoria == 'walk' ? '' : 'walk')} style={{ marginRight: 5 }}>
+          <TouchableOpacity
+            onPress={() => setCategoria(categoria === 'Walking' ? '' : 'Walking')}
+            style={{ marginRight: 5 }}
+          >
             <MaterialCommunityIcons
               name="walk"
               style={styles.filterIcon}
               size={27}
-              color={categoria === 'walk' ? '#581DB9' : 'gray'}
+              color={categoria === 'Walking' ? '#581DB9' : 'gray'}
             />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => setCategoria(categoria == 'run' ? '' : 'run')} style={{ marginRight: 5 }}>
+          <TouchableOpacity
+            onPress={() => setCategoria(categoria === 'Running' ? '' : 'Running')}
+            style={{ marginRight: 5 }}
+          >
             <MaterialCommunityIcons
               name="run-fast"
               style={styles.filterIcon}
               size={27}
-              color={categoria === 'run' ? '#581DB9' : 'gray'}
+              color={categoria === 'Running' ? '#581DB9' : 'gray'}
             />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => setCategoria(categoria == 'bike' ? '' : 'bike')} style={{ marginRight: 5 }}>
+          <TouchableOpacity
+            onPress={() => setCategoria(categoria === 'Cycling' ? '' : 'Cycling')}
+            style={{ marginRight: 5 }}
+          >
             <MaterialCommunityIcons
               name="bike"
               style={styles.filterIcon}
               size={27}
-              color={categoria === 'bike' ? '#581DB9' : 'gray'}
+              color={categoria === 'Cycling' ? '#581DB9' : 'gray'}
             />
           </TouchableOpacity>
         </View>
       </View>
-      <View style={{ marginTop: 5, borderBottomWidth: 1, borderBottomColor: 'lightgrey' }}>
-        <View style={styles.searchBar}>
-          <TextInput
-            style={styles.input}
-            placeholder="Pesquisar por localização"
-            value={searchPhrase}
-            onChangeText={setSearchPhrase}
-          />
-          {searchPhrase ? (
-            <TouchableOpacity style={styles.cancelButton} onPress={() => setSearchPhrase('')}>
-              <Text style={styles.cancelText}>Cancelar</Text>
-            </TouchableOpacity>
-          ) : null}
-        </View>
+
+      <View style={styles.searchContainer}>
+        <Searchbar
+          placeholder="Localização"
+          onChangeText={handleSearch}
+          value={searchPhrase}
+          style={styles.searchBar}
+          icon={() => <Feather name="search" size={15} color="black" />}
+          iconColor="#581DB9"
+          inputStyle={{ fontSize: 15 }}
+        />
       </View>
 
       <FlatList
         showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={
-          <View style={{ height: 1, width: width * 0.9, alignSelf: 'center', backgroundColor: 'lightgrey' }} />
+          <View style={{ height: 1, width: '90%', alignSelf: 'center', backgroundColor: 'lightgrey' }} />
         }
-        data={filteredVideos}
+        data={searchResults.length > 0 ? searchResults : filteredVideos}
         renderItem={({ item }) => (
           <View style={styles.infoContainer}>
             <UserInfo

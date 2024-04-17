@@ -133,7 +133,7 @@ export const FolowerProfile = () => {
         <TouchableOpacity style={styles.bckButton} onPress={() => navigation.goBack()}>
           <Feather name="arrow-left" size={30} color="black" />
         </TouchableOpacity>
-        <Text style={styles.title}>Perfil</Text>
+        <Text style={styles.title}>{userName}</Text>
       </View>
       <View style={{ height: 1, backgroundColor: 'lightgray', width: '100%' }} />
       <FlatList
@@ -148,7 +148,7 @@ export const FolowerProfile = () => {
                     source={creatorAvatar ? { uri: creatorAvatar } : require('../../../../assets/avatar.png')}
                     style={styles.avatar}
                   />
-                  <Text style={styles.userName}>{userName}</Text>
+
                   <View style={styles.userFollow}>
                     <View style={styles.seguidoresContainer}>
                       <Text style={styles.segdrTxt}>Seguidor</Text>

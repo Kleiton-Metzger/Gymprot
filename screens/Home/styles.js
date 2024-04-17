@@ -9,21 +9,8 @@ const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
     justifyContent: 'space-between',
-  },
-  header: {
-    fontSize: 18,
-    fontWeight: '500',
-    color: '#000000',
-    marginLeft: 5,
-    top: 10,
-  },
-  userNameH: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#581DB9',
-    top: 10,
+    // backgroundColor: 'red',
   },
   uavatar: {
     width: 40,
@@ -35,40 +22,18 @@ const styles = StyleSheet.create({
   filterIcon: {
     right: 25,
   },
+  searchContainer: {
+    padding: 10,
+    // backgroundColor: 'red',
+    width,
+  },
   searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f3f3f3',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'darkgrey',
-    marginHorizontal: 20,
-    marginBottom: 5,
-  },
-  searchBarClicked: {
-    borderColor: '#581DB9',
-  },
-  searchIcon: {
-    marginRight: 10,
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-  },
-  cancelText: {
-    marginLeft: 10,
-    color: '#581DB9',
-    fontSize: 13,
-  },
-  searchButton: {
-    marginLeft: 10,
-    color: '#007AFF',
-    fontSize: 16,
+    borderRadius: 20,
+    backgroundColor: '#F0F0F0',
+    width: '95%',
   },
   videoGridContainer: {
-    backgroundColor: '#f9f9f9',
+    backgroundColor: 'white',
   },
   videoItem: {
     width: '100%',
