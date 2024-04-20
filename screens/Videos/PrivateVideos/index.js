@@ -5,11 +5,16 @@ import { collection, onSnapshot, query, where, getDoc, doc } from 'firebase/fire
 import { db, auth } from '../../../storage/Firebase';
 import { Video } from 'expo-av';
 import styles from '../styles';
+import { useAuth } from '../../../Hooks/useAuth';
+
 const { width, height } = Dimensions.get('window');
 LogBox.ignoreLogs(['Sending `onAnimatedValueUpdate` with no listeners registered.']);
-
+LogBox.ignoreLogs([
+  'Could not find image file:///private/var/containers/Bundle/Application/CCC465B2-8EA5-4A73-B814-EAAAA115DD03/Expo%20Go.app/No%20avatar%20availble.png',
+]);
 export const PrivateScreen = ({ navigation }) => {
   const [filteredVideos, setFilteredVideos] = useState([]);
+  const { currentUser } = useAuth();
   useEffect(() => {
     const fetchUserVideos = async () => {
       try {
@@ -47,10 +52,10 @@ export const PrivateScreen = ({ navigation }) => {
         renderItem={({ item }) => (
           <View style={styles.infoContainer}>
             <UserInfo
-              userName={item?.creatorInfo?.name || ''}
+              userName={currentUser?.name || ''}
               location={item.location?.cityName || ''}
               tipo={item.type}
-              creatorAvatar={item?.creatorInfo?.avatar}
+              creatorAvatar={currentUser?.avatar}
               navigation={navigation} // Pass navigation as a prop
             />
             <VideoItem video={item.videoURL} />

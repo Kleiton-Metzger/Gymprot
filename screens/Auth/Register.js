@@ -74,6 +74,9 @@ export const Register = ({ navigation, navigation: { goBack } }) => {
           name: name,
           email: email,
           userId: user.uid,
+          seguidores: [],
+          seguindo: [],
+          bio: '',
         });
       })
       .catch(error => alert(error.message));

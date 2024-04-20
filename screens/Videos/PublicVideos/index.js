@@ -5,12 +5,17 @@ import { collection, onSnapshot, query, where, getDoc, doc } from 'firebase/fire
 import { db, auth } from '../../../storage/Firebase';
 import { Video } from 'expo-av';
 import styles from '../styles';
+import { useAuth } from '../../../Hooks/useAuth';
 
 const { width, height } = Dimensions.get('window'); //pegar a largura e altura da tela
 LogBox.ignoreLogs(['Sending `onAnimatedValueUpdate` with no listeners registered.']);
-
+LogBox.ignoreLogs([
+  'Could not find image file:///private/var/containers/Bundle/Application/CCC465B2-8EA5-4A73-B814-EAAAA115DD03/Expo%20Go.app/No%20avatar%20availble.png',
+]);
 export const PublicScreen = ({ navigation }) => {
   const [filteredVideos, setFilteredVideos] = useState([]);
+  const { currentUser } = useAuth();
+
   useEffect(() => {
     const fetchUserVideos = async () => {
       try {
@@ -48,10 +53,10 @@ export const PublicScreen = ({ navigation }) => {
         renderItem={({ item }) => (
           <View style={styles.infoContainer}>
             <UserInfo
-              userName={item?.creatorInfo?.name || ''}
+              userName={currentUser?.name || ''}
               location={item.location?.cityName || ''}
               tipo={item.type}
-              creatorAvatar={item?.creatorInfo?.avatar}
+              creatorAvatar={currentUser?.avatar}
               navigation={navigation} // Pass navigation as a prop
             />
             <VideoItem video={item.videoURL} />
@@ -70,8 +75,17 @@ export const PublicScreen = ({ navigation }) => {
 const UserInfo = ({ userName, location, tipo, creatorAvatar, navigation }) => (
   <View style={styles.userInfoContainer}>
     <TouchableOpacity onPress={() => navigation.navigate('Profile')} activeOpacity={0.8}>
-      {creatorAvatar && <Image source={{ uri: creatorAvatar }} style={styles.avatar} />}
+      {creatorAvatar ? (
+        <Image style={styles.avatar} source={{ uri: creatorAvatar }} />
+      ) : (
+        <Image
+          style={styles.avatar}
+          source={require('../../../assets/avatar.png')}
+          defaultSource={require('../../../assets/avatar.png')}
+        />
+      )}
     </TouchableOpacity>
+
     <View style={styles.userInfoTextContainer}>
       <Text style={styles.userName}>{userName}</Text>
       <View style={styles.locationContainer}>

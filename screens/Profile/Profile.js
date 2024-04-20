@@ -48,7 +48,10 @@ export const Profile = () => {
       <View style={{ height: 1, backgroundColor: 'lightgray', width: '100%' }} />
       <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
         <View style={styles.userDataContainer}>
-          <Image style={styles.avatar} source={{ uri: currentUser.avatar }} />
+          <Image
+            style={styles.avatar}
+            source={currentUser.avatar ? { uri: currentUser.avatar } : require('../../assets/avatar.png')}
+          />
           <View style={styles.userDatas}>
             <Text style={styles.userName}>{currentUser.name}</Text>
             <Text style={styles.userEmail}>{currentUser.email}</Text>

@@ -11,7 +11,6 @@ import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 import { RadioButton, TextInput, ProgressBar } from 'react-native-paper';
 import { Button } from '../../components';
 import { Keyboard } from 'react-native';
-import { text } from '@fortawesome/fontawesome-svg-core';
 import { styles } from './styles';
 import { useAuth } from '../../Hooks/useAuth';
 
@@ -31,6 +30,7 @@ export const CameraScreen = ({}) => {
   const [isMoving, setIsMoving] = useState(false);
   const [typeVideo, setTypeVideo] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [dataPoints, setDataPoints] = useState([]); // Array para armazenar os dados de velocidade e elevação
 
   const cameraRef = useRef(null);
   const timerRef = useRef(null);
@@ -38,7 +38,13 @@ export const CameraScreen = ({}) => {
   const calculateSpeed = accelerometerData => {
     const { x, y, z } = accelerometerData;
     const newSpeed = Math.sqrt(x * x + y * y + z * z);
-    return newSpeed;
+    if (newSpeed > 0.1) {
+      // Se houver movimento, atualize o speed
+      return newSpeed;
+    } else {
+      // Se não houver movimento, retorne 0
+      return 0;
+    }
   };
 
   useEffect(() => {
@@ -71,13 +77,22 @@ export const CameraScreen = ({}) => {
 
       const locationSubscription = Location.watchPositionAsync({ accuracy: Location.Accuracy.High }, location => {
         setElevation(location.coords.altitude);
+
+        if (recordTime % 10 === 0) {
+          setDataPoints(prevDataPoints => [
+            ...prevDataPoints,
+            { recordTime, speed, elevation: location.coords.altitude, videoTime: recordTime }, // Adicione videoTime
+          ]);
+        }
       });
 
       return () => {
         locationSubscription.remove();
       };
     })();
-  }, []);
+  }, [recordTime]);
+
+  //console.log(dataPoints);
 
   const startTimer = () => {
     timerRef.current = setInterval(() => {
@@ -102,7 +117,10 @@ export const CameraScreen = ({}) => {
   async function startRecording() {
     if (cameraRef.current) {
       try {
-        const videoRecordPromise = cameraRef.current.recordAsync();
+        const videoRecordPromise = cameraRef.current.recordAsync({
+          maxDuration: 60,
+          quality: Camera.Constants.VideoQuality['720p'],
+        });
         startTimer();
         if (videoRecordPromise) {
           setIsRecording(true);
@@ -153,11 +171,6 @@ export const CameraScreen = ({}) => {
   }
 
   const addVideo = async uri => {
-    if (!currentUser) {
-      console.log('User data is not available yet.');
-      return;
-    }
-
     const videoURL = await uploadVideoToFirebase(uri);
 
     const location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
@@ -171,19 +184,12 @@ export const CameraScreen = ({}) => {
         id: uuidv4(),
         videoURL,
         description,
-        createBy: currentUser.userId,
-        creatorInfo: {
-          userId: currentUser.userId,
-          name: currentUser.name,
-          avatar: currentUser.avatar,
-          userBio: currentUser.bio,
-        },
+        createBy: currentUser?.userId,
         createAt: new Date().toISOString(),
         location: { cityName, latitude, longitude },
-        speed,
-        elevation,
         type: typeVideo,
         status,
+        dataPoints,
       });
     } catch (error) {
       console.log('Error adding video to Firestore:', error);
@@ -203,7 +209,7 @@ export const CameraScreen = ({}) => {
         <TouchableOpacity
           style={[styles.recordButton, { backgroundColor: isRecording ? 'red' : 'white' }]}
           onPress={isRecording ? stopRecording : startRecording}
-          disabled={uploadProgress > 0 && uploadProgress < 100} // Disable the button when upload is in progress
+          disabled={uploadProgress > 0 && uploadProgress < 100}
         />
         {isRecording && (
           <View style={styles.timerContainer}>

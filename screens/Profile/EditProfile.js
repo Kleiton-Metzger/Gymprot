@@ -63,12 +63,12 @@ export const EditProfile = () => {
 
       const updates = {};
 
-      if (newName.trim() !== '' && newName !== currentUser.name) updates.name = newName.trim();
-      if (newAge.trim() !== '' && newAge !== currentUser.age) updates.age = newAge.trim();
-      if (newWeight.trim() !== '' && newWeight !== currentUser.weight) updates.weight = newWeight.trim();
-      if (newHeight.trim() !== '' && newHeight !== currentUser.height) updates.height = newHeight.trim();
-      if (newGender.trim() !== currentUser.gender) updates.gender = newGender.trim();
-      if (newBio.trim() !== '' && newBio !== currentUser.bio) updates.bio = newBio.trim(); // Adicionando atualização para a bio
+      if (newName && newName.trim() !== '' && newName !== currentUser.name) updates.name = newName.trim();
+      if (newAge && newAge.trim() !== '' && newAge !== currentUser.age) updates.age = newAge.trim();
+      if (newWeight && newWeight.trim() !== '' && newWeight !== currentUser.weight) updates.weight = newWeight.trim();
+      if (newHeight && newHeight.trim() !== '' && newHeight !== currentUser.height) updates.height = newHeight.trim();
+      if (newGender && newGender.trim() !== currentUser.gender) updates.gender = newGender.trim();
+      if (newBio && newBio.trim() !== '' && newBio !== currentUser.bio) updates.bio = newBio.trim(); // Adicionando atualização para a bio
 
       if (password.trim() !== '') {
         try {

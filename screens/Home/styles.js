@@ -1,4 +1,5 @@
 import { Dimensions, StyleSheet, useWindowDimensions } from 'react-native';
+import { overlay } from 'react-native-paper';
 const { width, height } = Dimensions.get('window'); //pegar a largura e altura da tela
 
 const styles = StyleSheet.create({
@@ -10,7 +11,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    // backgroundColor: 'red',
+    //backgroundColor: 'red',
   },
   uavatar: {
     width: 40,
@@ -20,7 +21,9 @@ const styles = StyleSheet.create({
     marginLeft: 13,
   },
   filterIcon: {
-    right: 25,
+    right: 20,
+    position: 'absolute',
+    flexDirection: 'row',
   },
   searchContainer: {
     padding: 10,
@@ -110,6 +113,12 @@ const styles = StyleSheet.create({
     height: '100%',
     overflow: 'hidden',
     borderRadius: 20,
+  },
+  videoContainer: {
+    width: '100%',
+    height: 200,
+    borderRadius: 20,
+    overflow: 'hidden',
   },
 });
 

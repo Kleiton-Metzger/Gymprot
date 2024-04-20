@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
   bioContainer: {
     padding: 10,
     width: '100%',
-    height: 110,
+    height: 'auto',
   },
   bioText: {
     fontSize: 14,
@@ -85,7 +85,6 @@ const styles = StyleSheet.create({
   bodyContainer: {
     flex: 1,
     width: '100%',
-    marginTop: 10,
   },
   userNameU: {
     fontSize: 16,
