@@ -1,20 +1,79 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, FlatList, TouchableOpacity, Dimensions, LogBox, SafeAreaView } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  FlatList,
+  TouchableOpacity,
+  Dimensions,
+  LogBox,
+  SafeAreaView,
+  Modal,
+  TextInput,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { collection, onSnapshot, query, where, getDoc, doc } from 'firebase/firestore';
-import { db, auth } from '../../../storage/Firebase';
+import { collection, onSnapshot, query, where, deleteDoc, doc, getDoc, getDocs, updateDoc } from 'firebase/firestore';
+import { db, auth, storage } from '../../../storage/Firebase';
+import { getStorage, ref, deleteObject } from 'firebase/storage';
 import { Video } from 'expo-av';
-import styles from '../styles';
 import { useAuth } from '../../../Hooks/useAuth';
+import styles from '../styles';
+import { Button } from '../../../components/common/Button';
+import { Menu, Divider, RadioButton } from 'react-native-paper';
 
-const { width, height } = Dimensions.get('window'); //pegar a largura e altura da tela
+const { width, height } = Dimensions.get('window');
 LogBox.ignoreLogs(['Sending `onAnimatedValueUpdate` with no listeners registered.']);
 LogBox.ignoreLogs([
   'Could not find image file:///private/var/containers/Bundle/Application/CCC465B2-8EA5-4A73-B814-EAAAA115DD03/Expo%20Go.app/No%20avatar%20availble.png',
 ]);
+
 export const PublicScreen = ({ navigation }) => {
   const [filteredVideos, setFilteredVideos] = useState([]);
   const { currentUser } = useAuth();
+  const [showModal, setShowModal] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false); // Novo estado
+  const [description, setDescription] = useState('');
+  const [status, setStatus] = useState();
+  const [typeVideo, setTypeVideo] = useState();
+  const [selectedVideo, setSelectedVideo] = useState(null);
+
+  const handleModalClose = () => {
+    setDescription('');
+    setStatus('Public');
+    setTypeVideo('Running');
+    setSelectedVideo(null);
+    setShowModal(false);
+  };
+
+  const handleDeleteVideoConfirmation = video => {
+    setSelectedVideo(video);
+    setShowDeleteConfirmation(true);
+  };
+
+  const handleDeleteVideo = async videoURL => {
+    try {
+      const storageRef = ref(storage, videoURL);
+      await deleteObject(storageRef);
+      console.log('Video file deleted successfully from storage');
+
+      const q = query(collection(db, 'videos'), where('videoURL', '==', videoURL));
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach(async doc => {
+        await deleteDoc(doc.ref);
+        console.log('Video deleted successfully');
+      });
+    } catch (error) {
+      console.error('Error deleting video document:', error);
+    }
+  };
+
+  // Função para confirmar a exclusão do vídeo
+  const handleConfirmDeleteVideo = () => {
+    handleDeleteVideo(selectedVideo.videoURL);
+    setShowDeleteConfirmation(false);
+  };
 
   useEffect(() => {
     const fetchUserVideos = async () => {
@@ -42,6 +101,21 @@ export const PublicScreen = ({ navigation }) => {
     fetchUserVideos();
   }, []);
 
+  const handleEditVideo = async () => {
+    try {
+      console.log('selectedVideo:', selectedVideo.id);
+      const q = query(collection(db, 'videos'), where('id', '==', selectedVideo.id));
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach(async doc => {
+        await updateDoc(doc.ref, { description, status, type: typeVideo });
+        console.log('Video updated successfully');
+        setShowModal(false);
+      });
+    } catch (error) {
+      console.error('Error updating video document:', error);
+    }
+  };
+
   return (
     <SafeAreaView>
       <FlatList
@@ -57,8 +131,33 @@ export const PublicScreen = ({ navigation }) => {
               location={item.location?.cityName || ''}
               tipo={item.type}
               creatorAvatar={currentUser?.avatar}
-              navigation={navigation} // Pass navigation as a prop
+              navigation={navigation}
             />
+            <View style={styles.vidoeOptionsContainer}>
+              <TouchableOpacity
+                style={styles.editButton}
+                onPress={() => {
+                  setSelectedVideo(item);
+                  setDescription(item.description);
+                  setStatus(item.status);
+                  setTypeVideo(item.type);
+                  setShowModal(true);
+                }}
+                activeOpacity={0.8}
+              >
+                <Feather name="edit" size={20} color="#581DB9" />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => {
+                  handleDeleteVideoConfirmation(item);
+                }}
+                style={styles.deleteVideo}
+                activeOpacity={0.8}
+              >
+                <Feather name="trash-2" size={20} color="red" />
+              </TouchableOpacity>
+            </View>
             <VideoItem video={item.videoURL} />
           </View>
         )}
@@ -66,8 +165,69 @@ export const PublicScreen = ({ navigation }) => {
         contentContainerStyle={styles.videoGridContainer}
         removeClippedSubviews={true}
         ListFooterComponent={<View style={{ marginBottom: 80 }} />}
-        ListEmptyComponent={() => <Text style={styles.emptyText}>Nenhum vídeo encontrado</Text>}
+        ListEmptyComponent={() => <Text style={styles.emptyText}>Nenhum vídeo publico encontrado</Text>}
       />
+      <Modal
+        onRequestClose={handleModalClose}
+        animationType="slide"
+        presentationStyle="formSheet"
+        visible={showModal}
+        onDismiss={handleModalClose}
+        contentContainerStyle={styles.modalContainer}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={{ padding: 10 }}>
+            <TouchableOpacity style={{ marginBottom: 15 }} onPress={handleModalClose}>
+              <Text style={{ color: '#581DB9', fontSize: 16, fontWeight: '600', textAlign: 'right' }}>Fechar</Text>
+            </TouchableOpacity>
+            <Text style={styles.modalTitle}>Editar Vídeo</Text>
+            <Text style={styles.modalSubtitle}>Edite as informações do vídeo</Text>
+            <TextInput
+              label="Descriição"
+              bordercolor="#581DB9"
+              onChangeText={setDescription}
+              value={description}
+              mode="outlined"
+              placeholder="Adicione uma breve descrição ao vídeo"
+              style={styles.descriptionInput}
+              multiline={true}
+            />
+            <Text style={styles.modalLabel}>Status do Vídeo:</Text>
+            <RadioButton.Group onValueChange={value => setStatus(value)} value={status}>
+              <RadioButton.Item label="Público" value="Public" color="green" />
+              <RadioButton.Item label="Privado" value="Private" color="red" />
+            </RadioButton.Group>
+            <Text style={styles.modalLabel}>Tipo de Exercício:</Text>
+            <RadioButton.Group onValueChange={value => setTypeVideo(value)} value={typeVideo}>
+              <RadioButton.Item label="Corrida" value="Running" color="#581DB9" />
+              <RadioButton.Item label="Bicicleta" value="Cycling" color="#581DB9" />
+              <RadioButton.Item label="Caminhada" value="Walking" color="#581DB9" />
+            </RadioButton.Group>
+            <Button onPress={handleEditVideo} label="Concluir" style={styles.modalButton} />
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
+      <Modal
+        visible={showDeleteConfirmation}
+        animationType="slide"
+        onRequestClose={() => setShowDeleteConfirmation(false)}
+        transparent
+      >
+        <View style={styles.confirmationModalContainer}>
+          <View style={styles.confirmationModal}>
+            <Text style={styles.confirmationText}>Tem certeza que deseja excluir este vídeo?</Text>
+            <View style={styles.confirmationButtonsContainer}>
+              <Button
+                onPress={() => setShowDeleteConfirmation(false)}
+                label="Cancelar"
+                style={[styles.modalButton, { marginRight: 10 }]}
+              />
+              <Button onPress={handleConfirmDeleteVideo} label="Confirmar" style={styles.modalButton} />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
