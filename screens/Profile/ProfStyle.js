@@ -92,23 +92,23 @@ export const styles = StyleSheet.create({
   segdrNum: {
     color: 'black',
     fontWeight: 'bold',
-    marginLeft: 20, // Changed from left: 20
+    marginLeft: 20,
   },
   bioContainer: {
     padding: 10,
     width: '100%',
-    height: 110,
+    height: 'auto',
   },
   bioText: {
     fontSize: 14,
     color: '#818589',
     marginTop: 5,
-    textAlign: 'justify', // Removed alignSelf: 'center'
+    textAlign: 'justify',
   },
   bodyContainer: {
     flex: 1,
     width: '100%',
-    height,
+    height: 'auto',
   },
   bodyTitle: {
     fontSize: 18,

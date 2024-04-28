@@ -71,7 +71,7 @@ export const Profile = () => {
         <View style={styles.bioContainer}>
           <Text style={styles.bioText}>{currentUser.bio}</Text>
         </View>
-        <View style={{ height: 1, backgroundColor: '#E5E4E2', width: '100%' }} />
+        <View style={{ height: 1, width: '95%', alignSelf: 'center', backgroundColor: 'lightgrey' }} />
 
         <View style={styles.bodyContainer}>
           <Text style={styles.bodyTitle}>Body</Text>

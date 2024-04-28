@@ -17,6 +17,7 @@ export const HomeScreen = () => {
   const navigation = useNavigation();
   const [searchPhrase, setSearchPhrase] = useState('');
   const [videos, setVideos] = useState([]);
+  const [originalVideos, setOriginalVideos] = useState([]);
   const { currentUser } = useAuth();
   const [categoria, setCategoria] = useState('');
   const [localizacao, setLocalizacao] = useState('');
@@ -45,6 +46,7 @@ export const HomeScreen = () => {
           }
         });
         setVideos(fetchedVideos);
+        setOriginalVideos(fetchedVideos);
       });
 
       return () => unsubscribeVideos();
@@ -70,36 +72,59 @@ export const HomeScreen = () => {
 
   const handleSearch = text => {
     setSearchPhrase(text);
-    setLocalizacao(text);
-  };
 
-  let filteredVideos = [...videos];
+    if (!text || text.trim() === '') {
+      setVideos([...originalVideos]);
+      return;
+    }
+
+    const searchText = text.toLowerCase();
+
+    const filteredVideos = originalVideos.filter(item => {
+      const location = item.location?.cityName.toLowerCase();
+      return location.includes(searchText);
+    });
+
+    setVideos(filteredVideos);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.headerContainer}>
-        <TouchableOpacity onPress={() => navigation.navigate('Profile')} activeOpacity={0.8}>
-          <Image
-            source={currentUser?.avatar ? { uri: currentUser.avatar } : require('../../assets/avatar.png')}
-            style={styles.uavatar}
-          />
-        </TouchableOpacity>
+      <DismissKeyboard>
+        <View style={styles.headerContainer}>
+          <TouchableOpacity onPress={() => navigation.navigate('Profile')} activeOpacity={0.8}>
+            <Image
+              source={currentUser?.avatar ? { uri: currentUser.avatar } : require('../../assets/avatar.png')}
+              style={styles.uavatar}
+            />
+          </TouchableOpacity>
 
-        <View style={styles.filterIcon}>
-          <FilterButton iconName="walk" categoria="Walking" currentCategoria={categoria} setCategoria={setCategoria} />
-          <FilterButton
-            iconName="run-fast"
-            categoria="Running"
-            currentCategoria={categoria}
-            setCategoria={setCategoria}
-          />
-          <FilterButton iconName="bike" categoria="Cycling" currentCategoria={categoria} setCategoria={setCategoria} />
+          <View style={styles.filterIcon}>
+            <FilterButton
+              iconName="walk"
+              categoria="Walking"
+              currentCategoria={categoria}
+              setCategoria={setCategoria}
+            />
+            <FilterButton
+              iconName="run-fast"
+              categoria="Running"
+              currentCategoria={categoria}
+              setCategoria={setCategoria}
+            />
+            <FilterButton
+              iconName="bike"
+              categoria="Cycling"
+              currentCategoria={categoria}
+              setCategoria={setCategoria}
+            />
+          </View>
         </View>
-      </View>
+      </DismissKeyboard>
 
       <View style={styles.searchContainer}>
         <Searchbar
-          placeholder="Location"
+          placeholder="Localização"
           onChangeText={handleSearch}
           value={searchPhrase}
           style={styles.searchBar}
@@ -133,7 +158,7 @@ export const HomeScreen = () => {
         keyExtractor={item => item.id.toString()}
         contentContainerStyle={styles.videoGridContainer}
         removeClippedSubviews={true}
-        ListEmptyComponent={() => <Text style={styles.emptyText}>No videos found in this location</Text>}
+        ListEmptyComponent={() => <Text style={styles.emptyText}>Nenhum vídeo encontrado</Text>}
       />
     </SafeAreaView>
   );

@@ -95,6 +95,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 16,
     fontWeight: 'bold',
+    color: '#581DB9',
   },
   locationContainer: {
     flexDirection: 'row',
