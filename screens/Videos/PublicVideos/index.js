@@ -12,6 +12,7 @@ import {
   TextInput,
   TouchableWithoutFeedback,
   Keyboard,
+  Alert,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { collection, onSnapshot, query, where, deleteDoc, doc, getDoc, getDocs, updateDoc } from 'firebase/firestore';
@@ -22,6 +23,8 @@ import { useAuth } from '../../../Hooks/useAuth';
 import styles from '../styles';
 import { Button } from '../../../components/common/Button';
 import { Menu, Divider, RadioButton } from 'react-native-paper';
+import VideosScreen from '../VideoRepro/VideoRepre';
+import { useNavigation } from '@react-navigation/native';
 
 const { width, height } = Dimensions.get('window');
 LogBox.ignoreLogs(['Sending `onAnimatedValueUpdate` with no listeners registered.']);
@@ -33,7 +36,7 @@ export const PublicScreen = ({ navigation }) => {
   const [filteredVideos, setFilteredVideos] = useState([]);
   const { currentUser } = useAuth();
   const [showModal, setShowModal] = useState(false);
-  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false); // Novo estado
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState();
   const [typeVideo, setTypeVideo] = useState();
@@ -69,7 +72,6 @@ export const PublicScreen = ({ navigation }) => {
     }
   };
 
-  // Função para confirmar a exclusão do vídeo
   const handleConfirmDeleteVideo = () => {
     handleDeleteVideo(selectedVideo.videoURL);
     setShowDeleteConfirmation(false);
@@ -110,6 +112,7 @@ export const PublicScreen = ({ navigation }) => {
         await updateDoc(doc.ref, { description, status, type: typeVideo });
         console.log('Video updated successfully');
         setShowModal(false);
+        Alert.alert('Sucesso', 'Vídeo atualizado com sucesso.');
       });
     } catch (error) {
       console.error('Error updating video document:', error);
@@ -158,14 +161,17 @@ export const PublicScreen = ({ navigation }) => {
                 <Feather name="trash-2" size={20} color="red" />
               </TouchableOpacity>
             </View>
-            <VideoItem video={item.videoURL} />
+            <View style={styles.videoInfoContainer}>
+              <Text style={styles.videoLocation}> {item.location.cityName}</Text>
+            </View>
+            <VideoItem video={item.videoURL} navigation={navigation} />
           </View>
         )}
         keyExtractor={item => item.id.toString()}
         contentContainerStyle={styles.videoGridContainer}
         removeClippedSubviews={true}
         ListFooterComponent={<View style={{ marginBottom: 80 }} />}
-        ListEmptyComponent={() => <Text style={styles.emptyText}>Nenhum vídeo publico encontrado</Text>}
+        ListEmptyComponent={() => <Text style={styles.emptyText}>Nenhum vídeo público encontrado</Text>}
       />
       <Modal
         onRequestClose={handleModalClose}
@@ -183,7 +189,7 @@ export const PublicScreen = ({ navigation }) => {
             <Text style={styles.modalTitle}>Editar Vídeo</Text>
             <Text style={styles.modalSubtitle}>Edite as informações do vídeo</Text>
             <TextInput
-              label="Descriição"
+              label="Descrição"
               bordercolor="#581DB9"
               onChangeText={setDescription}
               value={description}
@@ -257,8 +263,24 @@ const UserInfo = ({ userName, location, tipo, creatorAvatar, navigation }) => (
   </View>
 );
 
-const VideoItem = ({ video }) => (
+const VideoItem = ({ video, navigation }) => (
   <TouchableOpacity style={styles.videoItem} activeOpacity={0.8}>
-    <Video resizeMode="cover" style={styles.video} source={{ uri: video }} useNativeControls isLooping />
+    <TouchableOpacity
+      onPress={() => navigation.navigate('VideosScreen', { videoURL: video })}
+      activeOpacity={0.8}
+      style={styles.playButton}
+    >
+      <Feather name="play-circle" size={50} color="#581DB9" />
+    </TouchableOpacity>
+
+    <Video
+      resizeMode="cover"
+      style={styles.video}
+      source={{ uri: video }}
+      isMuted={true}
+      isLooping={false}
+      shouldPlay
+      focusable={true}
+    />
   </TouchableOpacity>
 );

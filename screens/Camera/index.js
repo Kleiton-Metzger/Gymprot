@@ -32,6 +32,7 @@ export const CameraScreen = () => {
   const [typeVideo, setTypeVideo] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [dataPoints, setDataPoints] = useState([]);
+  const [distance, setDistance] = useState(0);
 
   useEffect(() => {
     const requestPermissions = async () => {

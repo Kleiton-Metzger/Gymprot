@@ -18,6 +18,7 @@ import {
   EditProfile,
   ForgotPassword,
   FolowerProfile,
+  VideosScreen,
 } from './screens';
 import { getTabIconName } from './utils';
 import { LogBox, StatusBar } from 'react-native';
@@ -87,6 +88,16 @@ export default function App() {
               name="FolowerProfile"
               component={FolowerProfile}
               options={{ headerShown: false, gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="VideosScreen"
+              component={VideosScreen}
+              options={{
+                headerShown: false,
+                gestureEnabled: false,
+                presentation: 'transparentModal',
+                animationTypeForReplace: 'push',
+              }}
             />
           </Stack.Navigator>
         </AuthProvider>
