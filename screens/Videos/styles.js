@@ -78,6 +78,7 @@ const styles = StyleSheet.create({
     height: '100%',
     overflow: 'hidden',
     borderRadius: 20,
+    zIndex: 0,
   },
   videoGridContainer: {
     paddingBottom: 80,
@@ -144,7 +145,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   confirmationModalContainer: {
-    //flex: 1,
     backgroundColor: 'white',
     padding: 20,
     borderRadius: 20,
@@ -168,6 +168,31 @@ const styles = StyleSheet.create({
   confirmationButtonsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+  },
+  playButton: {
+    position: 'absolute',
+    left: '50%',
+    top: '50%',
+    marginLeft: -25,
+    marginTop: -25,
+    zIndex: 5,
+  },
+  videoInfoContainer: {
+    position: 'absolute',
+    padding: 10,
+    width: '100%',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    zIndex: 5,
+    bottom: 0,
+    alignItems: 'center',
+  },
+  videoLocation: {
+    fontSize: 25,
+    color: 'white',
+    fontWeight: 'bold',
+    fontStyle: 'italic',
+    marginBottom: 30,
   },
 });
 

@@ -9,10 +9,10 @@ export const VideosScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { videoURL } = route.params;
-  const [isVideoLoading, setIsVideoLoading] = useState(true); // State to track video loading
+  const [isVideoLoading, setIsVideoLoading] = useState(true);
 
   const handleVideoLoad = () => {
-    setIsVideoLoading(false); // Set loading state to false when video is loaded
+    setIsVideoLoading(false);
   };
 
   return (
