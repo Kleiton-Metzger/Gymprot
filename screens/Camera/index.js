@@ -26,6 +26,8 @@ export const CameraScreen = () => {
   const [recordTime, setRecordTime] = useState(0);
   const [speed, setSpeed] = useState(0);
   const [elevation, setElevation] = useState(null);
+  const [elevationac, setElevationac] = useState(null);
+
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState('Public');
   const [showModal, setShowModal] = useState(false);
@@ -77,10 +79,16 @@ export const CameraScreen = () => {
 
         locationSubscription = await Location.watchPositionAsync({ accuracy: Location.Accuracy.High }, location => {
           setElevation(location.coords.altitude);
+          setElevationac(location.coords.altitudeAccuracy);
           if (recordTime % 20 === 0) {
             setDataPoints(prevDataPoints => [
               ...prevDataPoints,
-              { speed, elevation: location.coords.altitude, videoTime: recordTime },
+              {
+                speed,
+                elevation: location.coords.altitude,
+                elevationac: location.coords.altitudeAccuracy,
+                videoTime: recordTime,
+              },
             ]);
           }
         });
@@ -234,7 +242,8 @@ export const CameraScreen = () => {
           <Text style={styles.infoText}>Elevation: {elevation ? elevation.toFixed(2) + ' m' : 'N/A'}</Text>
         </View>
         <View style={styles.infoTextContainer}>
-          <Text style={styles.infoText}>Distance:</Text>
+          <Text style={styles.infoText}>Distance: {distance.toFixed(2)} m</Text>
+          <Text style={styles.infoText}>ElevationAccuracy: {elevationac ? elevationac.toFixed(2) + ' m' : 'N/A'}</Text>
         </View>
       </View>
       <Modal

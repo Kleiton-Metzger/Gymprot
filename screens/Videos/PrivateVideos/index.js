@@ -112,7 +112,7 @@ export const PrivateScreen = ({ navigation }) => {
         await updateDoc(doc.ref, { description, status, type: typeVideo });
         console.log('Video updated successfully');
         setShowModal(false);
-        Alert.alert('Sucesso', 'Vídeo atualizado com sucesso.');
+        Alert.alert('Sucesso', 'Dados atualizado com sucesso.');
       });
     } catch (error) {
       console.error('Error updating video document:', error);

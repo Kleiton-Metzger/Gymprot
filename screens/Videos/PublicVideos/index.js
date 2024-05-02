@@ -112,7 +112,7 @@ export const PublicScreen = ({ navigation }) => {
         await updateDoc(doc.ref, { description, status, type: typeVideo });
         console.log('Video updated successfully');
         setShowModal(false);
-        Alert.alert('Sucesso', 'Vídeo atualizado com sucesso.');
+        Alert.alert('Sucesso', 'Dados atualizado com sucesso.');
       });
     } catch (error) {
       console.error('Error updating video document:', error);
@@ -264,7 +264,11 @@ const UserInfo = ({ userName, location, tipo, creatorAvatar, navigation }) => (
 );
 
 const VideoItem = ({ video, navigation }) => (
-  <TouchableOpacity style={styles.videoItem} activeOpacity={0.8}>
+  <TouchableOpacity
+    onPress={() => navigation.navigate('VideosScreen', { videoURL: video })}
+    style={styles.videoItem}
+    activeOpacity={1}
+  >
     <TouchableOpacity
       onPress={() => navigation.navigate('VideosScreen', { videoURL: video })}
       activeOpacity={0.8}

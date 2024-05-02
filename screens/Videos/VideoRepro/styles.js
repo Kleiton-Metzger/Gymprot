@@ -24,6 +24,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    //backgroundColor: 'black',
   },
   activityIndicator: {
     position: 'absolute',
@@ -33,5 +34,25 @@ export const styles = StyleSheet.create({
     right: 0,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  sensorContainer: {
+    width: '100%',
+    paddingHorizontal: 20,
+    marginTop: 20,
+  },
+  sensorItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  sensorLabel: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  sensorData: {
+    fontSize: 13,
+    color: 'black',
   },
 });
