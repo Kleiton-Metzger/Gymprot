@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { PaperProvider } from 'react-native-paper';
+import { LogBox, StatusBar } from 'react-native';
 
 import {
   Profile,
@@ -21,15 +22,29 @@ import {
   VideosScreen,
 } from './screens';
 import { getTabIconName } from './utils';
-import { LogBox, StatusBar } from 'react-native';
 import { AuthProvider } from './Hooks/useAuth';
 import TabNav from './components/TabNav';
+import SplashScreen from './screens/Auth/Splash';
 
 LogBox.ignoreLogs(['Sending `onAnimatedValueUpdate` with no listeners registered.']);
 
 export default function App() {
   const Stack = createStackNavigator();
   const Tab = createBottomTabNavigator();
+
+  const [splashVisible, setSplashVisible] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSplashVisible(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (splashVisible) {
+    return <SplashScreen />;
+  }
 
   const TabNavigator = () => {
     return (
@@ -59,7 +74,7 @@ export default function App() {
     <PaperProvider>
       <NavigationContainer>
         <AuthProvider>
-          <StatusBar backgroundColor="transparent" barStyle="dark-content" />
+          <StatusBar backgroundColor="white" barStyle="dark-content" />
           <Stack.Navigator>
             <Stack.Screen name="Login" component={Login} options={{ headerShown: false, gestureEnabled: false }} />
             <Stack.Screen name="Register" component={Register} options={{ headerShown: false }} />
