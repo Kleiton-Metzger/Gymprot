@@ -22,7 +22,10 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.gymprot.app",
+      "versionCode": 1,
+      "permissions": ["CAMERA", "RECORD_AUDIO", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"]
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -34,7 +37,16 @@
         {
           "camaraPermission": "Allow $(PRODUCT_NAME) to access your camera.",
           "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
-          "recordAudioAndroid": true
+          "recordAudioAndroid": true,
+          "videoStabilizationMode": "standard",
+          "videoQuality": "720p",
+          "androidCameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
+          "androidRecordAudioPermission": "Allow $(PRODUCT_NAME) to record audio",
+          "iosCameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
+          "iosMicrophonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+          "iosRecordAudioPermission": "Allow $(PRODUCT_NAME) to record audio",
+          "iosVideoStabilizationMode": "auto",
+          "iosVideoQuality": "720p"
         }
       ],
       [
