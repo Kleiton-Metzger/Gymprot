@@ -6,13 +6,14 @@ import { useAuth } from '../../Hooks/useAuth';
 import { getUSerSex } from '../../utils/gender';
 import { styles } from './ProfStyle';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { AreaChart, BarChart, Grid, LineChart, PieChart, YAxis } from 'react-native-svg-charts';
+import { AreaChart, BarChart, Grid, LineChart, PieChart, XAxis, YAxis } from 'react-native-svg-charts';
 import * as shape from 'd3-shape';
 import { Octicons } from '@expo/vector-icons';
+
 export const Profile = () => {
   const navigation = useNavigation();
   const { currentUser, signOut } = useAuth();
-  const data = [1, 2, 34, 5, 6, 7, 7];
+  const data = [50, 10, 40, 95, -4, -24, 85, 91, 35, 53, -53, 24, 50, -20, -80];
   const contentInset = { top: 20, bottom: 20 };
 
   const handleSignOut = async () => {
@@ -99,6 +100,69 @@ export const Profile = () => {
               >
                 <Grid />
               </LineChart>
+              <View style={{ flex: 1, marginLeft: 10 }}>
+                <LineChart
+                  style={styles.graph}
+                  data={data}
+                  gridMin={0}
+                  contentInset={{ top: 10, bottom: 10 }}
+                  svg={{ stroke: 'rgb(134, 65, 244)' }}
+                >
+                  <Grid />
+                </LineChart>
+                <XAxis
+                  style={styles.graph}
+                  data={data}
+                  formatLabel={(value, index) => 'Elevação'}
+                  contentInset={{ left: 10, right: 10 }}
+                  svg={{ fontSize: 10, fill: 'black' }}
+                />
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.graphContainer}>
+            <View style={{ flexDirection: 'row', height: 200, padding: 20 }}>
+              <YAxis
+                data={data}
+                contentInset={contentInset}
+                svg={{
+                  fill: 'grey',
+                  fontSize: 10,
+                }}
+                numberOfTicks={10}
+                formatLabel={value => `${value}M`}
+              />
+              <BarChart
+                style={styles.graph}
+                data={data}
+                svg={{ fill: 'rgba(134, 65, 244, 0.8)' }}
+                contentInset={contentInset}
+                spacingInner={0.2}
+                spacingOuter={0.2}
+              >
+                <Grid />
+              </BarChart>
+              <View style={{ flex: 1, marginLeft: 10 }}>
+                <BarChart
+                  style={styles.graph}
+                  data={data}
+                  gridMin={0}
+                  contentInset={{ top: 10, bottom: 10 }}
+                  svg={{ fill: 'rgba(134, 65, 244, 0.8)' }}
+                  spacingInner={0.2}
+                  spacingOuter={0.2}
+                >
+                  <Grid />
+                </BarChart>
+                <XAxis
+                  style={styles.graph}
+                  data={data}
+                  formatLabel={(value, index) => 'Caloria'}
+                  contentInset={{ left: 10, right: 10 }}
+                  svg={{ fontSize: 10, fill: 'black' }}
+                />
+              </View>
             </View>
           </View>
         </View>

@@ -123,8 +123,9 @@ export const styles = StyleSheet.create({
     marginTop: 10,
   },
   graph: {
-    width: '50%',
+    width: '90%',
     height: 'auto',
+    marginLeft: 10,
   },
   graphTitle: {
     fontSize: 16,
