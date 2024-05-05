@@ -6,10 +6,14 @@ import { useAuth } from '../../Hooks/useAuth';
 import { getUSerSex } from '../../utils/gender';
 import { styles } from './ProfStyle';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { AreaChart, BarChart, Grid, LineChart, PieChart, YAxis } from 'react-native-svg-charts';
+import * as shape from 'd3-shape';
 import { Octicons } from '@expo/vector-icons';
 export const Profile = () => {
   const navigation = useNavigation();
   const { currentUser, signOut } = useAuth();
+  const data = [1, 2, 34, 5, 6, 7, 7];
+  const contentInset = { top: 20, bottom: 20 };
 
   const handleSignOut = async () => {
     try {
@@ -75,6 +79,28 @@ export const Profile = () => {
 
         <View style={styles.bodyContainer}>
           <Text style={styles.bodyTitle}>Body</Text>
+          <View style={styles.graphContainer}>
+            <View style={{ flexDirection: 'row', height: 200, padding: 20 }}>
+              <YAxis
+                data={data}
+                contentInset={contentInset}
+                svg={{
+                  fill: 'grey',
+                  fontSize: 10,
+                }}
+                numberOfTicks={10}
+                formatLabel={value => `${value}M`}
+              />
+              <LineChart
+                style={styles.graph}
+                data={data}
+                svg={{ stroke: 'rgb(134, 65, 244)' }}
+                contentInset={contentInset}
+              >
+                <Grid />
+              </LineChart>
+            </View>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -117,4 +117,26 @@ export const styles = StyleSheet.create({
     alignSelf: 'center',
     marginTop: 10,
   },
+  graphContainer: {
+    width: '100%',
+    height: 'auto',
+    marginTop: 10,
+  },
+  graph: {
+    width: '50%',
+    height: 'auto',
+  },
+  graphTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#581DB9',
+    alignSelf: 'center',
+    marginTop: 10,
+  },
+  graphText: {
+    fontSize: 14,
+    color: 'black',
+    textAlign: 'justify',
+    marginTop: 10,
+  },
 });
