@@ -12,18 +12,18 @@ export const ForgotPassword = ({ navigation, navigation: { goBack } }) => {
   const handleResetPassword = () => {
     setEmailError('');
     if (!email.trim()) {
-      setEmailError('Email is required');
+      setEmailError('Introduza o seu email');
       return;
     }
 
     sendPasswordResetEmail(auth, email)
       .then(() => {
-        alert('Password reset email sent');
+        alert('Palaavra-passe enviada com sucesso. Verifique o seu email para redefinir a sua palavra-passe');
         navigation.navigate('Login');
       })
       .catch(error => {
         console.error('Error sending password reset email:', error);
-        setEmailError('Error sending password reset email');
+        setEmailError('Erro ao enviar email');
       });
   };
 
@@ -38,7 +38,7 @@ export const ForgotPassword = ({ navigation, navigation: { goBack } }) => {
           </View>
           <View style={styles.logoContainer}>
             <Logo style={styles.logo} />
-            <Header>Reset Password</Header>
+            <Header>Recuperar Palavra-Passe</Header>
           </View>
           <View style={styles.inputContainer}>
             <Input
@@ -54,7 +54,7 @@ export const ForgotPassword = ({ navigation, navigation: { goBack } }) => {
             />
           </View>
           <View style={styles.btnContainer}>
-            <Button style={styles.button} onPress={handleResetPassword} label="Reset Password" />
+            <Button style={styles.button} onPress={handleResetPassword} label="Enviar Email" />
           </View>
         </View>
       </DismissKeyboard>

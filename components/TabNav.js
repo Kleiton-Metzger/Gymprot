@@ -21,8 +21,8 @@ function TabNav() {
           tabBarLabelStyle: { fontSize: 12, fontWeight: 'bold' },
         }}
       >
-        <Tab.Screen name="Public" component={PublicScreen} options={{ tabBarLabel: 'Public Videos' }} />
-        <Tab.Screen name="Private" component={PrivateScreen} options={{ tabBarLabel: 'Private Videos' }} />
+        <Tab.Screen name="Public" component={PublicScreen} options={{ tabBarLabel: 'Meus Vídeos Públicos' }} />
+        <Tab.Screen name="Private" component={PrivateScreen} options={{ tabBarLabel: 'Meus Vídeos Privados' }} />
       </Tab.Navigator>
     </SafeAreaView>
   );

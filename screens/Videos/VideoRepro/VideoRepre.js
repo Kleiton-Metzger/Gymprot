@@ -85,6 +85,10 @@ export const VideosScreen = () => {
               <Text style={styles.sensorLabel}>Altitude:</Text>
               <Text style={styles.sensorData}>{videoData.dataPoints[currentDataPointIndex].elevation} m</Text>
             </View>
+            <View style={styles.sensorItem}>
+              <Text style={styles.sensorLabel}>Altitude Soil:</Text>
+              <Text style={styles.sensorData}>{videoData.dataPoints[currentDataPointIndex].elevationac} m</Text>
+            </View>
           </View>
         )}
       </View>

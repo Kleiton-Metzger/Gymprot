@@ -40,29 +40,28 @@ export const Register = ({ navigation, navigation: { goBack } }) => {
     setPasswordError('');
     setConfirmPasswordError('');
 
-    // Validate name, email, password, and confirm password
     if (!name.trim() && !email.trim() && !password.trim() && !confirmPassword.trim()) {
-      alert('Please enter your name, email, password, and confirm password to register an account');
+      alert('Por favor, preencha todos os campos para criar uma conta');
       return;
     }
     if (!name.trim()) {
-      setNameError('Please enter your name');
+      setNameError('Por favor, introduza o seu nome');
       return;
     }
     if (!email.trim()) {
-      setEmailError('Please enter your email');
+      setEmailError('Introduza o seu email');
       return;
     }
     if (!password.trim()) {
-      setPasswordError('Please enter your password');
+      setPasswordError('Introduza a sua palavra-passe');
       return;
     }
     if (!confirmPassword.trim()) {
-      setConfirmPassword('Please enter your confirm password');
+      setConfirmPassword('Introduza a sua palavra-passe');
       return;
     }
     if (password !== confirmPassword) {
-      alert('Passwords do not match!');
+      alert('Palaavra-passe e confirmar palavra-passe não coincidem');
       return;
     }
 
@@ -96,12 +95,12 @@ export const Register = ({ navigation, navigation: { goBack } }) => {
               <Logo />
             </View>
             <View style={styles.titleContainer}>
-              <Header>Register</Header>
+              <Header>Criar Conta</Header>
             </View>
             <View style={styles.inputContainer}>
               <Input
                 mode="outlined"
-                label="Name"
+                label="Nome"
                 color="#581DB9"
                 underline="#581DB9"
                 returnKeyType="next"
@@ -121,7 +120,7 @@ export const Register = ({ navigation, navigation: { goBack } }) => {
               />
               <Input
                 mode="outlined"
-                label="Password"
+                label="Palavra-passe"
                 color="#581DB9"
                 underline="#581DB9"
                 textContentType="password"
@@ -132,7 +131,7 @@ export const Register = ({ navigation, navigation: { goBack } }) => {
               />
               <Input
                 mode="outlined"
-                label="Confirm Password"
+                label="Confirmar Palavra-passe"
                 color="#581DB9"
                 underline="#581DB9"
                 textContentType="password"
@@ -141,11 +140,11 @@ export const Register = ({ navigation, navigation: { goBack } }) => {
                 onChangeText={setConfirmPassword}
                 errorText={confirmPasswordError}
               />
-              <Button onPress={handleSignUp} label="Register" />
+              <Button onPress={handleSignUp} label="Criar" style={styles.button1} />
               <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: '5%' }}>
-                <Text>Already have an account? </Text>
+                <Text>Já tem uma conta? </Text>
                 <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                  <Text style={styles.register}>Login</Text>
+                  <Text style={styles.register}>Entrar</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -197,5 +196,14 @@ const styles = StyleSheet.create({
   register: {
     color: '#581DB9',
     fontWeight: 'bold',
+  },
+  button1: {
+    width: '50%',
+    height: 50,
+    borderRadius: 5,
+    backgroundColor: '#581DB9',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
   },
 });

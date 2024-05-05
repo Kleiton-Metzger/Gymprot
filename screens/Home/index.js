@@ -202,7 +202,9 @@ const UserInfo = ({ userName, location, tipo, creatorAvatar, navigation, current
         <Feather name="map-pin" size={15} color="black" style={styles.locationIcon} />
         <Text style={styles.location}>{location}</Text>
       </View>
-      <Text style={styles.tipo}>Type: {tipo}</Text>
+      <Text style={styles.tipo}>
+        Tipo de Exercício: {tipo === 'Walking' ? 'Caminhada' : tipo === 'Running' ? 'Corrida' : 'Ciclismo'}
+      </Text>
     </View>
   </View>
 );

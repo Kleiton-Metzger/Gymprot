@@ -32,15 +32,15 @@ export const Login = () => {
     setError('');
 
     if (!email.trim() && !password.trim()) {
-      setError('Please enter your email and password');
+      setError('Por favor, introduza o seu email e palavra-passe para entrar');
       return;
     }
     if (!email.trim()) {
-      setEmailError('Please enter your email');
+      setEmailError('Introduza o seu email');
       return;
     }
     if (!password.trim()) {
-      setPasswordError('Please enter your password');
+      setPasswordError('Introduza a sua palavra-passe');
       return;
     }
 
@@ -48,7 +48,7 @@ export const Login = () => {
       .then(userCredential => {
         const user = userCredential.user;
       })
-      .catch(error => setError('Invalid email or password'));
+      .catch(error => setError('Palaavra-passe ou email incorretos'));
   };
 
   return (
@@ -73,7 +73,7 @@ export const Login = () => {
             />
             <Input
               mode="outlined"
-              label="Password"
+              label="Palaavra-passe"
               color="#581DB9"
               underline="#581DB9"
               returnKeyType="done"
@@ -84,18 +84,18 @@ export const Login = () => {
               errorText={passwordError}
             />
             {error ? <Text style={styles.error}>{error}</Text> : null}
-            <Button onPress={handleLogin} label="Login" />
+            <Button onPress={handleLogin} label="Entrar" style={styles.button} />
 
             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: '5%' }}>
-              <Text style={styles.textRegister}>Don't have an account? </Text>
+              <Text style={styles.textRegister}>Não tem uma conta? </Text>
               <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Register')}>
-                <Text style={styles.register}>Register</Text>
+                <Text style={styles.register}>Registar</Text>
               </TouchableOpacity>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: '5%' }}>
-              <Text style={styles.textforgot}>Forgot your password? </Text>
+              <Text style={styles.textforgot}>Esqueceu a palavra-passe? </Text>
               <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('ForgotPassword')}>
-                <Text style={styles.register}>Reset</Text>
+                <Text style={styles.register}>Recuperar palavra-passe</Text>
               </TouchableOpacity>
             </View>
           </View>

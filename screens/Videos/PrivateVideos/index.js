@@ -112,7 +112,7 @@ export const PrivateScreen = ({ navigation }) => {
         await updateDoc(doc.ref, { description, status, type: typeVideo });
         console.log('Video updated successfully');
         setShowModal(false);
-        Alert.alert('Sucesso', 'Dados atualizado com sucesso.');
+        Alert.alert('Sucesso', 'Dados atualizados com sucesso.');
       });
     } catch (error) {
       console.error('Error updating video document:', error);
@@ -160,6 +160,9 @@ export const PrivateScreen = ({ navigation }) => {
               >
                 <Feather name="trash-2" size={20} color="red" />
               </TouchableOpacity>
+            </View>
+            <View style={styles.videoInfoContainer}>
+              <Text style={styles.videoLocation}> {item.location.cityName}</Text>
             </View>
             <VideoItem video={item.videoURL} navigation={navigation} />
           </View>
@@ -255,16 +258,35 @@ const UserInfo = ({ userName, location, tipo, creatorAvatar, navigation }) => (
         <Feather name="map-pin" size={15} color="black" style={styles.locationIcon} />
         <Text style={styles.location}>{location}</Text>
       </View>
-      <Text style={styles.tipo}>Tipo: {tipo}</Text>
+      <Text style={styles.tipo}>
+        Tipo de Exercício: {tipo === 'Walking' ? 'Caminhada' : tipo === 'Running' ? 'Corrida' : 'Ciclismo'}
+      </Text>
     </View>
   </View>
 );
 
 const VideoItem = ({ video, navigation }) => (
-  <TouchableOpacity style={styles.videoItem} activeOpacity={0.8}>
-    <TouchableOpacity onPress={() => navigation.navigate('VideosScreen')} activeOpacity={0.8} style={styles.playButton}>
+  <TouchableOpacity
+    onPress={() => navigation.navigate('VideosScreen', { videoURL: video })}
+    style={styles.videoItem}
+    activeOpacity={1}
+  >
+    <TouchableOpacity
+      onPress={() => navigation.navigate('VideosScreen', { videoURL: video })}
+      activeOpacity={0.8}
+      style={styles.playButton}
+    >
       <Feather name="play-circle" size={50} color="#581DB9" />
     </TouchableOpacity>
-    <Video resizeMode="cover" style={styles.video} source={{ uri: video }} isMuted={true} shouldPlay isLooping />
+
+    <Video
+      resizeMode="cover"
+      style={styles.video}
+      source={{ uri: video }}
+      isMuted={true}
+      isLooping={false}
+      shouldPlay
+      focusable={true}
+    />
   </TouchableOpacity>
 );

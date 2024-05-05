@@ -112,7 +112,7 @@ export const PublicScreen = ({ navigation }) => {
         await updateDoc(doc.ref, { description, status, type: typeVideo });
         console.log('Video updated successfully');
         setShowModal(false);
-        Alert.alert('Sucesso', 'Dados atualizado com sucesso.');
+        Alert.alert('Sucesso', 'Dados atualizados com sucesso.');
       });
     } catch (error) {
       console.error('Error updating video document:', error);
@@ -258,7 +258,9 @@ const UserInfo = ({ userName, location, tipo, creatorAvatar, navigation }) => (
         <Feather name="map-pin" size={15} color="black" style={styles.locationIcon} />
         <Text style={styles.location}>{location}</Text>
       </View>
-      <Text style={styles.tipo}>Tipo: {tipo}</Text>
+      <Text style={styles.tipo}>
+        Tipo de Exercício: {tipo === 'Walking' ? 'Caminhada' : tipo === 'Running' ? 'Corrida' : 'Ciclismo'}
+      </Text>
     </View>
   </View>
 );

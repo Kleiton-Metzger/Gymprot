@@ -61,11 +61,11 @@ export default function App() {
           },
         })}
       >
-        <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Home', headerShown: false }} />
+        <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Inicio', headerShown: false }} />
         <Tab.Screen name="Upload" component={UploadScreen} options={{ title: 'Upload', headerShown: false }} />
         <Tab.Screen name="Camera" component={CameraScreen} options={{ title: 'Camera', headerShown: false }} />
-        <Tab.Screen name="MyVideos" component={TabNav} options={{ title: 'My Videos', headerShown: false }} />
-        <Tab.Screen name="Profile" component={Profile} options={{ title: 'Profile', headerShown: false }} />
+        <Tab.Screen name="MyVideos" component={TabNav} options={{ title: 'Meus Videos', headerShown: false }} />
+        <Tab.Screen name="Profile" component={Profile} options={{ title: 'Perfil', headerShown: false }} />
       </Tab.Navigator>
     );
   };
