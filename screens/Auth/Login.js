@@ -1,171 +1,153 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform } from 'react-native';
-import { StyleSheet } from 'react-native-web';
+import { View, Text, KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { auth, signInWithEmailAndPassword } from '../../storage/Firebase';
+import { DismissKeyboard, Logo, Header, Input, Button } from '../../components';
+import { useAuth } from '../../Hooks/useAuth';
 
 export const Login = () => {
-    const navigation = useNavigation();
+  const navigation = useNavigation();
 
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [passwordVisible, setPasswordVisible] = useState(false); // State to manage password visibility
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const { user, setUser } = useAuth();
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(user => {
+      setUser(user);
+      if (loading) setLoading(false);
+      if (user) {
+        navigation.replace('ProfileScreen');
+      }
+    });
+    return unsubscribe;
+  }, []);
 
-    useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged(user => {
-            setUser(user);
-            if (loading) setLoading(false);
-            if (user) {
-                navigation.navigate('ProfileScreen'); // Navigate to Profile screen if user is logged in
-            }
-        });
-        return unsubscribe;
-    }, [loading, navigation]);
+  const handleLogin = () => {
+    setEmailError('');
+    setPasswordError('');
+    setError('');
 
-    const handleLogin = () => {
-        signInWithEmailAndPassword(auth, email, password)
-            .then(userCredential => {
-                const user = userCredential.user;
-                console.log('Logged in with:', user.email);
-            })
-            .catch(error => alert(error.message));
-    };
+    if (!email.trim() && !password.trim()) {
+      setError('Por favor, introduza o seu email e palavra-passe para entrar');
+      return;
+    }
+    if (!email.trim()) {
+      setEmailError('Introduza o seu email');
+      return;
+    }
+    if (!password.trim()) {
+      setPasswordError('Introduza a sua palavra-passe');
+      return;
+    }
 
-    if (loading)return null;
-    
-    
+    signInWithEmailAndPassword(auth, email, password)
+      .then(userCredential => {
+        const user = userCredential.user;
+      })
+      .catch(error => setError('Palaavra-passe ou email incorretos'));
+  };
 
-    return (
-        <KeyboardAvoidingView
-            style={styles.container}
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-        >
-            <Image source={require('../../assets/logo.png')} style={styles.logo} />
-            <Text style={styles.title}>Login</Text>
-            <Text style={styles.text}>Email</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="Email"
-                value={email}
-                onChangeText={setEmail}
+  return (
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <DismissKeyboard>
+        <View style={styles.container}>
+          <Logo />
+          <Header>Login</Header>
+          <View style={styles.inputContainer}>
+            <Input
+              mode="outlined"
+              label="Email"
+              color="#581DB9"
+              underline="#581DB9"
+              returnKeyType="next"
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              textContentType="emailAddress"
+              keyboardType="email-address"
+              errorText={emailError}
             />
-            <Text style={styles.text}>Password</Text>
-            <View style={styles.passwordInputContainer}>
-                <TextInput
-                    style={styles.passwordInput}
-                    placeholder="Password"
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry={!passwordVisible} // Toggle secureTextEntry based on passwordVisible state
-                />
-                <TouchableOpacity
-                    style={styles.visibilityIcon}
-                    onPress={() => setPasswordVisible(!passwordVisible)}>
-                    <Image
-                        source={passwordVisible ? require('../../assets/eye-open.png') : require('../../assets/eye-closed.png')}
-                        style={styles.eyeIcon}
-                    />
-                </TouchableOpacity>
+            <Input
+              mode="outlined"
+              label="Palaavra-passe"
+              color="#581DB9"
+              underline="#581DB9"
+              returnKeyType="done"
+              value={password}
+              onChangeText={setPassword}
+              autoCapitalize="none"
+              textContentType="password"
+              errorText={passwordError}
+            />
+            {error ? <Text style={styles.error}>{error}</Text> : null}
+            <Button onPress={handleLogin} label="Entrar" style={styles.button} />
+
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: '5%' }}>
+              <Text style={styles.textRegister}>Não tem uma conta? </Text>
+              <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Register')}>
+                <Text style={styles.register}>Registar</Text>
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity style={styles.buttonContainer} onPress={handleLogin}>
-                <Text style={styles.buttonText}>Login</Text>
-            </TouchableOpacity>
-            <Text style={styles.textRegister}>
-                Don't have an account yet?{' '}
-                <Text style={styles.register} onPress={() => navigation.navigate('Register')}>
-                    Register
-                </Text>
-            </Text>
-        </KeyboardAvoidingView>
-    );
-}
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: '5%' }}>
+              <Text style={styles.textforgot}>Esqueceu a palavra-passe? </Text>
+              <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('ForgotPassword')}>
+                <Text style={styles.register}>Recuperar palavra-passe</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </DismissKeyboard>
+    </KeyboardAvoidingView>
+  );
+};
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'white',
-        paddingBottom: 50, // Adjust paddingBottom to accommodate space for the keyboard
-    },
-    logo: {
-        width: 150,
-        height: 150,
-        borderRadius: 100,
-        marginBottom: 50,
-        borderWidth: 1,
-        borderColor: 'black',
-    },
-    title: {
-        fontSize: 30,
-        marginBottom: 30,
-        color: 'black',
-        fontWeight: 'bold',
-    },
-    text: {
-        color: 'black',
-        fontWeight: 'bold',
-        fontSize: 15,
-        textAlign: 'left',
-        width: '80%',
-        marginBottom: 10,
-    },
-    input: {
-        width: '80%',
-        backgroundColor: 'rgba(255, 255, 255, 1)',
-        padding: 15,
-        marginBottom: 20,
-        borderRadius: 25,
-        borderColor: 'black',
-        borderWidth: 1,
-    },
-    buttonContainer: {
-        backgroundColor: 'rgba(88, 29, 185, 1)',
-        padding: 15,
-        width: '45%',
-        alignItems: 'center',
-        borderRadius: 25,
-        top: 20,
-        borderColor: 'black',
-        borderWidth: 1,
-    },
-    buttonText: {
-        color: 'white',
-        fontWeight: 'bold',
-        fontSize: 20,
-    },
-    textRegister: {
-        color: 'black',
-        fontSize: 15,
-        marginTop: 40,
-        textAlign: 'center',
-    },
-    register: {
-        color: 'rgba(88, 29, 185, 1)',
-        fontWeight: 'bold',
-    },
-    passwordInputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        width: '80%',
-        marginBottom: 20,
-        borderRadius: 25,
-        borderColor: 'black',
-        borderWidth: 1,
-    },
-    passwordInput: {
-        flex: 1,
-        height: 40,
-        paddingLeft: 10,
-    },
-    visibilityIcon: {
-        padding: 10,
-    },
-    eyeIcon: {
-        width: 20,
-        height: 20,
-    },
+  container: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: '20%',
+  },
+  inputContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    paddingLeft: '10%',
+    paddingRight: '10%',
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 20,
+  },
+  button: {
+    width: '50%',
+    height: 50,
+    borderRadius: 5,
+    backgroundColor: '#581DB9',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  textRegister: {
+    color: 'black',
+    fontSize: 15,
+  },
+  register: {
+    color: '#581DB9',
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  error: {
+    color: 'red',
+    fontSize: 14,
+    marginTop: 10,
+  },
+  textforgot: {
+    color: 'black',
+    fontSize: 15,
+  },
 });

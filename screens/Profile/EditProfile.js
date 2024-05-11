@@ -1,311 +1,329 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { auth, db } from '../../storage/Firebase';
+import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
+import { DismissKeyboard, Input, Button as BTN, BackBtn } from '../../components';
+import { Dialog, Portal, Button as PaperButton, RadioButton, Avatar, ActivityIndicator } from 'react-native-paper';
+import { useAuth } from '../../Hooks/useAuth';
+import { auth, db } from '../../storage/Firebase';
+import { styles } from './EditStyle';
+import { FontAwesome5 } from '@expo/vector-icons';
 
 export const EditProfile = () => {
-    const navigation = useNavigation();
+  const { currentUser } = useAuth();
+  const navigation = useNavigation();
+  const [userData, setUserData] = useState(null);
+  const [newName, setName] = useState(currentUser.name);
+  const [newAge, setAge] = useState(currentUser.age);
+  const [newWeight, setWeight] = useState(currentUser.weight);
+  const [newHeight, setHeight] = useState(currentUser.height);
+  const [newGender, setGender] = useState(currentUser.gender);
+  const [newAvatar, setAvatar] = useState(currentUser.avatar);
+  const [newBio, setBio] = useState(currentUser.bio); // Adicionando estado para a bio
+  const [visible, setVisible] = useState(false);
+  const [password, setPassword] = useState('');
+  const [uploading, setUploading] = useState(false);
 
-    const [name, setName] = useState('');
-    const [age, setAge] = useState('');
-    const [weight, setWeight] = useState('');
-    const [height, setHeight] = useState('');
-    const [gender, setGender] = useState('');
-    const [password, setPassword] = useState('');
-    const [passwordVisible, setPasswordVisible] = useState(false);
-    const [avatar, setAvatar] = useState(null);
+  const pickImage = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        console.error('Permission to access camera roll was denied');
+        return;
+      }
 
-    useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                const userDocSnap = await getDoc(doc(db, 'users', auth.currentUser.uid));
-                if (userDocSnap.exists()) {
-                    const userData = userDocSnap.data();
-                    setName(userData.name);
-                    setAge(userData.age || '');
-                    setWeight(userData.weight || '');
-                    setHeight(userData.height || '');
-                    setGender(userData.gender || '');
-                    setAvatar(userData.photoURL);
-                }
-            } catch (error) {
-                console.error('Error fetching user data: ', error);
-            }
-        };
-        fetchUserData();
-    }, []);
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        quality: 1,
+        allowsEditing: true,
+        aspect: [4, 3],
+      });
 
-    const pickImage = async () => {
+      if (!result.canceled) {
+        setAvatar(result.assets[0].uri);
+      } else {
+        setAvatar(null);
+      }
+    } catch (error) {
+      console.error('Error picking image: ', error);
+    }
+  };
+
+  const handleUpdateProfile = async () => {
+    try {
+      setUploading(true);
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        console.error('User not signed in');
+        return;
+      }
+
+      const updates = {};
+
+      if (newName && newName.trim() !== '' && newName !== currentUser.name) updates.name = newName.trim();
+      if (newAge && newAge.trim() !== '' && newAge !== currentUser.age) updates.age = newAge.trim();
+      if (newWeight && newWeight.trim() !== '' && newWeight !== currentUser.weight) updates.weight = newWeight.trim();
+      if (newHeight && newHeight.trim() !== '' && newHeight !== currentUser.height) updates.height = newHeight.trim();
+      if (newGender && newGender.trim() !== currentUser.gender) updates.gender = newGender.trim();
+      if (newBio && newBio.trim() !== '' && newBio !== currentUser.bio) updates.bio = newBio.trim(); // Adicionando atualização para a bio
+
+      if (password.trim() !== '') {
         try {
-            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-            if (status !== 'granted') {
-                console.error('Permission to access camera roll was denied');
-                return;
-            }
-            
-            const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.All,
-                quality: 1,
-                allowsEditing: true,
-                aspect: [4, 3],
-            });
-            
-            if (!result.canceled) {
-                setAvatar(result.assets[0].uri);
-            }
+          await currentUser.updatePassword(password.trim());
+          console.log('Password updated successfully');
         } catch (error) {
-            console.error('Error picking image: ', error);
+          console.error('Error updating password:', error);
         }
-    };
+      }
 
-    const handleUpdateProfile = async () => {
-        try {
-            const currentUser = auth.currentUser;
-            if (!currentUser) {
-                console.error('User not signed in');
-                return;
-            }
+      if (newAvatar && currentUser.avatar !== newAvatar) {
+        const photoURL = await handleUpdateAvatar(currentUser.uid);
+        updates.avatar = photoURL;
+      }
 
-            const updates = {};
+      if (Object.keys(updates).length > 0) {
+        await setDoc(doc(db, 'users', currentUser.uid), updates, { merge: true });
+        console.log('Profile updated successfully');
+      }
 
-            if (name.trim() !== '') {
-                updates.name = name.trim();
-            }
+      navigation.navigate('Profile');
+      setUploading(false);
+    } catch (error) {
+      console.error('Error updating profile: ', error);
+      setUploading(false);
+    }
+  };
 
-            if (age.trim() !== '') {
-                updates.age = age.trim();
-            }
+  const handleUpdateAvatar = async uid => {
+    try {
+      const photoURL = await uploadToFirebase(newAvatar, uid);
+      await deleteOldAvatar(uid);
+      return photoURL;
+    } catch (error) {
+      console.error('Error updating avatar: ', error);
+      throw error;
+    }
+  };
 
-            if (weight.trim() !== '') {
-                updates.weight = weight.trim();
-            }
+  const uploadToFirebase = async (uri, uid) => {
+    const storage = getStorage();
+    const fileName = `${uid}-${uuidv4()}.png`;
+    const storageRef = ref(storage, `avatars/${fileName}`);
 
-            if (height.trim() !== '') {
-                updates.height = height.trim();
-            }
+    try {
+      const response = await fetch(uri);
+      if (!response.ok) {
+        throw new Error('Failed to fetch the image');
+      }
 
-            if (gender.trim() !== '') {
-                updates.gender = gender.trim();
-            }
+      const blob = await response.blob();
+      await uploadBytesResumable(storageRef, blob);
+      const photoURL = await getDownloadURL(storageRef);
+      return photoURL;
+    } catch (error) {
+      console.error('Error uploading file: ', error);
+      throw error;
+    }
+  };
 
-            if (password.trim() !== '') {
-                try {
-                    await currentUser.updatePassword(password.trim());
-                    console.log('Password updated successfully');
-                } catch (error) {
-                    console.error('Error updating password:', error);
-                }
-            }
+  const handleDeleteAvatar = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        console.error('User not signed in');
+        return;
+      }
 
-            if (avatar !== null) {
-                try {
-                    const photoURL = await uploadToFirebase(avatar);
-                    updates.photoURL = photoURL;
-                    console.log('Avatar uploaded successfully');
-                } catch (error) {
-                    console.error('Error uploading avatar:', error);
-                }
-            }
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      const userDocSnap = await getDoc(userDocRef);
+      if (!userDocSnap.exists()) {
+        console.error('User document does not exist');
+        return;
+      }
 
-            if (Object.keys(updates).length > 0) {  
-                await setDoc(doc(db, 'users', currentUser.uid), updates, { merge: true });
-                console.log('Profile updated successfully'); 
-            }
+      const userData = userDocSnap.data();
+      const oldPhotoURL = userData.avatar;
+      console.log('Old Photo URL:', oldPhotoURL);
 
-            navigation.navigate('Profile');
-        } catch (error) {
-            console.error('Error updating profile: ', error);
-        }
-    };
+      await setDoc(userDocRef, { avatar: null }, { merge: true });
 
-    const uploadToFirebase = async (uri) => {
+      if (oldPhotoURL) {
         const storage = getStorage();
-        const fileName = `${auth.currentUser.uid}-${uuidv4()}.jpg`;
-        const storageRef = ref(storage, `avatars/${fileName}`);
+        const oldAvatarRef = ref(storage, oldPhotoURL);
+        await deleteObject(oldAvatarRef);
+        console.log('Avatar deleted from storage successfully');
+      }
 
-        try {
-            const response = await fetch(uri);
-            if (!response.ok) {
-                throw new Error('Failed to fetch the image');
-            }
+      setAvatar(null);
+      console.log('Avatar deleted successfully');
+    } catch (error) {
+      console.error('Error deleting avatar: ', error);
+    }
+  };
 
-            const blob = await response.blob();
-            await uploadBytesResumable(storageRef, blob);
-            const photoURL = await getDownloadURL(storageRef);
-            return photoURL;
-        } catch (error) {
-            console.error('Error uploading file: ', error);
-            throw error;
+  const deleteOldAvatar = async uid => {
+    try {
+      const userDocSnap = await getDoc(doc(db, 'users', uid));
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data();
+        const oldPhotoURL = userData.avatar;
+        if (oldPhotoURL) {
+          const storage = getStorage();
+          const oldAvatarRef = ref(storage, oldPhotoURL);
+          await deleteObject(oldAvatarRef);
         }
-    };
+      }
+    } catch (error) {
+      if (error.code === 'storage/object-not-found') {
+        console.log('Old avatar not found in storage');
+      } else {
+        console.error('Error deleting old avatar:', error.code, error.message);
+      }
+    }
+  };
 
-    return (
-        <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : null}>
-            <TouchableOpacity style={styles.backContainer} onPress={() => navigation.navigate('Profile')}>
-                <Image source={require('../../assets/back.png')} style={styles.backbtn} />
-                <Text style={styles.backtxt}>Profile</Text>
-            </TouchableOpacity>
+  const hideDialog = () => setVisible(false);
+  const showDialog = () => setVisible(true);
 
-            <TouchableOpacity style={styles.avatarContainer} onPress={pickImage}>
-                <Image source={avatar ? { uri: avatar } : require('../../assets/avatar.jpg')} style={styles.avatar} />
-            </TouchableOpacity>
+  return (
+    <DismissKeyboard>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={{ position: 'absolute', left: 20, top: 15 }}
+          activeOpacity={0.8}
+        >
+          <FontAwesome5 name="arrow-left" size={24} color="black" />
+        </TouchableOpacity>
+        <View style={styles.body}>
+          <TouchableOpacity onPress={pickImage}>
+            {newAvatar ? (
+              <Avatar.Image size={140} source={{ uri: newAvatar }} />
+            ) : (
+              <Avatar.Image size={130} source={require('../../assets/avatar.png')} />
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleDeleteAvatar} style={styles.deleteButton}>
+            <Text style={styles.deleteButtonText}>Remover Avatar</Text>
+          </TouchableOpacity>
 
-            <Text style={styles.text}>Nome</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="Nome"
-                value={name}
-                onChangeText={setName}
+          <View style={styles.inputContainer}>
+            <Input
+              mode="outlined"
+              label="Nome"
+              color="#581DB9"
+              underline="#581DB9"
+              returnKeyType="next"
+              value={newName}
+              onChangeText={setName}
+              autoCapitalize="words"
+              textContentType="name"
+              keyboardType="default"
             />
-            <Text style={styles.text}>Idade</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="Idade"
-                value={age}
+            <View style={styles.rowContainer}>
+              <Input
+                mode="outlined"
+                label="Idade"
+                color="#581DB9"
+                underline="#581DB9"
+                returnKeyType="next"
+                value={newAge}
                 onChangeText={setAge}
+                autoCapitalize="none"
+                textContentType="none"
                 keyboardType="numeric"
-            />
-            <Text style={styles.text}>Peso (kg)</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="Peso"
-                value={weight}
+                width={'45%'}
+              />
+              <Input
+                mode="outlined"
+                label="Peso"
+                color="#581DB9"
+                underline="#581DB9"
+                returnKeyType="next"
+                value={newWeight}
                 onChangeText={setWeight}
+                autoCapitalize="none"
+                textContentType="none"
                 keyboardType="numeric"
-            />
-            <Text style={styles.text}>Altura (cm)</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="Altura"
-                value={height}
-                onChangeText={setHeight}
-                keyboardType="numeric"
-            />
-            <Text style={styles.text}>Genero</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="Genero"
-                value={gender}
-                onChangeText={setGender}
-            />
-            <Text style={styles.text}>Password</Text>
-            <View style={styles.passwordInputContainer}>
-                <TextInput
-                    style={styles.passwordInput}
-                    placeholder="Password"
-                    value={password}
-                    secureTextEntry={!passwordVisible}
-                    onChangeText={setPassword}
-                />
-                <TouchableOpacity
-                    style={styles.visibilityIcon}
-                    onPress={() => setPasswordVisible(!passwordVisible)}>
-                    <Image
-                        source={passwordVisible ? require('../../assets/eye-open.png') : require('../../assets/eye-closed.png')}
-                        style={styles.eyeIcon}
-                    />
-                </TouchableOpacity>
+                width={'45%'}
+              />
             </View>
-
-            <TouchableOpacity style={styles.buttonContainer} onPress={handleUpdateProfile}>
-                <Text style={styles.buttonText}>Update</Text>
+            <Input
+              mode="outlined"
+              label="Altura"
+              color="#581DB9"
+              underline="#581DB9"
+              returnKeyType="next"
+              value={newHeight}
+              onChangeText={setHeight}
+              autoCapitalize="none"
+              textContentType="none"
+              keyboardType="numeric"
+            />
+            <Input
+              mode="outlined"
+              label="Bio"
+              color="#581DB9"
+              underline="#581DB9"
+              returnKeyType="next"
+              value={newBio}
+              onChangeText={setBio}
+              autoCapitalize="sentences"
+              textContentType="none"
+              keyboardType="default"
+              numberOfLines={4}
+              multiline={true}
+              style={styles.bioInput}
+            />
+            <Input
+              mode="outlined"
+              label="Password"
+              color="#581DB9"
+              underline="#581DB9"
+              returnKeyType="done"
+              value={password}
+              onChangeText={setPassword}
+              autoCapitalize="none"
+              textContentType="password"
+              keyboardType="default"
+              containerStyle={styles.input}
+            />
+            <Text style={styles.genderopcText}>Selecione o gênero</Text>
+            <TouchableOpacity onPress={showDialog} style={styles.genderButton}>
+              <Text style={styles.genderButtonText}>
+                {newGender
+                  ? newGender === '1'
+                    ? 'Masculino'
+                    : newGender === '2'
+                    ? 'Feminino'
+                    : 'Outro'
+                  : 'Selecione o Gênero'}
+              </Text>
             </TouchableOpacity>
-        </KeyboardAvoidingView>
-    );
-}
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'white',
-    },
-    backContainer: {
-        position: 'absolute',
-        top: 50,
-        left: 20,
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 10,
-    },
-    backbtn: {
-        width: 30,
-        height: 30,
-        marginRight: 10,
-    },
-    backtxt: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: 'black',
-    },
-    avatarContainer: {
-        marginBottom: 20,
-    },
-    avatar: {
-        width: 150,
-        height: 150,
-        borderRadius: 75,
-        borderColor: 'black',
-        borderWidth: 1,
-    },
-    text: {
-        color: 'black',
-        fontWeight: 'bold',
-        fontSize: 15,
-        textAlign: 'left',
-        width: '80%',
-        marginBottom: 10,
-    },
-    input: {
-        width: '80%',
-        height: 40,
-        backgroundColor: 'white',
-        borderWidth: 1,
-        borderColor: 'black',
-        marginBottom: 20,
-        paddingLeft: 10,
-        borderRadius: 25,
-    },
-    buttonContainer: {
-        backgroundColor: 'rgba(88, 29, 185, 1)',
-        padding: 15,
-        width: '45%',
-        alignItems: 'center',
-        borderRadius: 25,
-        top: 20,
-        borderColor: 'black',
-        borderWidth: 1,
-    },
-    buttonText: {
-        color: 'white',
-        fontWeight: 'bold',
-        fontSize: 20,
-    },
-    passwordInputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        width: '80%',
-        marginBottom: 20,
-        borderRadius: 25,
-        borderColor: 'black',
-        borderWidth: 1,
-        backgroundColor: 'white',
-    },
-    passwordInput: {
-        flex: 1,
-        height: 40,
-        paddingLeft: 10,
-    },
-    visibilityIcon: {
-        padding: 10,
-    },
-    eyeIcon: {
-        width: 20,
-        height: 20,
-    },
-});
+            <Portal>
+              <Dialog visible={visible} onDismiss={hideDialog}>
+                <Dialog.Title>Gênero</Dialog.Title>
+                <Dialog.Content>
+                  <RadioButton.Group onValueChange={newValue => setGender(newValue)} value={newGender}>
+                    <RadioButton.Item label="Masculino" value="1" />
+                    <RadioButton.Item label="Feminino" value="2" />
+                    <RadioButton.Item label="Outro" value="3" />
+                  </RadioButton.Group>
+                </Dialog.Content>
+                <Dialog.Actions>
+                  <PaperButton onPress={hideDialog}>Cancelar</PaperButton>
+                  <PaperButton onPress={hideDialog}>OK</PaperButton>
+                </Dialog.Actions>
+              </Dialog>
+            </Portal>
+            {uploading && <ActivityIndicator size={30} top={15} color="#581DB9" />}
+            <BTN onPress={handleUpdateProfile} label="Atualizar" style={styles.buttonContainer} />
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    </DismissKeyboard>
+  );
+};

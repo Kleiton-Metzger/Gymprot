@@ -1,213 +1,209 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Image, SafeAreaView } from 'react-native';
 import { StyleSheet } from 'react-native-web';
 import { useNavigation } from '@react-navigation/native';
 import { auth, createUserWithEmailAndPassword } from '../../storage/Firebase';
 import { db } from '../../storage/Firebase';
-import {doc, setDoc} from "firebase/firestore";
+import { doc, setDoc } from 'firebase/firestore';
+import { DismissKeyboard, Logo, Header, Input, Button } from '../../components';
+import { FontAwesome5 } from '@expo/vector-icons';
 
+export const Register = ({ navigation, navigation: { goBack } }) => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordVisible, setPasswordVisible] = useState(false); // State to manage password visibility
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false); // State to manage confirm password visibility
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [nameError, setNameError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = useState('');
 
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(user => {
+      setUser(user);
+      if (loading) setLoading(false);
+      if (user) {
+        navigation.replace('ProfileScreen');
+      }
+    });
+    return unsubscribe;
+  }, [loading, navigation]);
 
-export const Register = () => {
-    const navigation = useNavigation();
+  const handleSignUp = () => {
+    setNameError('');
+    setEmailError('');
+    setPasswordError('');
+    setConfirmPasswordError('');
 
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [passwordVisible, setPasswordVisible] = useState(false); // State to manage password visibility
-    const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false); // State to manage confirm password visibility
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged(user => {
-            setUser(user);
-            if (loading) setLoading(false);
-            if (user) {
-                navigation.navigate('ProfileScreen'); // Navigate to Profile screen if user is logged in
-            }
-        });
-        return unsubscribe;
-    }, [loading, navigation]);
-
-    const handleSignUp = () => {
-        // Validate password and confirm password
-        if (password !== confirmPassword) {
-            alert("Passwords do not match!");
-            return;
-        }
-
-        createUserWithEmailAndPassword(auth, email, password)
-            .then(userCredential => {
-                const user = userCredential.user;
-                console.log('Registered with:', user.email);
-                setDoc(doc(db, "users", user.uid), {
-                    name: name,
-                    email: email,
-                    userId: user.uid,
-                });
-            })
-            .catch(error => alert(error.message));
+    if (!name.trim() && !email.trim() && !password.trim() && !confirmPassword.trim()) {
+      alert('Por favor, preencha todos os campos para criar uma conta');
+      return;
+    }
+    if (!name.trim()) {
+      setNameError('Por favor, introduza o seu nome');
+      return;
+    }
+    if (!email.trim()) {
+      setEmailError('Introduza o seu email');
+      return;
+    }
+    if (!password.trim()) {
+      setPasswordError('Introduza a sua palavra-passe');
+      return;
+    }
+    if (!confirmPassword.trim()) {
+      setConfirmPassword('Introduza a sua palavra-passe');
+      return;
+    }
+    if (password !== confirmPassword) {
+      alert('Palaavra-passe e confirmar palavra-passe não coincidem');
+      return;
     }
 
-    if (loading) return null;
+    createUserWithEmailAndPassword(auth, email, password)
+      .then(userCredential => {
+        const user = userCredential.user;
+        console.log('Registered with:', user.email);
+        setDoc(doc(db, 'users', user.uid), {
+          name: name,
+          email: email,
+          userId: user.uid,
+          seguidores: [],
+          seguindo: [],
+          bio: '',
+        });
+      })
+      .catch(error => alert(error.message));
+  };
 
-    return (
-        <KeyboardAvoidingView style={styles.container} behavior="padding">
-            <View style={styles.titleContainer}>
-                <Text style={styles.title}>Register</Text>
-                <Text style={styles.detail}>Please enter your details to register</Text>
+  if (loading) return null;
+
+  return (
+    <SafeAreaView>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <DismissKeyboard>
+          <View style={styles.container}>
+            <TouchableOpacity onPress={goBack} style={{ position: 'absolute', left: 20, top: 10 }}>
+              <FontAwesome5 name="arrow-left" size={24} color="black" />
+            </TouchableOpacity>
+            <View style={styles.logoContainer}>
+              <Logo />
             </View>
-            <Text style={styles.text}>Name</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="Name"
+            <View style={styles.titleContainer}>
+              <Header>Criar Conta</Header>
+            </View>
+            <View style={styles.inputContainer}>
+              <Input
+                mode="outlined"
+                label="Nome"
+                color="#581DB9"
+                underline="#581DB9"
+                returnKeyType="next"
                 value={name}
                 onChangeText={setName}
-            />
-            <Text style={styles.text}>Email</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="Email"
+                errorText={nameError}
+              />
+              <Input
+                mode="outlined"
+                label="Email"
+                color="#581DB9"
+                underline="#581DB9"
+                returnKeyType="next"
                 value={email}
                 onChangeText={setEmail}
-            />
-            <Text style={styles.text}>Password</Text>
-            <View style={styles.passwordInputContainer}>
-                <TextInput
-                    style={styles.passwordInput}
-                    placeholder="Password"
-                    value={password}
-                    secureTextEntry={!passwordVisible} // Toggle secureTextEntry based on passwordVisible state
-                    onChangeText={setPassword}
-                />
-                <TouchableOpacity
-                    style={styles.visibilityIcon}
-                    onPress={() => setPasswordVisible(!passwordVisible)}>
-                    <Image
-                        source={passwordVisible ? require('../../assets/eye-open.png') : require('../../assets/eye-closed.png')}
-                        style={styles.eyeIcon}
-                    />
+                errorText={emailError}
+              />
+              <Input
+                mode="outlined"
+                label="Palavra-passe"
+                color="#581DB9"
+                underline="#581DB9"
+                textContentType="password"
+                returnKeyType="next"
+                value={password}
+                onChangeText={setPassword}
+                errorText={passwordError}
+              />
+              <Input
+                mode="outlined"
+                label="Confirmar Palavra-passe"
+                color="#581DB9"
+                underline="#581DB9"
+                textContentType="password"
+                returnKeyType="done"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                errorText={confirmPasswordError}
+              />
+              <Button onPress={handleSignUp} label="Criar" style={styles.button1} />
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: '5%' }}>
+                <Text>Já tem uma conta? </Text>
+                <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                  <Text style={styles.register}>Entrar</Text>
                 </TouchableOpacity>
+              </View>
             </View>
-            <Text style={styles.text}>Confirm Password</Text>
-            <View style={styles.passwordInputContainer}>
-                <TextInput
-                    style={styles.passwordInput}
-                    placeholder="Confirm Password"
-                    value={confirmPassword}
-                    secureTextEntry={!confirmPasswordVisible} // Toggle secureTextEntry based on confirmPasswordVisible state
-                    onChangeText={setConfirmPassword}
-                />
-                <TouchableOpacity
-                    style={styles.visibilityIcon}
-                    onPress={() => setConfirmPasswordVisible(!confirmPasswordVisible)}>
-                    <Image
-                        source={confirmPasswordVisible ? require('../../assets/eye-open.png') : require('../../assets/eye-closed.png')}
-                        style={styles.eyeIcon}
-                    />
-                </TouchableOpacity>
-            </View>
-            <TouchableOpacity style={styles.buttonContainer} onPress={handleSignUp}>
-                <Text style={styles.buttonText}>Register</Text>
-            </TouchableOpacity>
-            <Text style={styles.textRegister}>
-                Already have an account?{' '}
-                <Text
-                    style={styles.register}
-                    onPress={() => navigation.navigate('Login')}
-                >
-                    Login
-                </Text>
-            </Text>
-        </KeyboardAvoidingView>
-    );
-}
+          </View>
+        </DismissKeyboard>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+};
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderColor: 'black',
-    },
-    titleContainer: {
-        marginBottom: 30,
-        alignItems: 'center',
-    },
-    title: {
-        fontSize: 30,
-        color: 'black',
-        fontWeight: 'bold',
-    },
-    detail: {
-        fontSize: 15,
-        color: 'black',
-        textAlign: 'center',
-    },
-    text: {
-        color: 'black',
-        fontWeight: 'bold',
-        fontSize: 15,
-        textAlign: 'left',
-        width: '80%',
-        marginBottom: 10,
-    },
-    input: {
-        width: '80%',
-        height: 40,
-        backgroundColor: 'white',
-        borderWidth: 1,
-        borderColor: 'black',
-        marginBottom: 20,
-        paddingLeft: 10,
-        borderRadius: 25,
-    },
-    buttonContainer: {
-        backgroundColor: 'rgba(88, 29, 185, 1)',
-        padding: 15,
-        width: '45%',
-        alignItems: 'center',
-        borderRadius: 25,
-        top: 20,
-        borderColor: 'black',
-        borderWidth: 1,
-    },
-    buttonText: {
-        color: 'white',
-        fontWeight: 'bold',
-        fontSize: 20,
-    },
-    textRegister: {
-        color: 'black',
-        fontSize: 15,
-        marginTop: 40,
-    },
-    register: {
-        color: 'rgba(88, 29, 185, 1)',
-        fontWeight: 'bold',
-    },
-    passwordInputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        width: '80%',
-        marginBottom: 20,
-        borderRadius: 25,
-        borderColor: 'black',
-        borderWidth: 1,
-        backgroundColor: 'white',
-    },
-    passwordInput: {
-        flex: 1,
-        height: 40,
-        paddingLeft: 10,
-    },
-    visibilityIcon: {
-        padding: 10,
-    },
-    eyeIcon: {
-        width: 20,
-        height: 20,
-    },
+  container: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  inputContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    paddingLeft: '10%',
+    paddingRight: '10%',
+  },
+  logoContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: '10%',
+  },
+  titleContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  button: {
+    width: '100%',
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#581DB9',
+    borderRadius: 5,
+    marginVertical: 10,
+  },
+  buttonText: {
+    fontSize: 18,
+    color: '#fff',
+  },
+  error: {
+    color: 'red',
+    marginTop: 10,
+  },
+  register: {
+    color: '#581DB9',
+    fontWeight: 'bold',
+  },
+  button1: {
+    width: '50%',
+    height: 50,
+    borderRadius: 5,
+    backgroundColor: '#581DB9',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+  },
 });

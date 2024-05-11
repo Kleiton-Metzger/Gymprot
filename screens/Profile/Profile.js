@@ -1,129 +1,172 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import React from 'react';
+import { View, Text, TouchableOpacity, Button, Image, SafeAreaView, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { doc, onSnapshot } from 'firebase/firestore';
-import { db, auth } from '../../storage/Firebase';
+import { Avatar, ActivityIndicator } from 'react-native-paper';
+import { useAuth } from '../../Hooks/useAuth';
+import { getUSerSex } from '../../utils/gender';
+import { styles } from './ProfStyle';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { AreaChart, BarChart, Grid, LineChart, PieChart, XAxis, YAxis } from 'react-native-svg-charts';
+import * as shape from 'd3-shape';
+import { Octicons } from '@expo/vector-icons';
 
 export const Profile = () => {
   const navigation = useNavigation();
-  const [userData, setUserData] = useState(null);
+  const { currentUser, signOut } = useAuth();
+  const data = [50, 10, 40, 95, -4, -24, 85, 91, 35, 53, -53, 24, 50, -20, -80];
+  const contentInset = { top: 20, bottom: 20 };
 
-  useEffect(() => {
-    const unsubscribe = onSnapshot(doc(db, 'users', auth.currentUser.uid), (docSnap) => {
-      if (docSnap.exists()) {
-        const userData = docSnap.data();
-        console.log('User Data:', userData);
-        setUserData(userData);
-      } else {
-        console.log('No such document!');
-      }
-    });
-
-    // Clean up the listener when the component unmounts
-    return () => unsubscribe();
-  }, []);
-
-  const handleSignOut = () => {
-    auth
-      .signOut()
-      .then(() => {
-        navigation.replace('Login');
-        console.log('User signed out!');
-      })
-      .catch(error => alert(error.message));
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigation.replace('Login');
+    } catch (error) {
+      console.log('Error signing out:', error.message);
+    }
   };
 
-  const handleMenuPress = () => {
-    navigation.navigate('EditProfileScreen');
-  };
+  if (!currentUser) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity style={styles.editContainer} onPress={handleMenuPress}>
-        <Image source={require('../../assets/edit.png')} style={styles.editIcon} />
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={handleMenuPress}>
-        <Image source={userData?.photoURL ? { uri: userData.photoURL } : require('../../assets/avatar.jpg')} style={styles.avatar} />
-      </TouchableOpacity>
-
-      {userData && (
-        <View style={styles.userDataContainer}>
-          <UserData label="Nome" value={userData.name} />
-          <UserData label="Email" value={userData.email} />
-          <UserData label="Idade" value={userData.age} />
-          <UserData label="Peso" value={userData.weight} />
-          <UserData label="Altura" value={userData.height} />
-          <UserData label="Genero" value={userData.gender} />
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <View style={styles.editContainer}>
+          <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('EditProfileScreen')}>
+            <MaterialCommunityIcons name="account-edit-outline" size={35} color="black" style={styles.editIcon} />
+          </TouchableOpacity>
         </View>
-        
-      )}
+        <View style={styles.perfilTextContainer}>
+          <Text style={styles.perfilText}>Perfil</Text>
+        </View>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity onPress={handleSignOut} activeOpacity={0.7}>
+            <MaterialCommunityIcons name="logout" size={25} color="black" style={styles.logoutbtn} />
+          </TouchableOpacity>
+        </View>
+      </View>
+      <View style={{ height: 1, backgroundColor: 'lightgray', width: '100%' }} />
+      <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+        <View style={styles.userDataContainer}>
+          <Image
+            style={styles.avatar}
+            source={currentUser.avatar ? { uri: currentUser.avatar } : require('../../assets/avatar.png')}
+          />
+          <View style={styles.userDatas}>
+            <Text style={styles.userName}>{currentUser.name}</Text>
+            <Text style={styles.userEmail}>{currentUser.email}</Text>
+            <View style={styles.userFollow}>
+              <View style={styles.seguidoresContainer}>
+                <Text style={styles.segdrTxt}> Seguidores</Text>
+                <Text style={styles.segdrNum}> {currentUser.seguidores ? currentUser.seguidores.length : 0 || 0}</Text>
+              </View>
+              <View>
+                <Text style={styles.segdrTxt}> Seguindo</Text>
+                <Text style={styles.segdrNum}> {currentUser.seguindo ? currentUser.seguindo.length : 0 || 0}</Text>
+              </View>
+            </View>
+          </View>
+        </View>
 
-      <TouchableOpacity style={styles.buttonContainer} onPress={handleSignOut}>
-        <Text style={styles.buttonText}>Logout</Text>
-      </TouchableOpacity>
-    </View>
+        <View style={styles.bioContainer}>
+          <Text style={styles.bioText}>{currentUser.bio}</Text>
+        </View>
+        <View style={{ height: 1, width: '95%', alignSelf: 'center', backgroundColor: 'lightgrey' }} />
+
+        <View style={styles.bodyContainer}>
+          <Text style={styles.bodyTitle}>Body</Text>
+          <View style={styles.graphContainer}>
+            <View style={{ flexDirection: 'row', height: 200, padding: 20 }}>
+              <YAxis
+                data={data}
+                contentInset={contentInset}
+                svg={{
+                  fill: 'grey',
+                  fontSize: 10,
+                }}
+                numberOfTicks={10}
+                formatLabel={value => `${value}M`}
+              />
+              <LineChart
+                style={styles.graph}
+                data={data}
+                svg={{ stroke: 'rgb(134, 65, 244)' }}
+                contentInset={contentInset}
+              >
+                <Grid />
+              </LineChart>
+              <View style={{ flex: 1, marginLeft: 10 }}>
+                <LineChart
+                  style={styles.graph}
+                  data={data}
+                  gridMin={0}
+                  contentInset={{ top: 10, bottom: 10 }}
+                  svg={{ stroke: 'rgb(134, 65, 244)' }}
+                >
+                  <Grid />
+                </LineChart>
+                <XAxis
+                  style={styles.graph}
+                  data={data}
+                  formatLabel={(value, index) => 'Elevação'}
+                  contentInset={{ left: 10, right: 10 }}
+                  svg={{ fontSize: 10, fill: 'black' }}
+                />
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.graphContainer}>
+            <View style={{ flexDirection: 'row', height: 200, padding: 20 }}>
+              <YAxis
+                data={data}
+                contentInset={contentInset}
+                svg={{
+                  fill: 'grey',
+                  fontSize: 10,
+                }}
+                numberOfTicks={10}
+                formatLabel={value => `${value}M`}
+              />
+              <BarChart
+                style={styles.graph}
+                data={data}
+                svg={{ fill: 'rgba(134, 65, 244, 0.8)' }}
+                contentInset={contentInset}
+                spacingInner={0.2}
+                spacingOuter={0.2}
+              >
+                <Grid />
+              </BarChart>
+              <View style={{ flex: 1, marginLeft: 10 }}>
+                <BarChart
+                  style={styles.graph}
+                  data={data}
+                  gridMin={0}
+                  contentInset={{ top: 10, bottom: 10 }}
+                  svg={{ fill: 'rgba(134, 65, 244, 0.8)' }}
+                  spacingInner={0.2}
+                  spacingOuter={0.2}
+                >
+                  <Grid />
+                </BarChart>
+                <XAxis
+                  style={styles.graph}
+                  data={data}
+                  formatLabel={(value, index) => 'Caloria'}
+                  contentInset={{ left: 10, right: 10 }}
+                  svg={{ fontSize: 10, fill: 'black' }}
+                />
+              </View>
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
-
-const UserData = ({ label, value }) => (
-  <View style={styles.userData}>
-    <Text style={styles.userDataLabel}>{label}:</Text>
-    <Text style={styles.userDataValue}>{value}</Text>
-  </View>
-);
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'white',
-  },
-  editContainer: {
-    position: 'absolute',
-    top: 50,
-    right: 20,
-  },
-  editIcon: {
-    width: 30,
-    height: 30,
-  },
-  avatar: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    marginBottom: 20,
-    borderColor: 'black',
-    borderWidth: 1,
-  },
-  buttonContainer: {
-    backgroundColor: 'rgba(88, 29, 185, 1)',
-    padding: 10,
-    width: '40%',
-    alignItems: 'center',
-    borderRadius: 25,
-    marginVertical: 10,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 15,
-  },
-  userDataContainer: {
-    alignItems: 'center',
-  },
-  userData: {
-    flexDirection: 'row',
-    marginBottom: 10,
-  },
-  userDataLabel: {
-    fontSize: 16,
-    marginRight: 5,
-    color: 'black',
-    fontWeight: 'bold',
-  },
-  userDataValue: {
-    fontSize: 16,
-    color: 'black',
-  },
-});
