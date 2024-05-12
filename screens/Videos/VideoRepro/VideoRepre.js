@@ -44,11 +44,30 @@ export const VideosScreen = () => {
         setCurrentDataPointIndex(prevIndex =>
           prevIndex < videoData.dataPoints.length - 1 ? prevIndex + 1 : prevIndex,
         );
-      }, 20090);
+      }, 5000);
 
       return () => clearInterval(interval);
     }
   }, [videoData]);
+
+  const calculateAltitudeChange = () => {
+    const altitudeGain =
+      currentDataPointIndex > 0
+        ? videoData.dataPoints[currentDataPointIndex].elevation -
+          videoData.dataPoints[currentDataPointIndex - 1].elevation
+        : 0;
+
+    let altitudeChangeStatus = '';
+    if (altitudeGain > 0) {
+      altitudeChangeStatus = 'A subir';
+    } else if (altitudeGain < 0) {
+      altitudeChangeStatus = 'A descer';
+    } else {
+      altitudeChangeStatus = 'Sem mudança';
+    }
+
+    return altitudeGain.toFixed(2) + 'm (' + altitudeChangeStatus + ')';
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -86,8 +105,8 @@ export const VideosScreen = () => {
               <Text style={styles.sensorData}>{videoData.dataPoints[currentDataPointIndex].elevation} m</Text>
             </View>
             <View style={styles.sensorItem}>
-              <Text style={styles.sensorLabel}>Altitude Soil:</Text>
-              <Text style={styles.sensorData}>{videoData.dataPoints[currentDataPointIndex].elevationac} m</Text>
+              <Text style={styles.sensorLabel}>Altitude Gain:</Text>
+              <Text style={styles.sensorData}>{currentDataPointIndex > 0 ? calculateAltitudeChange() : 'N/A'}</Text>
             </View>
           </View>
         )}
