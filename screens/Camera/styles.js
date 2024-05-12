@@ -101,4 +101,14 @@ export const styles = StyleSheet.create({
     borderRadius: 5,
     marginVertical: 10,
   },
+  progress: {
+    height: 10,
+    backgroundColor: '#581DB9',
+    borderRadius: 5,
+  },
+  flip: {
+    position: 'absolute',
+    bottom: 30,
+    right: 10,
+  },
 });

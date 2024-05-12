@@ -4,13 +4,14 @@ import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { v4 as uuidv4 } from 'uuid';
+import uuid from 'uuid-random';
+
 import { DismissKeyboard, Input, Button as BTN, BackBtn } from '../../components';
 import { Dialog, Portal, Button as PaperButton, RadioButton, Avatar, ActivityIndicator } from 'react-native-paper';
 import { useAuth } from '../../Hooks/useAuth';
 import { auth, db } from '../../storage/Firebase';
 import { styles } from './EditStyle';
-import { FontAwesome5 } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 
 export const EditProfile = () => {
   const { currentUser } = useAuth();
@@ -110,7 +111,7 @@ export const EditProfile = () => {
 
   const uploadToFirebase = async (uri, uid) => {
     const storage = getStorage();
-    const fileName = `${uid}-${uuidv4()}.png`;
+    const fileName = `${uid}-${uuid()}.png`;
     const storageRef = ref(storage, `avatars/${fileName}`);
 
     try {
@@ -196,7 +197,7 @@ export const EditProfile = () => {
           style={{ position: 'absolute', left: 20, top: 15 }}
           activeOpacity={0.8}
         >
-          <FontAwesome5 name="arrow-left" size={24} color="black" />
+          <Ionicons name="arrow-back" size={30} />
         </TouchableOpacity>
         <View style={styles.body}>
           <TouchableOpacity onPress={pickImage}>
@@ -276,6 +277,7 @@ export const EditProfile = () => {
               keyboardType="default"
               numberOfLines={4}
               multiline={true}
+              maxLength={100}
               style={styles.bioInput}
             />
             <Input

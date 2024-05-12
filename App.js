@@ -27,6 +27,9 @@ import TabNav from './components/TabNav';
 import SplashScreen from './screens/Auth/Splash';
 
 LogBox.ignoreLogs(['Sending `onAnimatedValueUpdate` with no listeners registered.']);
+LogBox.ignoreLogs([
+  'AWarning: TextInput.Icon: Support for defaultProps will be removed from function components in a future major release. Use JavaScript default parameters instead.',
+]);
 
 export default function App() {
   const Stack = createStackNavigator();

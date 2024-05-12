@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { FontAwesome5 } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Video } from 'expo-av';
 import { collection, getDocs, query, where } from 'firebase/firestore';
@@ -53,7 +53,7 @@ export const VideosScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <TouchableOpacity style={styles.header} onPress={() => navigation.goBack()} activeOpacity={0.8}>
-        <FontAwesome5 name="arrow-left" style={styles.backBtn} size={24} color="black" />
+        <Ionicons name="arrow-back" size={30} color="black" style={styles.backBtn} />
       </TouchableOpacity>
       <View style={styles.body}>
         {isVideoLoading && <ActivityIndicator size={30} color="#581DB9" style={styles.activityIndicator} />}
