@@ -20,7 +20,11 @@
         "NSMotionUsageDescription": "Allow $(PRODUCT_NAME) to access your motion data",
         "NSLocationWhenInUseUsageDescription": "Allow $(PRODUCT_NAME) to access your location",
         "NSLocationAlwaysUsageDescription": "Allow $(PRODUCT_NAME) to access your location",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "Allow $(PRODUCT_NAME) to access your location"
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Allow $(PRODUCT_NAME) to access your location",
+        "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone",
+        "NSBluetoothAlwaysUsageDescription": "Allow $(PRODUCT_NAME) to access your bluetooth",
+        "NSBluetoothPeripheralUsageDescription": "Allow $(PRODUCT_NAME) to access your bluetooth",
+        "NSCalendarsUsageDescription": "Allow $(PRODUCT_NAME) to access your calendar"
       }
     },
     "android": {

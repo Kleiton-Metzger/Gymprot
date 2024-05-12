@@ -167,6 +167,18 @@ dependencies {
         implementation jscFlavor
     }
 }
+llprojects {
+    repositories {
+
+        // * Your other repositories here *
+
+        // * Add a new maven block after other repositories / blocks *
+        maven {
+            // expo-camera bundles a custom com.google.android:cameraview
+            url "$rootDir/../node_modules/expo-camera/android/maven"
+        }
+    }
+}
 
 apply from: new File(["node", "--print", "require.resolve('@react-native-community/cli-platform-android/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim(), "../native_modules.gradle");
 applyNativeModulesAppBuildGradle(project)
