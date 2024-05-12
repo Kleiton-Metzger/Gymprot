@@ -56,8 +56,8 @@ export const FolowerProfile = () => {
   const fetchVideos = async () => {
     try {
       const videosRef = collection(db, 'videos');
-      const q = query(videosRef, where('createBy', '==', createBy));
-      const querySnapshot = await getDocs(q); // Correção aqui
+      const q = query(videosRef, where('createBy', '==', createBy), where('status', '==', 'Public'));
+      const querySnapshot = await getDocs(q);
       const videosData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setVideos(videosData);
     } catch (error) {
@@ -65,6 +65,10 @@ export const FolowerProfile = () => {
     }
   };
 
+  useEffect(() => {
+    fetchUserData();
+    fetchVideos();
+  }, []);
   useEffect(() => {
     fetchUserData();
     fetchVideos();
