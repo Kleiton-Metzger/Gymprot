@@ -28,7 +28,6 @@ export const CameraScreen = () => {
   const [recordTime, setRecordTime] = useState(0);
   const [speed, setSpeed] = useState(0);
   const [elevation, setElevation] = useState(null);
-  const [elevationac, setElevationac] = useState(null);
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState('Public');
   const [showModal, setShowModal] = useState(false);
@@ -50,9 +49,10 @@ export const CameraScreen = () => {
       }
 
       if (Platform.OS === 'android') {
+        const { status: camera } = await Camera.requestCameraPermissionsAsync();
         const { status: audioStatus } = await Camera.requestMicrophonePermissionsAsync();
-        if (audioStatus !== 'granted') {
-          console.log('Audio recording permission not granted');
+        if (audioStatus !== 'granted' || camera !== 'granted') {
+          console.log('Camera or Microphone permission not granted');
           return;
         }
       }
@@ -101,22 +101,24 @@ export const CameraScreen = () => {
           console.log('Permission to access location was denied');
           return;
         }
+        if ((recordTime === 1 || recordTime % 5 === 0) && isRecording) {
+          console.log('im doing it');
+          locationSubscription = await Location.watchPositionAsync(
+            { accuracy: Location.Accuracy.Highest },
+            location => {
+              setElevation(location.coords.altitude);
 
-        locationSubscription = await Location.watchPositionAsync({ accuracy: Location.Accuracy.High }, location => {
-          setElevation(location.coords.altitude);
-          setElevationac(location.coords.altitudeAccuracy);
-          if (recordTime % 20 === 0) {
-            setDataPoints(prevDataPoints => [
-              ...prevDataPoints,
-              {
-                speed,
-                elevation: location.coords.altitude,
-                elevationac: location.coords.altitudeAccuracy,
-                videoTime: recordTime,
-              },
-            ]);
-          }
-        });
+              setDataPoints([
+                ...dataPoints,
+                {
+                  speed,
+                  elevation: location.coords.altitude.toFixed(2),
+                  videoTime: recordTime,
+                },
+              ]);
+            },
+          );
+        }
       } catch (error) {
         console.error('Error initializing location subscription:', error);
       }
@@ -156,6 +158,7 @@ export const CameraScreen = () => {
   };
 
   const startRecording = async () => {
+    setDataPoints([]);
     if (cameraRef.current) {
       try {
         const videoRecordPromise = cameraRef.current.recordAsync({
@@ -211,7 +214,7 @@ export const CameraScreen = () => {
 
   const addVideo = async uri => {
     const videoURL = await uploadVideoToFirebase(uri);
-    const location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
+    const location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest });
     const { latitude, longitude } = location.coords;
     try {
       const geocode = await Location.reverseGeocodeAsync({ latitude, longitude });
@@ -268,7 +271,6 @@ export const CameraScreen = () => {
         </View>
         <View style={styles.infoTextContainer}>
           <Text style={styles.infoText}>Distance: {distance.toFixed(2)} m</Text>
-          <Text style={styles.infoText}>ElevationAccuracy: {elevationac ? elevationac.toFixed(2) + ' m' : 'N/A'}</Text>
         </View>
       </View>
       <Modal
