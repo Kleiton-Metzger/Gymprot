@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
-
+    "UIBackgroundModes": ["location", "fetch"],
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
@@ -15,7 +15,16 @@
       "infoPlist": {
         "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access your camera",
         "NSPhotoLibraryUsageDescription": "Allow $(PRODUCT_NAME) to access your photos",
-        "NSPhotoLibraryAddUsageDescription": "Allow $(PRODUCT_NAME) to save photos"
+        "NSPhotoLibraryAddUsageDescription": "Allow $(PRODUCT_NAME) to save photos",
+        "UIBackgroundModes": ["location", "fetch", "barometer", "microphone", "sensor"],
+        "NSMotionUsageDescription": "Allow $(PRODUCT_NAME) to access your motion data",
+        "NSLocationWhenInUseUsageDescription": "Allow $(PRODUCT_NAME) to access your location",
+        "NSLocationAlwaysUsageDescription": "Allow $(PRODUCT_NAME) to access your location",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Allow $(PRODUCT_NAME) to access your location",
+        "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone",
+        "NSBluetoothAlwaysUsageDescription": "Allow $(PRODUCT_NAME) to access your bluetooth",
+        "NSBluetoothPeripheralUsageDescription": "Allow $(PRODUCT_NAME) to access your bluetooth",
+        "NSCalendarsUsageDescription": "Allow $(PRODUCT_NAME) to access your calendar"
       }
     },
     "android": {
@@ -63,9 +72,10 @@
           "photosPermission": "Allow $(PRODUCT_NAME) to access your photo",
           "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera"
         }
-      ]
+      ],
+      "expo-build-properties"
     ],
-    "sdkVersion": "49.0.0"
+    "sdkVersion": "51.0.0"
   },
   "name": "gymapp"
 }

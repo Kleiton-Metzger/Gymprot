@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { FontAwesome5 } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Video } from 'expo-av';
 import { collection, getDocs, query, where } from 'firebase/firestore';
@@ -44,16 +44,35 @@ export const VideosScreen = () => {
         setCurrentDataPointIndex(prevIndex =>
           prevIndex < videoData.dataPoints.length - 1 ? prevIndex + 1 : prevIndex,
         );
-      }, 20090);
+      }, 5000);
 
       return () => clearInterval(interval);
     }
   }, [videoData]);
 
+  const calculateAltitudeChange = () => {
+    const altitudeGain =
+      currentDataPointIndex > 0
+        ? videoData.dataPoints[currentDataPointIndex].elevation -
+          videoData.dataPoints[currentDataPointIndex - 1].elevation
+        : 0;
+
+    let altitudeChangeStatus = '';
+    if (altitudeGain > 0) {
+      altitudeChangeStatus = 'A subir';
+    } else if (altitudeGain < 0) {
+      altitudeChangeStatus = 'A descer';
+    } else {
+      altitudeChangeStatus = 'Sem mudança';
+    }
+
+    return altitudeGain.toFixed(2) + 'm (' + altitudeChangeStatus + ')';
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <TouchableOpacity style={styles.header} onPress={() => navigation.goBack()} activeOpacity={0.8}>
-        <FontAwesome5 name="arrow-left" style={styles.backBtn} size={24} color="black" />
+        <Ionicons name="arrow-back" size={30} color="black" style={styles.backBtn} />
       </TouchableOpacity>
       <View style={styles.body}>
         {isVideoLoading && <ActivityIndicator size={30} color="#581DB9" style={styles.activityIndicator} />}
@@ -86,8 +105,8 @@ export const VideosScreen = () => {
               <Text style={styles.sensorData}>{videoData.dataPoints[currentDataPointIndex].elevation} m</Text>
             </View>
             <View style={styles.sensorItem}>
-              <Text style={styles.sensorLabel}>Altitude Soil:</Text>
-              <Text style={styles.sensorData}>{videoData.dataPoints[currentDataPointIndex].elevationac} m</Text>
+              <Text style={styles.sensorLabel}>Altitude Gain:</Text>
+              <Text style={styles.sensorData}>{currentDataPointIndex > 0 ? calculateAltitudeChange() : 'N/A'}</Text>
             </View>
           </View>
         )}

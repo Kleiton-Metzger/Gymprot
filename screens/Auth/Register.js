@@ -1,12 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Image, SafeAreaView } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Platform,
+  KeyboardAvoidingView,
+  Image,
+  SafeAreaView,
+} from 'react-native';
 import { StyleSheet } from 'react-native-web';
 import { useNavigation } from '@react-navigation/native';
 import { auth, createUserWithEmailAndPassword } from '../../storage/Firebase';
 import { db } from '../../storage/Firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { DismissKeyboard, Logo, Header, Input, Button } from '../../components';
-import { FontAwesome5 } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 
 export const Register = ({ navigation, navigation: { goBack } }) => {
   const [name, setName] = useState('');
@@ -88,8 +97,8 @@ export const Register = ({ navigation, navigation: { goBack } }) => {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <DismissKeyboard>
           <View style={styles.container}>
-            <TouchableOpacity onPress={goBack} style={{ position: 'absolute', left: 20, top: 10 }}>
-              <FontAwesome5 name="arrow-left" size={24} color="black" />
+            <TouchableOpacity onPress={goBack} activeOpacity={0.8} style={{ position: 'absolute', left: 20, top: 10 }}>
+              <Ionicons name="arrow-back" size={30} />
             </TouchableOpacity>
             <View style={styles.logoContainer}>
               <Logo />

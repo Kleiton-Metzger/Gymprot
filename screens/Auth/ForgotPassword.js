@@ -3,7 +3,7 @@ import { View, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { auth, sendPasswordResetEmail } from '../../storage/Firebase';
 import { Logo, Header, Input, Button, DismissKeyboard, BackBtn } from '../../components';
-import { FontAwesome5 } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 
 export const ForgotPassword = ({ navigation, navigation: { goBack } }) => {
   const [email, setEmail] = useState('');
@@ -32,8 +32,8 @@ export const ForgotPassword = ({ navigation, navigation: { goBack } }) => {
       <DismissKeyboard>
         <View>
           <View style={styles.hederContainer}>
-            <TouchableOpacity onPress={goBack} style={{ position: 'absolute', left: 20, top: 0 }}>
-              <FontAwesome5 name="arrow-left" size={24} color="black" />
+            <TouchableOpacity onPress={goBack} activeOpacity={0.8} style={{ position: 'absolute', left: 20, top: 0 }}>
+              <Ionicons name="arrow-back" size={30} />
             </TouchableOpacity>
           </View>
           <View style={styles.logoContainer}>

@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, Modal, TouchableWithoutFeedback } from 'react-native';
-import { Camera } from 'expo-camera';
+import { View, Text, TouchableOpacity, Modal, TouchableWithoutFeedback, Platform } from 'react-native';
+import { Camera, CameraView, useCameraPermissions } from 'expo-camera';
 import * as MediaLibrary from 'expo-media-library';
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
 import { app, db } from '../../storage/Firebase';
-import { v4 as uuidv4 } from 'uuid';
+import uuid from 'uuid-random';
 import { Accelerometer } from 'expo-sensors';
 import * as Location from 'expo-location';
 import { doc, setDoc } from 'firebase/firestore';
@@ -13,21 +13,21 @@ import { Button } from '../../components';
 import { Keyboard } from 'react-native';
 import { styles } from './styles';
 import { useAuth } from '../../Hooks/useAuth';
+import { MaterialIcons } from '@expo/vector-icons';
 
 export const CameraScreen = () => {
   const { currentUser } = useAuth();
   const cameraRef = useRef(null);
   const timerRef = useRef(null);
 
+  const [permission, requestPermission] = useCameraPermissions();
+  const [facing, setFacing] = useState('back');
   const [hasPermission, setHasPermission] = useState(null);
-  const [type] = useState(Camera.Constants.Type.back);
   const [isRecording, setIsRecording] = useState(false);
   const [videoUri, setVideoUri] = useState(null);
   const [recordTime, setRecordTime] = useState(0);
   const [speed, setSpeed] = useState(0);
   const [elevation, setElevation] = useState(null);
-  const [elevationac, setElevationac] = useState(null);
-
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState('Public');
   const [showModal, setShowModal] = useState(false);
@@ -36,15 +36,40 @@ export const CameraScreen = () => {
   const [dataPoints, setDataPoints] = useState([]);
   const [distance, setDistance] = useState(0);
 
+  function toggleCameraFacing() {
+    setFacing(current => (current === 'back' ? 'front' : 'back'));
+  }
+
   useEffect(() => {
     const requestPermissions = async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === 'granted');
-      MediaLibrary.requestPermissionsAsync();
+      const { status } = await requestPermission();
+      if (status !== 'granted') {
+        console.log('Camera permission not granted');
+        return;
+      }
+
+      if (Platform.OS === 'android') {
+        const { status: camera } = await Camera.requestCameraPermissionsAsync();
+        const { status: audioStatus } = await Camera.requestMicrophonePermissionsAsync();
+        if (audioStatus !== 'granted' || camera !== 'granted') {
+          console.log('Camera or Microphone permission not granted');
+          return;
+        }
+      }
+
+      if (Platform.OS === 'ios') {
+        const { status: mediaStatus } = await MediaLibrary.requestPermissionsAsync();
+        if (mediaStatus !== 'granted') {
+          console.log('Media Library permission not granted');
+          return;
+        }
+      }
+
+      setHasPermission(true);
     };
+
     requestPermissions();
   }, []);
-
   useEffect(() => {
     const initializeAccelerometer = async () => {
       Accelerometer.setUpdateInterval(100);
@@ -76,22 +101,24 @@ export const CameraScreen = () => {
           console.log('Permission to access location was denied');
           return;
         }
+        if ((recordTime === 1 || recordTime % 5 === 0) && isRecording) {
+          console.log('im doing it');
+          locationSubscription = await Location.watchPositionAsync(
+            { accuracy: Location.Accuracy.Highest },
+            location => {
+              setElevation(location.coords.altitude);
 
-        locationSubscription = await Location.watchPositionAsync({ accuracy: Location.Accuracy.High }, location => {
-          setElevation(location.coords.altitude);
-          setElevationac(location.coords.altitudeAccuracy);
-          if (recordTime % 20 === 0) {
-            setDataPoints(prevDataPoints => [
-              ...prevDataPoints,
-              {
-                speed,
-                elevation: location.coords.altitude,
-                elevationac: location.coords.altitudeAccuracy,
-                videoTime: recordTime,
-              },
-            ]);
-          }
-        });
+              setDataPoints([
+                ...dataPoints,
+                {
+                  speed,
+                  elevation: location.coords.altitude.toFixed(2),
+                  videoTime: recordTime,
+                },
+              ]);
+            },
+          );
+        }
       } catch (error) {
         console.error('Error initializing location subscription:', error);
       }
@@ -131,12 +158,13 @@ export const CameraScreen = () => {
   };
 
   const startRecording = async () => {
+    setDataPoints([]);
     if (cameraRef.current) {
       try {
         const videoRecordPromise = cameraRef.current.recordAsync({
           maxDuration: 60,
-          quality: Camera.Constants.VideoQuality['720p'],
-          stabilizationMode: Camera.Constants.VideoStabilization['auto'],
+          quality: '720p',
+          stabilizationMode: 'auto',
           autoFocus: 'on',
         });
         startTimer();
@@ -164,7 +192,7 @@ export const CameraScreen = () => {
     try {
       const response = await fetch(uri);
       const blob = await response.blob();
-      const storageRef = ref(getStorage(app), `Videos/${uuidv4()}.mp4`);
+      const storageRef = ref(getStorage(app), `Videos/${uuid()}.mp4`);
       const uploadTask = uploadBytesResumable(storageRef, blob);
       uploadTask.on(
         'state_changed',
@@ -186,13 +214,13 @@ export const CameraScreen = () => {
 
   const addVideo = async uri => {
     const videoURL = await uploadVideoToFirebase(uri);
-    const location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
+    const location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest });
     const { latitude, longitude } = location.coords;
     try {
       const geocode = await Location.reverseGeocodeAsync({ latitude, longitude });
       const cityName = geocode[0].city;
-      await setDoc(doc(db, 'videos', uuidv4()), {
-        id: uuidv4(),
+      await setDoc(doc(db, 'videos', uuid()), {
+        id: uuid(),
         videoURL,
         description,
         createBy: currentUser?.userId,
@@ -216,13 +244,13 @@ export const CameraScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Camera
-        whiteBalance={Camera.Constants.WhiteBalance.auto}
+      <CameraView
         style={styles.camera}
         videoStabilizationMode="auto"
+        videoQuality="720p"
         autoFocus="on"
         mode="video"
-        type={type}
+        facing={facing}
         ref={cameraRef}
       >
         <TouchableOpacity
@@ -235,7 +263,7 @@ export const CameraScreen = () => {
             <Text style={styles.timerText}>{formatTime(recordTime)}</Text>
           </View>
         )}
-      </Camera>
+      </CameraView>
       <View style={styles.infoContainer}>
         <View style={styles.infoTextContainer}>
           <Text style={styles.infoText}>Current Speed: {speed ? speed.toFixed(2) + ' m/s' : 'N/A'}</Text>
@@ -243,7 +271,6 @@ export const CameraScreen = () => {
         </View>
         <View style={styles.infoTextContainer}>
           <Text style={styles.infoText}>Distance: {distance.toFixed(2)} m</Text>
-          <Text style={styles.infoText}>ElevationAccuracy: {elevationac ? elevationac.toFixed(2) + ' m' : 'N/A'}</Text>
         </View>
       </View>
       <Modal
