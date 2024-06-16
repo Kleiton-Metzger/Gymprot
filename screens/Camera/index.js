@@ -27,6 +27,7 @@ export const CameraScreen = () => {
   const [videoUri, setVideoUri] = useState(null);
   const [recordTime, setRecordTime] = useState(0);
   const [speed, setSpeed] = useState(0);
+  const [initialElevation, setInitialElevation] = useState(null);
   const [elevation, setElevation] = useState(null);
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState('Public');
@@ -35,7 +36,7 @@ export const CameraScreen = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [dataPoints, setDataPoints] = useState([]);
   const [distance, setDistance] = useState(0);
-
+  const prevDataPoints = useRef([]);
   function toggleCameraFacing() {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
   }
@@ -70,72 +71,47 @@ export const CameraScreen = () => {
 
     requestPermissions();
   }, []);
-  useEffect(() => {
-    const initializeAccelerometer = async () => {
-      Accelerometer.setUpdateInterval(100);
-      Accelerometer.addListener(accelerometerData => {
-        const { x = 0, y = 0, z = 0 } = accelerometerData;
-        const alpha = 0.1;
-        const smoothedX = alpha * x + (1 - alpha) * 0;
-        const smoothedY = alpha * y + (1 - alpha) * 0;
-        const smoothedZ = alpha * z + (1 - alpha) * 0;
-        const newSpeed = Math.sqrt(smoothedX ** 2 + smoothedY ** 2 + smoothedZ ** 2);
-        setSpeed(newSpeed);
-      });
-    };
-
-    initializeAccelerometer();
-
-    return () => {
-      Accelerometer.removeAllListeners();
-    };
-  }, []);
 
   useEffect(() => {
-    let locationSubscription;
-
-    const initializeLocationSubscription = async () => {
+    const fetchElevation = async () => {
       try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          console.log('Permission to access location was denied');
-          return;
-        }
-        if ((recordTime === 1 || recordTime % 5 === 0) && isRecording) {
-          console.log('im doing it');
-          locationSubscription = await Location.watchPositionAsync(
-            { accuracy: Location.Accuracy.Highest },
-            location => {
-              setElevation(location.coords.altitude);
+        const location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.BestForNavigation });
+        const { altitude } = location.coords;
 
-              setDataPoints([
-                ...dataPoints,
-                {
-                  speed,
-                  elevation: location.coords.altitude.toFixed(2),
-                  videoTime: recordTime,
-                },
-              ]);
-            },
-          );
+        if (!initialElevation) {
+          setInitialElevation(altitude || 0);
+        }
+        setElevation(altitude || 0);
+
+        if (isRecording) {
+          const timestamp = new Date().toISOString();
+          const elevationGain = initialElevation ? (initialElevation - altitude).toFixed(2) : 0;
+
+          const newDataPoint = {
+            timestamp,
+            speed: speed.toFixed(2),
+            initialElevation: initialElevation.toFixed(2),
+            elevation: altitude.toFixed(2),
+            elevationGain,
+            Tempo: recordTime + 's',
+          };
+
+          setDataPoints(prevDataPoints => [...prevDataPoints, newDataPoint]);
+
+          if (prevDataPoints.current.length > 0) {
+            const lastPoint = prevDataPoints.current[prevDataPoints.current.length - 1];
+            const newDistance = distance + Location.computeDistanceBetweenPoints(lastPoint, location.coords);
+            setDistance(newDistance);
+          }
         }
       } catch (error) {
-        console.error('Error initializing location subscription:', error);
+        console.log('Error fetching elevation:', error);
       }
     };
+    const intervalId = setInterval(fetchElevation, 5000);
 
-    initializeLocationSubscription();
-
-    return () => {
-      if (locationSubscription) {
-        try {
-          locationSubscription.remove();
-        } catch (error) {
-          console.error('Error removing location subscription:', error);
-        }
-      }
-    };
-  }, [recordTime]);
+    return () => clearInterval(intervalId);
+  }, [isRecording, speed, initialElevation, elevation, distance, dataPoints]);
 
   const startTimer = () => {
     timerRef.current = setInterval(() => {
@@ -267,10 +243,13 @@ export const CameraScreen = () => {
       <View style={styles.infoContainer}>
         <View style={styles.infoTextContainer}>
           <Text style={styles.infoText}>Current Speed: {speed ? speed.toFixed(2) + ' m/s' : 'N/A'}</Text>
+          <Text style={styles.infoText}>
+            Inicial Elevation: {initialElevation ? initialElevation.toFixed(2) + ' m' : 'N/A'}
+          </Text>
           <Text style={styles.infoText}>Elevation: {elevation ? elevation.toFixed(2) + ' m' : 'N/A'}</Text>
-        </View>
-        <View style={styles.infoTextContainer}>
-          <Text style={styles.infoText}>Distance: {distance.toFixed(2)} m</Text>
+          <Text style={styles.infoText}>
+            Elevation Gain: {elevation ? (initialElevation - elevation).toFixed(2) + ' m' : 'N/A'}
+          </Text>
         </View>
       </View>
       <Modal

@@ -53,7 +53,7 @@ export const VideosScreen = () => {
   const calculateAltitudeChange = () => {
     const altitudeGain =
       currentDataPointIndex > 0
-        ? videoData.dataPoints[currentDataPointIndex].elevation -
+        ? videoData.dataPoints[currentDataPointIndex].initialElevation -
           videoData.dataPoints[currentDataPointIndex - 1].elevation
         : 0;
 
@@ -94,7 +94,7 @@ export const VideosScreen = () => {
           <View style={styles.sensorContainer}>
             <View style={styles.sensorItem}>
               <Text style={styles.sensorLabel}>Tempo:</Text>
-              <Text style={styles.sensorData}>{videoData.dataPoints[currentDataPointIndex].videoTime} s</Text>
+              <Text style={styles.sensorData}>{videoData.dataPoints[currentDataPointIndex].Tempo} s</Text>
             </View>
             <View style={styles.sensorItem}>
               <Text style={styles.sensorLabel}>Current Speed:</Text>
