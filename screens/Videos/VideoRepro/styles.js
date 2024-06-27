@@ -1,58 +1,109 @@
-import React from 'react';
-import { Dimensions, StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#fff',
   },
   header: {
-    width: '100%',
-    height: 50,
-    backgroundColor: 'white',
-    justifyContent: 'center',
+    padding: 10,
+    flexDirection: 'row',
     alignItems: 'center',
   },
   backBtn: {
-    position: 'absolute',
-    top: 10,
-    left: 20,
+    marginLeft: 10,
   },
   body: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    //backgroundColor: 'black',
   },
   activityIndicator: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
+    marginTop: 20,
   },
   sensorContainer: {
-    width: '100%',
-    paddingHorizontal: 20,
     marginTop: 20,
+    alignItems: 'center',
   },
   sensorItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
+    marginVertical: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    paddingVertical: 5,
   },
   sensorLabel: {
-    fontSize: 15,
     fontWeight: 'bold',
-    color: 'black',
+    marginRight: 10,
   },
   sensorData: {
-    fontSize: 13,
-    color: 'black',
+    fontWeight: 'normal',
+  },
+  modalContent: {
+    padding: 10,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+  },
+  modalCloseButton: {
+    marginBottom: 15,
+  },
+  modalCloseText: {
+    color: '#581DB9',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'right',
+  },
+  modalTitle: {
+    fontSize: 20,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  modalInput: {
+    marginBottom: 10,
+    backgroundColor: 'white',
+  },
+  modalButton: {
+    marginVertical: 20,
+    paddingVertical: 10,
+    backgroundColor: '#581DB9',
+    borderRadius: 10,
+    alignItems: 'center',
+    width: '50%',
+    alignSelf: 'center',
+  },
+  video: {
+    width,
+    height: 300,
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 10,
+  },
+  machineDataContainer: {
+    width,
+    padding: 10,
+    flexDirection: 'row',
+  },
+  machineDataItem: {
+    padding: 10,
+    justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    width: '50%',
+  },
+  machineDataLabel: {
+    fontWeight: 'bold',
+  },
+  machineDataValue: {
+    fontWeight: 'normal',
+  },
+  machineDataTitle: {
+    fontWeight: 'bold',
+  },
+  machineDataname: {
+    fontWeight: 'normal',
+    borderRadius: 5,
   },
 });
