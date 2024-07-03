@@ -25,9 +25,13 @@
         "NSBluetoothAlwaysUsageDescription": "Allow $(PRODUCT_NAME) to access your bluetooth",
         "NSBluetoothPeripheralUsageDescription": "Allow $(PRODUCT_NAME) to access your bluetooth",
         "NSCalendarsUsageDescription": "Allow $(PRODUCT_NAME) to access your calendar",
+<<<<<<< HEAD
         "NSLocationTemporaryUsageDescriptionDictionary": {
           "Access location in the background": "We need your location to track your movement even when the app is in the background."
         }
+=======
+        "NSSENSORSUsageDescription": "Allow $(PRODUCT_NAME) to access your sensors"
+>>>>>>> 81d6f2551baf630818c24e7117e9e73935e86777
       }
     },
     "android": {
@@ -37,7 +41,18 @@
       },
       "package": "com.gymprot.app",
       "versionCode": 1,
-      "permissions": ["CAMERA", "RECORD_AUDIO", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"]
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_BACKGROUND_LOCATION",
+        "android.permission.ACCESS_MEDIA_LOCATION",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.HIGH_SAMPLING_RATE_SENSORS"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
