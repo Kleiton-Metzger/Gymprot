@@ -12,17 +12,19 @@ export const styles = StyleSheet.create({
     alignSelf: 'center',
     marginTop: 20,
     color: '#581DB9',
-    padding: 20,
   },
-  uploadButtonContainer: {
+  fab: {
     backgroundColor: '#581DB9',
     position: 'absolute',
+    bottom: '15%',
     right: 20,
-    bottom: 20,
+    borderRadius: 30,
+    elevation: 8,
+    zIndex: 1,
   },
   list: {
     flex: 1,
-    marginTop: 10,
+    marginTop: 20,
   },
   dialogContainer: {
     backgroundColor: '#fff',

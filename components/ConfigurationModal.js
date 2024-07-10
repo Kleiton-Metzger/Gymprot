@@ -1,19 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Modal, TouchableOpacity, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native';
 import { Button } from '../components/common/Button';
-import { TextInput } from 'react-native-paper';
-import { styles } from '../screens/Videos/VideoRepro/styles';
+import { TextInput, List } from 'react-native-paper';
+import { styles } from '../screens/Videos/VideoRepro/styles'; // Importa seus estilos personalizados
+import { doc, getDoc, updateDoc } from 'firebase/firestore'; // Ajuste conforme sua versão do Firebase
+import { db } from '../storage/Firebase';
+import { useAuth } from '../Hooks/useAuth';
 
 const ConfigurationModal = ({
   isVisible,
   onClose,
-  bicycleName,
+  bicycleName: initialBicycleName,
   setBicycleName,
-  treadmillName,
+  treadmillName: initialTreadmillName,
   setTreadmillName,
-  inclination,
+  inclination: initialInclination,
   setInclination,
-  maxSpeed,
+  maxSpeed: initialMaxSpeed,
   setMaxSpeed,
   onStart,
   type,
@@ -21,28 +24,52 @@ const ConfigurationModal = ({
   const [nameError, setNameError] = useState('');
   const [inclinationError, setInclinationError] = useState('');
   const [maxSpeedError, setMaxSpeedError] = useState('');
+  const [savedMachines, setSavedMachines] = useState([]); // State para armazenar as máquinas salvas
+  const { currentUser } = useAuth();
+
+  useEffect(() => {
+    // Função assíncrona para buscar as máquinas salvas do Firestore
+    const fetchSavedMachines = async () => {
+      if (currentUser && currentUser.userId) {
+        try {
+          const userDocRef = doc(db, 'users', currentUser.userId);
+          const userDocSnap = await getDoc(userDocRef);
+          const userData = userDocSnap.data();
+
+          // Verifica se existe a propriedade 'machines' e se é uma array
+          if (userData && userData.machines && Array.isArray(userData.machines)) {
+            setSavedMachines(userData.machines); // Atualiza o state com as máquinas salvas
+          }
+        } catch (error) {
+          console.error('Error fetching saved machines:', error);
+        }
+      }
+    };
+
+    fetchSavedMachines(); // Chama a função de busca ao montar o componente
+  }, [currentUser]); // Executa apenas quando o currentUser muda
 
   const validateInputs = () => {
     let isValid = true;
 
-    if (type === 'Cycling' && !bicycleName) {
+    if (type === 'Cycling' && !initialBicycleName.trim()) {
       setNameError('O nome ou modelo da bicicleta é obrigatório');
       isValid = false;
-    } else if (type !== 'Cycling' && !treadmillName) {
+    } else if (type !== 'Cycling' && !initialTreadmillName.trim()) {
       setNameError('Indique marca ou modelo da passadeira');
       isValid = false;
     } else {
       setNameError('');
     }
 
-    if (type !== 'Cycling' && (!inclination || isNaN(inclination))) {
+    if (type !== 'Cycling' && (!initialInclination || isNaN(initialInclination))) {
       setInclinationError('Indique a inclinação máxima da passadeira');
       isValid = false;
     } else {
       setInclinationError('');
     }
 
-    if (!maxSpeed || isNaN(maxSpeed)) {
+    if (!initialMaxSpeed || isNaN(initialMaxSpeed)) {
       setMaxSpeedError(
         type === 'Cycling'
           ? 'O nível máximo de ajuste de dificuldade é obrigatório'
@@ -64,6 +91,112 @@ const ConfigurationModal = ({
     }
   };
 
+  const handleSaveMachineData = async () => {
+    if (validateInputs() && currentUser && currentUser.userId) {
+      try {
+        const userDocRef = doc(db, 'users', currentUser.userId);
+        let newMachineConfig = {};
+        if (type !== 'Cycling') {
+          newMachineConfig = {
+            name: initialTreadmillName,
+            inclination: Number(initialInclination),
+            maxSpeed: Number(initialMaxSpeed),
+            type: 'Treadmill',
+          };
+        } else {
+          newMachineConfig = {
+            name: initialBicycleName,
+            maxResistance: Number(initialMaxSpeed),
+            type: 'Bicycle',
+          };
+        }
+
+        const userDocSnap = await getDoc(userDocRef);
+        const userData = userDocSnap.data();
+
+        let updatedMachines = [];
+        if (userData && userData.machines && Array.isArray(userData.machines)) {
+          updatedMachines = [...userData.machines];
+        }
+
+        updatedMachines.push({
+          [newMachineConfig.type]: {
+            name: newMachineConfig.name,
+            ...(newMachineConfig.type === 'Treadmill' && { inclination: newMachineConfig.inclination }),
+            ...(newMachineConfig.type === 'Treadmill' && { maxSpeed: newMachineConfig.maxSpeed }),
+            ...(newMachineConfig.type === 'Bicycle' && { maxResistance: newMachineConfig.maxResistance }),
+          },
+        });
+
+        await updateDoc(userDocRef, {
+          machines: updatedMachines,
+        });
+
+        console.log('Machine config added successfully');
+
+        setSavedMachines(updatedMachines);
+      } catch (error) {
+        console.error('Error adding machine config to user:', error);
+      }
+    }
+  };
+
+  const handleFillMachineData = machine => {
+    if (machine.Treadmill) {
+      setTreadmillName(machine.Treadmill.name);
+      setInclination(machine.Treadmill.inclination.toString());
+      setMaxSpeed(machine.Treadmill.maxSpeed.toString());
+    } else if (machine.Bicycle) {
+      setBicycleName(machine.Bicycle.name);
+      setMaxSpeed(machine.Bicycle.maxResistance.toString());
+    }
+  };
+
+  const filteredMachines = savedMachines.filter(machine => {
+    if (type === 'Cycling') {
+      return machine.Bicycle;
+    } else {
+      return machine.Treadmill;
+    }
+  });
+
+  const handleDeleteMachine = async machine => {
+    if (currentUser && currentUser.userId) {
+      try {
+        const userDocRef = doc(db, 'users', currentUser.userId);
+        const userDocSnap = await getDoc(userDocRef);
+        const userData = userDocSnap.data();
+
+        let updatedMachines = [];
+        if (userData && userData.machines && Array.isArray(userData.machines)) {
+          updatedMachines = [...userData.machines];
+        }
+
+        const index = updatedMachines.findIndex(m => {
+          if (machine.Treadmill) {
+            return m.Treadmill && m.Treadmill.name === machine.Treadmill.name;
+          } else if (machine.Bicycle) {
+            return m.Bicycle && m.Bicycle.name === machine.Bicycle.name;
+          }
+        });
+
+        if (index > -1) {
+          updatedMachines.splice(index, 1);
+        }
+
+        await updateDoc(userDocRef, {
+          machines: updatedMachines,
+        });
+
+        console.log('Machine config deleted successfully');
+
+        setSavedMachines(updatedMachines);
+      } catch (error) {
+        console.error('Error deleting machine config from user:', error);
+      }
+    }
+  };
+
   return (
     <Modal onRequestClose={onClose} animationType="slide" presentationStyle="formSheet" visible={isVisible}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -79,7 +212,7 @@ const ConfigurationModal = ({
               <TextInput
                 label="Bicicleta"
                 onChangeText={setBicycleName}
-                value={bicycleName}
+                value={initialBicycleName}
                 mode="outlined"
                 placeholder="Nome ou modelo da sua bicicleta"
                 style={styles.modalInput}
@@ -88,7 +221,7 @@ const ConfigurationModal = ({
               <TextInput
                 label="Ajuste de resistência"
                 placeholder="Adicione o seu nível máximo dificuldade"
-                value={maxSpeed}
+                value={initialMaxSpeed}
                 onChangeText={setMaxSpeed}
                 keyboardType="numeric"
                 mode="outlined"
@@ -101,7 +234,7 @@ const ConfigurationModal = ({
               <TextInput
                 label="Passadeira"
                 onChangeText={setTreadmillName}
-                value={treadmillName}
+                value={initialTreadmillName}
                 mode="outlined"
                 placeholder="Nome ou modelo da sua passadeira"
                 style={styles.modalInput}
@@ -110,7 +243,7 @@ const ConfigurationModal = ({
               <TextInput
                 label="Inclinação máxima"
                 placeholder="Inclinação máxima suportada"
-                value={inclination}
+                value={initialInclination}
                 onChangeText={setInclination}
                 keyboardType="numeric"
                 mode="outlined"
@@ -120,7 +253,7 @@ const ConfigurationModal = ({
               <TextInput
                 label="Velocidade máxima"
                 placeholder="Velocidade máxima atingível"
-                value={maxSpeed}
+                value={initialMaxSpeed}
                 onChangeText={setMaxSpeed}
                 keyboardType="numeric"
                 mode="outlined"
@@ -130,6 +263,72 @@ const ConfigurationModal = ({
             </>
           )}
           <Button onPress={handleStart} label="Iniciar" style={styles.modalButton} />
+          <Button onPress={handleSaveMachineData} label="Guardar" style={styles.modalButtonG} />
+
+          <View style={{ marginTop: 20 }}>
+            <Text
+              style={{
+                fontSize: 18,
+                alignSelf: 'center',
+                fontWeight: 'bold',
+                marginBottom: 20,
+              }}
+            >
+              Minhas Máquinas
+            </Text>
+            {filteredMachines.map((machine, index) => (
+              <View key={index} style={styles.machineItemContainer}>
+                <List.Accordion
+                  onLongPress={() => {
+                    handleDeleteMachine(machine);
+                  }}
+                  title={machine.Treadmill ? `Passadeiras:` : `Bicicletas: `}
+                  left={props => (
+                    <List.Icon
+                      {...props}
+                      icon={machine.Treadmill ? 'run-fast' : 'bike'}
+                      color={machine.Treadmill ? '#581DB9' : '#581DB9'}
+                    />
+                  )}
+                  theme={{ colors: { primary: '#581DB9' } }}
+                  style={{ backgroundColor: index % 2 === 0 ? '#fff' : '#fff' }}
+                >
+                  {machine.Treadmill && (
+                    <>
+                      <List.Item
+                        style={{ padding: 10 }}
+                        onPress={() => {
+                          handleFillMachineData(machine);
+                        }}
+                        title={`Nome: ${machine.Treadmill.name}`}
+                      />
+                      <List.Item title={`Inclinação máxima: ${machine.Treadmill.inclination}`} />
+                      <List.Item style={styles.sensorItem} title={`Velocidade máxima: ${machine.Treadmill.maxSpeed}`} />
+                    </>
+                  )}
+                  {machine.Bicycle && (
+                    <>
+                      <List.Item
+                        onPress={() => {
+                          handleFillMachineData(machine);
+                        }}
+                        title={`Nome: ${machine.Bicycle.name}`}
+                      />
+                      <List.Item title={`Resistência máxima: ${machine.Bicycle.maxResistance}`} />
+                    </>
+                  )}
+                </List.Accordion>
+                <TouchableOpacity
+                  style={styles.deleteIcon}
+                  onPress={() => {
+                    handleDeleteMachine(machine);
+                  }}
+                >
+                  <List.Icon icon="delete" color="red" />
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
         </View>
       </TouchableWithoutFeedback>
     </Modal>

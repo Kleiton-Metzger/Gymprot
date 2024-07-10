@@ -1,21 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Image, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, Image, FlatList, ActivityIndicator } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from './style';
 import { SeguirBTN } from '../../../../components/common/seguirButton';
-import {
-  doc,
-  getDoc,
-  updateDoc,
-  arrayUnion,
-  arrayRemove,
-  where,
-  query,
-  collection,
-  getDocs, // Adicione esta importação
-} from 'firebase/firestore';
+import { doc, getDoc, updateDoc, arrayUnion, arrayRemove, where, query, collection, getDocs } from 'firebase/firestore';
 import { db } from '../../../../storage/Firebase';
 import { useAuth } from '../../../../Hooks/useAuth';
 import { Video } from 'expo-av';
@@ -30,9 +20,12 @@ export const FolowerProfile = () => {
   const [notFollowing, setNotFollowing] = useState(true);
   const [videos, setVideos] = useState([]);
   const [headerVisible, setHeaderVisible] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [rendered, setRendered] = useState(false);
 
   const fetchUserData = async () => {
     try {
+      setLoading(true);
       const userDocRef = doc(db, 'users', createBy);
       const docSnap = await getDoc(userDocRef);
       if (docSnap.exists()) {
@@ -50,11 +43,14 @@ export const FolowerProfile = () => {
       }
     } catch (error) {
       console.error('Error fetching user data: ', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const fetchVideos = async () => {
     try {
+      setLoading(true);
       const videosRef = collection(db, 'videos');
       const q = query(videosRef, where('createBy', '==', createBy), where('status', '==', 'Public'));
       const querySnapshot = await getDocs(q);
@@ -62,6 +58,8 @@ export const FolowerProfile = () => {
       setVideos(videosData);
     } catch (error) {
       console.error('Error fetching videos: ', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -74,8 +72,32 @@ export const FolowerProfile = () => {
     fetchVideos();
   }, []);
 
+  useEffect(() => {
+    if (!loading && userData && videos.length > 0) {
+      setRendered(true);
+    }
+  }, [loading, userData, videos]);
+
   const handleSeguir = async () => {
     try {
+      // Atualiza imediatamente a UI
+      if (isFollowing) {
+        setUserData(prevUserData => ({
+          ...prevUserData,
+          seguidores: prevUserData.seguidores.filter(seguidor => seguidor.userId !== currentUser.userId),
+        }));
+        setIsFollowing(false);
+        setNotFollowing(true);
+      } else {
+        setUserData(prevUserData => ({
+          ...prevUserData,
+          seguidores: [...prevUserData.seguidores, { userId: currentUser.userId, name: currentUser.name }],
+        }));
+        setIsFollowing(true);
+        setNotFollowing(false);
+      }
+
+      // Atualiza a base de dados posteriormente
       const userDocRef = doc(db, 'users', createBy);
       const currentUserDocRef = doc(db, 'users', currentUser.userId);
 
@@ -93,9 +115,6 @@ export const FolowerProfile = () => {
             name: userData.name,
           }),
         });
-
-        setIsFollowing(false);
-        setNotFollowing(true);
       } else {
         await updateDoc(userDocRef, {
           seguidores: arrayUnion({
@@ -110,14 +129,19 @@ export const FolowerProfile = () => {
             name: userData?.name,
           }),
         });
-
-        setIsFollowing(true);
-        setNotFollowing(false);
       }
     } catch (error) {
       console.error('Error following user: ', error);
     }
   };
+
+  if (!rendered) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="normal" color="#0000ff" />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -182,7 +206,6 @@ export const FolowerProfile = () => {
                           userName={userData?.name}
                           creatorAvatar={userData?.avatar}
                           location={item.location?.cityName || ''}
-                          //navigation={navigation}
                         />
                         <VideoItem video={item?.videoURL} />
                       </View>
@@ -215,10 +238,7 @@ const UserInfo = ({ userName, location, tipo, creatorAvatar, navigation }) => (
     {creatorAvatar ? (
       <Image source={{ uri: creatorAvatar }} style={styles.avatarUser} />
     ) : (
-      <Image
-        source={require('../../../../assets/avatar.png')} // Caminho para o avatar padrão
-        style={styles.avatarUser}
-      />
+      <Image source={require('../../../../assets/avatar.png')} style={styles.avatarUser} />
     )}
 
     <View style={styles.userInfoTextContainer}>

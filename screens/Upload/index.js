@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
-import { FAB, List, Dialog, Button, Divider, ActivityIndicator, DataTable } from 'react-native-paper';
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { FAB, List, Dialog, Button, Divider, DataTable } from 'react-native-paper';
 import * as DocumentPicker from 'expo-document-picker';
-import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { db, auth } from '../../storage/Firebase';
 import { doc, setDoc, collection, getDocs, query, where, onSnapshot } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
@@ -17,25 +17,6 @@ const formatDate = dateString => {
   return `${day}-${month}-${year}`;
 };
 
-const DocumentItem = React.memo(({ item }) => {
-  const handlePress = useCallback(() => {
-    alert('Documento ' + item.name);
-  }, [item]);
-
-  return (
-    <TouchableOpacity onPress={handlePress}>
-      <View>
-        <List.Item
-          title={item.name}
-          description={`Criado em: ${formatDate(item.createAt)}`}
-          left={() => <List.Icon icon="file-pdf-box" />}
-        />
-      </View>
-      <Divider />
-    </TouchableOpacity>
-  );
-});
-
 export const UploadScreen = () => {
   const [documents, setDocuments] = useState([]);
   const [dialogVisible, setDialogVisible] = useState(false);
@@ -44,16 +25,14 @@ export const UploadScreen = () => {
   const [nameError, setNameError] = useState('');
   const [userId, setUserId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [userData, setUserData] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(doc(db, 'users', auth.currentUser.uid), docSnap => {
       if (docSnap.exists()) {
         const userData = docSnap.data();
-        setUserData(userData);
         setUserId(auth.currentUser.uid);
       } else {
-        alert('Erro', 'User não encontrado.');
+        alert('Erro: Usuário não encontrado.');
       }
     });
 
@@ -81,11 +60,10 @@ export const UploadScreen = () => {
     }
   };
 
-  const uploadDocument = async () => {
+  const selectDocument = async () => {
     try {
-      const document = await DocumentPicker.getDocumentAsync({ type: '*/*' });
-      if (!document.canceled) {
-        console.log('Documento Selecionado:', document);
+      const document = await DocumentPicker.getDocumentAsync({ type: / * / });
+      if (document.type === 'success') {
         setSelectedDocument(document);
         setDialogVisible(true);
       } else {
@@ -103,55 +81,55 @@ export const UploadScreen = () => {
         return;
       }
 
-      setLoading(true);
-
-      const storage = getStorage();
-      const documentID = uuidv4();
-
-      let documentType = '';
-      let documentUri = '';
-      if (selectedDocument.name) {
-        const documentNameArray = selectedDocument.name.split('.');
-        if (documentNameArray.length > 1) {
-          documentType = documentNameArray.pop();
-        }
-      }
-      if (selectedDocument.assets && selectedDocument.assets.length > 0) {
-        documentUri = selectedDocument.assets[0].uri;
-      }
-
-      const storageRef = ref(storage, `documents/${documentID}.${documentType}`);
-
       if (!documentName.trim()) {
-        setNameError('Por favor, insira um nome para o documento.');
+        setNameError('O nome do documento é obrigatório.');
         return;
       }
 
-      await uploadBytesResumable(storageRef, documentUri, () => {
-        // Progress callback (optional)
-      });
+      setLoading(true);
 
-      const documentData = {
-        id: documentID,
-        userId: userId,
-        name: documentName,
-        type: documentType,
-        createAt: new Date().toISOString(),
-        uri: documentUri,
-      };
+      const response = await fetch(selectedDocument.uri);
+      const blob = await response.blob();
 
-      console.log('Document Data:', documentData);
+      const storage = getStorage();
+      const documentID = uuidv4();
+      const documentType = 'pdf';
 
-      const docRef = doc(db, 'documentos', documentID);
-      await setDoc(docRef, documentData);
+      const storageRef = ref(storage, `documents/${documentID}.${documentType}`);
+      const uploadTask = uploadBytesResumable(storageRef, blob);
 
-      setDocuments([...documents, documentData]);
-      setDialogVisible(false);
-      setDocumentName('');
-      setSelectedDocument(null);
-      setNameError('');
+      uploadTask.on(
+        'state_changed',
+        snapshot => {},
+        error => {
+          console.error('Error uploading document:', error);
+          alert('Erro ao enviar documento:', error);
+        },
+        async () => {
+          const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+
+          const documentData = {
+            id: documentID,
+            userId: userId,
+            name: documentName.trim(),
+            type: documentType,
+            createAt: new Date().toISOString(),
+            uri: downloadUrl,
+          };
+
+          const docRef = doc(db, 'documentos', documentID);
+          await setDoc(docRef, documentData);
+
+          setDocuments([...documents, documentData]);
+          setDialogVisible(false);
+          setDocumentName('');
+          setSelectedDocument(null);
+          setNameError('');
+        },
+      );
     } catch (error) {
       console.error('Error uploading document:', error);
+      alert('Erro ao enviar documento:', error);
     } finally {
       setLoading(false);
     }
@@ -159,7 +137,6 @@ export const UploadScreen = () => {
 
   const handleDialogDismiss = () => {
     setDialogVisible(false);
-    alert('Upload Cancelado.');
     setDocumentName('');
     setSelectedDocument(null);
     setNameError('');
@@ -167,7 +144,7 @@ export const UploadScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Os Meus Documentos</Text>
+      <Text style={styles.title}>Meus Documentos</Text>
       <DataTable.Header style={styles.subTitles}>
         <Text style={styles.fileName}>Nome</Text>
         <Text style={styles.fileData}>Data de Criação</Text>
@@ -181,21 +158,23 @@ export const UploadScreen = () => {
           renderItem={({ item }) => (
             <TouchableOpacity onPress={() => alert('Documento ' + item.name)}>
               <DataTable.Row key={item.id}>
-                <List.Icon icon="file-pdf-box" />
-                <DataTable.Cell>{item.name}</DataTable.Cell>
-                <DataTable.Cell>{formatDate(item.createAt)}</DataTable.Cell>
+                <List.Item
+                  title={item.name}
+                  description={formatDate(item.createAt)}
+                  left={() => <List.Icon icon="file-pdf-box" />}
+                />
               </DataTable.Row>
             </TouchableOpacity>
           )}
           style={styles.list}
         />
       )}
-      <FAB icon="plus-circle" onPress={uploadDocument} style={styles.uploadButtonContainer} color="#fff" />
+      <FAB icon="plus" onPress={selectDocument} style={styles.fab} color="#fff" />
       <Dialog visible={dialogVisible} style={styles.dialogContainer} onDismiss={handleDialogDismiss}>
         <Dialog.Title style={styles.dialogTitle}>Upload de Documento</Dialog.Title>
         <Dialog.Content>
           <Input
-            label="Name"
+            label="Nome"
             placeholder="Nome do Documento"
             borderColor="#581DB9"
             color="#581DB9"

@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Button, Image, SafeAreaView, ScrollView }
 import { useNavigation } from '@react-navigation/native';
 import { Avatar, ActivityIndicator } from 'react-native-paper';
 import { useAuth } from '../../Hooks/useAuth';
-import { getUSerSex } from '../../utils/gender';
+import { getUSerSex } from '../../utils/gender'; // Check if this is needed
 import { styles } from './ProfStyle';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AreaChart, BarChart, Grid, LineChart, PieChart, XAxis, YAxis } from 'react-native-svg-charts';
@@ -36,22 +36,16 @@ export const Profile = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.editContainer}>
-          <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('EditProfileScreen')}>
-            <MaterialCommunityIcons name="account-edit-outline" size={35} color="black" style={styles.editIcon} />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.perfilTextContainer}>
-          <Text style={styles.perfilText}>Perfil</Text>
-        </View>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity onPress={handleSignOut} activeOpacity={0.7}>
-            <MaterialCommunityIcons name="logout" size={25} color="black" style={styles.logoutbtn} />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('EditProfileScreen')}>
+          <MaterialCommunityIcons name="account-edit-outline" size={35} color="black" style={styles.editIcon} />
+        </TouchableOpacity>
+        <Text style={styles.perfilText}>Perfil</Text>
+        <TouchableOpacity onPress={handleSignOut} activeOpacity={0.7}>
+          <MaterialCommunityIcons name="logout" size={25} color="black" style={styles.logoutbtn} />
+        </TouchableOpacity>
       </View>
-      <View style={{ height: 1, backgroundColor: 'lightgray', width: '100%' }} />
-      <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+
+      <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.userDataContainer}>
           <Image
             style={styles.avatar}
@@ -62,12 +56,12 @@ export const Profile = () => {
             <Text style={styles.userEmail}>{currentUser.email}</Text>
             <View style={styles.userFollow}>
               <View style={styles.seguidoresContainer}>
-                <Text style={styles.segdrTxt}> Seguidores</Text>
-                <Text style={styles.segdrNum}> {currentUser.seguidores ? currentUser.seguidores.length : 0 || 0}</Text>
+                <Text style={styles.segdrTxt}>Seguidores</Text>
+                <Text style={styles.segdrNum}>{currentUser.seguidores ? currentUser.seguidores.length : 0}</Text>
               </View>
               <View>
-                <Text style={styles.segdrTxt}> Seguindo</Text>
-                <Text style={styles.segdrNum}> {currentUser.seguindo ? currentUser.seguindo.length : 0 || 0}</Text>
+                <Text style={styles.segdrTxt}>Seguindo</Text>
+                <Text style={styles.segdrNum}>{currentUser.seguindo ? currentUser.seguindo.length : 0}</Text>
               </View>
             </View>
           </View>
@@ -76,17 +70,11 @@ export const Profile = () => {
         <View style={styles.bioContainer}>
           <Text style={styles.bioText}>{currentUser.bio}</Text>
         </View>
-        <View style={{ height: 1, width: '95%', alignSelf: 'center', backgroundColor: 'lightgrey' }} />
+        <View style={styles.separator} />
 
         <View style={styles.bodyContainer}>
           <Text style={styles.bodyTitle}>Body</Text>
-          <View style={styles.graphContainer}>
-            <View style={{ flexDirection: 'row', height: 200, padding: 20 }}></View>
-          </View>
-
-          <View style={styles.graphContainer}>
-            <View style={{ flexDirection: 'row', height: 200, padding: 20 }}></View>
-          </View>
+          <View style={styles.graphContainer}></View>
         </View>
       </ScrollView>
     </SafeAreaView>

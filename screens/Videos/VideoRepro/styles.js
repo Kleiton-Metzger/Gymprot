@@ -106,4 +106,23 @@ export const styles = StyleSheet.create({
     fontWeight: 'normal',
     borderRadius: 5,
   },
+  modalButtonG: {
+    paddingVertical: 10,
+    backgroundColor: '#581DB9',
+    borderRadius: 10,
+    alignItems: 'center',
+    width: '50%',
+    alignSelf: 'center',
+  },
+  machineItemContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 10,
+    backgroundColor: '#fff',
+    marginVertical: 5,
+  },
+  deleteIcon: {
+    padding: 10,
+  },
 });
