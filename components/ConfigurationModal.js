@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Modal, TouchableOpacity, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native';
 import { Button } from '../components/common/Button';
 import { TextInput, List } from 'react-native-paper';
-import { styles } from '../screens/Videos/VideoRepro/styles'; // Importa seus estilos personalizados
-import { doc, getDoc, updateDoc } from 'firebase/firestore'; // Ajuste conforme sua versão do Firebase
+import { styles } from '../screens/Videos/VideoRepro/styles';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../storage/Firebase';
 import { useAuth } from '../Hooks/useAuth';
 
@@ -24,11 +24,10 @@ const ConfigurationModal = ({
   const [nameError, setNameError] = useState('');
   const [inclinationError, setInclinationError] = useState('');
   const [maxSpeedError, setMaxSpeedError] = useState('');
-  const [savedMachines, setSavedMachines] = useState([]); // State para armazenar as máquinas salvas
+  const [savedMachines, setSavedMachines] = useState([]);
   const { currentUser } = useAuth();
 
   useEffect(() => {
-    // Função assíncrona para buscar as máquinas salvas do Firestore
     const fetchSavedMachines = async () => {
       if (currentUser && currentUser.userId) {
         try {
@@ -36,9 +35,8 @@ const ConfigurationModal = ({
           const userDocSnap = await getDoc(userDocRef);
           const userData = userDocSnap.data();
 
-          // Verifica se existe a propriedade 'machines' e se é uma array
           if (userData && userData.machines && Array.isArray(userData.machines)) {
-            setSavedMachines(userData.machines); // Atualiza o state com as máquinas salvas
+            setSavedMachines(userData.machines);
           }
         } catch (error) {
           console.error('Error fetching saved machines:', error);
@@ -46,8 +44,8 @@ const ConfigurationModal = ({
       }
     };
 
-    fetchSavedMachines(); // Chama a função de busca ao montar o componente
-  }, [currentUser]); // Executa apenas quando o currentUser muda
+    fetchSavedMachines();
+  }, [currentUser]);
 
   const validateInputs = () => {
     let isValid = true;
