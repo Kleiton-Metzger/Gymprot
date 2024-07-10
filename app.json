@@ -25,7 +25,13 @@
         "NSBluetoothAlwaysUsageDescription": "Allow $(PRODUCT_NAME) to access your bluetooth",
         "NSBluetoothPeripheralUsageDescription": "Allow $(PRODUCT_NAME) to access your bluetooth",
         "NSCalendarsUsageDescription": "Allow $(PRODUCT_NAME) to access your calendar",
+<<<<<<< HEAD
+        "NSLocationTemporaryUsageDescriptionDictionary": {
+          "Access location in the background": "We need your location to track your movement even when the app is in the background."
+        }
+=======
         "NSSENSORSUsageDescription": "Allow $(PRODUCT_NAME) to access your sensors"
+>>>>>>> 81d6f2551baf630818c24e7117e9e73935e86777
       }
     },
     "android": {
@@ -71,6 +77,12 @@
         }
       ],
       [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+        }
+      ],
+      [
         "expo-media-library",
         {
           "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",
@@ -78,6 +90,7 @@
           "isAccessMediaLocationEnabled": true
         }
       ],
+
       [
         "expo-image-picker",
         {

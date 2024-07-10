@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, SafeAreaView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Video } from 'expo-av';
 import { collection, getDocs, query, where } from 'firebase/firestore';
-import { db } from '../../../storage/Firebase';
+import { db } from '../../../storage/Firebase'; // Importando apenas o db do arquivo Firebase
 import { styles } from './styles';
-import VideoData from '../../../components/VideoData'; // Ajuste o caminho conforme necessário
-import ConfigurationModal from '../../../components/ConfigurationModal'; // Ajuste o caminho conforme necessário
 
 export const VideosScreen = () => {
   const navigation = useNavigation();
@@ -16,12 +14,6 @@ export const VideosScreen = () => {
   const [isVideoLoading, setIsVideoLoading] = useState(true);
   const [videoData, setVideoData] = useState(null);
   const [currentDataPointIndex, setCurrentDataPointIndex] = useState(0);
-  const [isModalVisible, setIsModalVisible] = useState(true);
-  const [treadmillName, setTreadmillName] = useState('');
-  const [bicycleName, setBicycleName] = useState('');
-  const [inclination, setInclination] = useState('');
-  const [maxSpeed, setMaxSpeed] = useState('');
-  const [type, setType] = useState('');
 
   useEffect(() => {
     const fetchVideoData = async () => {
@@ -33,7 +25,6 @@ export const VideosScreen = () => {
           const videoDoc = querySnapshot.docs[0];
           const videoData = videoDoc.data();
           setVideoData(videoData);
-          setType(videoData.type);
         } else {
           console.log('Nenhum vídeo encontrado para a URL:', videoURL);
         }
@@ -59,13 +50,23 @@ export const VideosScreen = () => {
     }
   }, [videoData]);
 
-  const handleStart = () => {
-    setIsModalVisible(false);
-  };
+  const calculateAltitudeChange = () => {
+    const altitudeGain =
+      currentDataPointIndex > 0
+        ? videoData.dataPoints[currentDataPointIndex].initialElevation -
+          videoData.dataPoints[currentDataPointIndex - 1].elevation
+        : 0;
 
-  const handleModalClose = () => {
-    setIsModalVisible(false);
-    navigation.goBack();
+    let altitudeChangeStatus = '';
+    if (altitudeGain > 0) {
+      altitudeChangeStatus = 'A subir';
+    } else if (altitudeGain < 0) {
+      altitudeChangeStatus = 'A descer';
+    } else {
+      altitudeChangeStatus = 'Sem mudança';
+    }
+
+    return altitudeGain.toFixed(2) + 'm (' + altitudeChangeStatus + ')';
   };
 
   return (
@@ -75,45 +76,41 @@ export const VideosScreen = () => {
       </TouchableOpacity>
       <View style={styles.body}>
         {isVideoLoading && <ActivityIndicator size={30} color="#581DB9" style={styles.activityIndicator} />}
-        {videoData && !isModalVisible && (
+        {videoData && (
           <Video
             source={{ uri: videoURL }}
-            isMuted
+            isMuted={false}
             volume={2.0}
             resizeMode="cover"
             shouldPlay
             isLooping={false}
             useNativeControls
-            style={styles.video}
+            style={{ width: '100%', height: 300 }}
             onLoad={() => setIsVideoLoading(false)}
           />
         )}
+
         {videoData && currentDataPointIndex < videoData.dataPoints.length && (
-          <VideoData
-            dataPoints={videoData.dataPoints}
-            currentDataPointIndex={currentDataPointIndex}
-            type={type}
-            treadmillName={treadmillName}
-            bicycleName={bicycleName}
-            inclination={inclination}
-            maxSpeed={maxSpeed}
-          />
+          <View style={styles.sensorContainer}>
+            <View style={styles.sensorItem}>
+              <Text style={styles.sensorLabel}>Tempo:</Text>
+              <Text style={styles.sensorData}>{videoData.dataPoints[currentDataPointIndex].Tempo} s</Text>
+            </View>
+            <View style={styles.sensorItem}>
+              <Text style={styles.sensorLabel}>Current Speed:</Text>
+              <Text style={styles.sensorData}>{videoData.dataPoints[currentDataPointIndex].speed} m/s</Text>
+            </View>
+            <View style={styles.sensorItem}>
+              <Text style={styles.sensorLabel}>Altitude:</Text>
+              <Text style={styles.sensorData}>{videoData.dataPoints[currentDataPointIndex].elevation} m</Text>
+            </View>
+            <View style={styles.sensorItem}>
+              <Text style={styles.sensorLabel}>Altitude Gain:</Text>
+              <Text style={styles.sensorData}>{currentDataPointIndex > 0 ? calculateAltitudeChange() : 'N/A'}</Text>
+            </View>
+          </View>
         )}
       </View>
-      <ConfigurationModal
-        isVisible={isModalVisible}
-        onClose={handleModalClose}
-        treadmillName={treadmillName}
-        setTreadmillName={setTreadmillName}
-        bicycleName={bicycleName}
-        setBicycleName={setBicycleName}
-        inclination={inclination}
-        setInclination={setInclination}
-        maxSpeed={maxSpeed}
-        setMaxSpeed={setMaxSpeed}
-        onStart={handleStart}
-        type={type}
-      />
     </SafeAreaView>
   );
 };
