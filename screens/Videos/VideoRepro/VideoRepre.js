@@ -6,8 +6,8 @@ import { Video } from 'expo-av';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../../../storage/Firebase';
 import { styles } from './styles';
-import VideoData from '../../../components/VideoData'; // Adjust path as necessary
-import ConfigurationModal from '../../../components/ConfigurationModal'; // Adjust path as necessary
+import VideoData from '../../../components/VideoData';
+import ConfigurationModal from '../../../components/ConfigurationModal';
 
 export const VideosScreen = () => {
   const navigation = useNavigation();
@@ -80,7 +80,7 @@ export const VideosScreen = () => {
       <TouchableOpacity style={styles.header} onPress={() => navigation.goBack()} activeOpacity={0.8}>
         <Ionicons name="arrow-back" size={30} color="black" style={styles.backBtn} />
       </TouchableOpacity>
-      <View style={styles.body}>
+      <View style={styles.videoContainer}>
         {isVideoLoading && <ActivityIndicator size={30} color="#581DB9" style={styles.activityIndicator} />}
         {videoData && !isModalVisible && (
           <Video
@@ -95,18 +95,24 @@ export const VideosScreen = () => {
             onLoad={() => setIsVideoLoading(false)}
           />
         )}
-
-        {videoData && (
-          <VideoData
-            dataPoints={videoData.dataPoints}
-            currentDataPointIndex={currentDataPointIndex}
-            type={type}
-            treadmillName={treadmillName}
-            bicycleName={bicycleName}
-            inclination={inclination}
-            maxSpeed={maxSpeed}
-          />
-        )}
+        <View style={styles.dataContainer}>
+          {videoData && (
+            <VideoData
+              type={type}
+              dataPoints={videoData.dataPoints}
+              currentDataPointIndex={currentDataPointIndex}
+              time={videoData.dataPoints[currentDataPointIndex].time}
+              speed={videoData.dataPoints[currentDataPointIndex].speed}
+              altitude={videoData.dataPoints[currentDataPointIndex].elevation}
+              altitudeChange={calculateAltitudeChange()}
+              distance={videoData.dataPoints[currentDataPointIndex].distance}
+              inclination={videoData.dataPoints[currentDataPointIndex].inclination}
+              treadmillName={treadmillName}
+              bicycleName={bicycleName}
+              maxSpeed={maxSpeed}
+            />
+          )}
+        </View>
       </View>
       <ConfigurationModal
         isVisible={isModalVisible}
