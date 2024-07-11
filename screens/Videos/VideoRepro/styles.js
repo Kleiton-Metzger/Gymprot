@@ -5,7 +5,7 @@ const { width } = Dimensions.get('window');
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'red',
   },
   header: {
     padding: 10,
@@ -35,19 +35,32 @@ export const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   sensorLabel: {
+    color: 'white',
     fontWeight: 'bold',
     marginRight: 10,
   },
+  overlayText: {
+    color: 'white',
+    fontWeight: 'bold',
+    marginRight: 10,
+  },
+
   sensorData: {
     fontWeight: 'normal',
+    color: 'white',
   },
   modalContent: {
     padding: 10,
     backgroundColor: '#fff',
     justifyContent: 'center',
   },
+  modalCloseButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
   modalCloseButton: {
     marginBottom: 15,
+    width: '20%',
   },
   modalCloseText: {
     color: '#581DB9',
@@ -86,6 +99,7 @@ export const styles = StyleSheet.create({
     padding: 10,
     flexDirection: 'row',
   },
+
   machineDataItem: {
     padding: 10,
     justifyContent: 'space-between',
@@ -95,16 +109,20 @@ export const styles = StyleSheet.create({
   },
   machineDataLabel: {
     fontWeight: 'bold',
+    color: 'white',
   },
   machineDataValue: {
     fontWeight: 'normal',
+    color: 'white',
   },
   machineDataTitle: {
     fontWeight: 'bold',
+    color: 'white',
   },
   machineDataname: {
     fontWeight: 'normal',
     borderRadius: 5,
+    color: 'white',
   },
   modalButtonG: {
     paddingVertical: 10,
@@ -124,5 +142,64 @@ export const styles = StyleSheet.create({
   },
   deleteIcon: {
     padding: 10,
+  },
+  modalIcon: {
+    padding: 10,
+    marginLeft: '45%',
+  },
+  confirmationModalContainer: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 20,
+    width: '80%',
+    alignSelf: 'center',
+    alignItems: 'center',
+    top: '40%',
+  },
+  confirmationModal: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#581DB9',
+    textAlign: 'center',
+  },
+  confirmationText: {
+    fontSize: 15,
+    color: 'gray',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  confirmationButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  modalIcon: {
+    padding: 10,
+    marginLeft: '45%',
+  },
+
+  modalIconText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: 'gray',
+    marginLeft: '45%',
+  },
+  machineDataTitle: {
+    fontSize: 18,
+    alignSelf: 'center',
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: 'white',
+  },
+  modalSwitchContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  modalSwitchText: {
+    fontSize: 16,
+    color: 'gray',
+  },
+  modalSwitch: {
+    transform: [{ scaleX: 1 }, { scaleY: 1 }],
   },
 });

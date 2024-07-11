@@ -6,26 +6,28 @@ export const styles = StyleSheet.create({
   },
   camera: {
     flex: 1,
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: '30%',
   },
   recordButton: {
-    position: 'absolute',
-    bottom: 50,
     alignSelf: 'center',
     alignItems: 'center',
-    height: 70,
-    width: 70,
-    borderRadius: 35,
-    backgroundColor: 'red',
-    justifyContent: 'center',
+    height: 80,
+    width: 80,
+    borderRadius: 40,
+    borderColor: 'black',
+    borderWidth: 3,
   },
   timerContainer: {
     position: 'absolute',
-    top: 20,
+    top: '5%',
     alignSelf: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    backgroundColor: 'red',
+    padding: 5,
     borderRadius: 10,
   },
   timerText: {
@@ -49,8 +51,8 @@ export const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: 20,
     borderRadius: 10,
+    height: '90%',
     justifyContent: 'center',
-    marginHorizontal: 20,
   },
   modalTitle: {
     fontSize: 20,
@@ -59,7 +61,7 @@ export const styles = StyleSheet.create({
     marginBottom: 10,
   },
   modalSubtitle: {
-    fontSize: 16,
+    fontSize: 15,
     textAlign: 'center',
     color: 'gray',
     marginBottom: 20,
@@ -67,10 +69,11 @@ export const styles = StyleSheet.create({
   modalLabel: {
     fontSize: 16,
     color: 'black',
-    marginTop: 10,
+    marginTop: 20,
     fontWeight: 'bold',
     marginHorizontal: 10,
   },
+
   button: {
     marginVertical: 10,
     paddingVertical: 12,
@@ -82,8 +85,8 @@ export const styles = StyleSheet.create({
   },
   descriptionInput: {
     marginVertical: 10,
-    backgroundColor: '#F0F0F0', // Fundo cinza claro para input
-    height: 80, // Altura aumentada para melhor usabilidade
+    backgroundColor: '#F0F0F0',
+    height: 80,
     borderRadius: 10,
     paddingHorizontal: 10,
   },

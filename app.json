@@ -13,25 +13,22 @@
       "bundleIdentifier": "com.gymprot.app",
       "buildNumber": "1.0.0",
       "infoPlist": {
-        "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access your camera",
-        "NSPhotoLibraryUsageDescription": "Allow $(PRODUCT_NAME) to access your photos",
-        "NSPhotoLibraryAddUsageDescription": "Allow $(PRODUCT_NAME) to save photos",
+        "NSCameraUsageDescription": "Allow Gymprot to access your camera",
+        "NSPhotoLibraryUsageDescription": "Allow Gymprot to access your photos",
+        "NSPhotoLibraryAddUsageDescription": "Allow Gymprot to save photos",
         "UIBackgroundModes": ["location", "fetch", "barometer", "microphone", "sensor"],
-        "NSMotionUsageDescription": "Allow $(PRODUCT_NAME) to access your motion data",
-        "NSLocationWhenInUseUsageDescription": "Allow $(PRODUCT_NAME) to access your location",
-        "NSLocationAlwaysUsageDescription": "Allow $(PRODUCT_NAME) to access your location",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "Allow $(PRODUCT_NAME) to access your location",
-        "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone",
-        "NSBluetoothAlwaysUsageDescription": "Allow $(PRODUCT_NAME) to access your bluetooth",
-        "NSBluetoothPeripheralUsageDescription": "Allow $(PRODUCT_NAME) to access your bluetooth",
-        "NSCalendarsUsageDescription": "Allow $(PRODUCT_NAME) to access your calendar",
-<<<<<<< HEAD
+        "NSMotionUsageDescription": "Allow Gymprot to access your motion data",
+        "NSLocationWhenInUseUsageDescription": "Allow Gymprot to access your location",
+        "NSLocationAlwaysUsageDescription": "Allow Gymprot to access your location",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Allow Gymprot to access your location",
+        "NSMicrophoneUsageDescription": "Allow Gymprot to access your microphone",
+        "NSBluetoothAlwaysUsageDescription": "Allow Gymprot to access your bluetooth",
+        "NSBluetoothPeripheralUsageDescription": "Allow Gymprot to access your bluetooth",
+        "NSCalendarsUsageDescription": "Allow Gymprot to access your calendar",
         "NSLocationTemporaryUsageDescriptionDictionary": {
           "Access location in the background": "We need your location to track your movement even when the app is in the background."
-        }
-=======
-        "NSSENSORSUsageDescription": "Allow $(PRODUCT_NAME) to access your sensors"
->>>>>>> 81d6f2551baf630818c24e7117e9e73935e86777
+        },
+        "NSSENSORSUsageDescription": "Allow Gymprot to access your sensors"
       }
     },
     "android": {
@@ -62,16 +59,16 @@
       [
         "expo-camera",
         {
-          "camaraPermission": "Allow $(PRODUCT_NAME) to access your camera.",
-          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+          "cameraPermission": "Allow Gymprot to access your camera.",
+          "microphonePermission": "Allow Gymprot to access your microphone",
           "recordAudioAndroid": true,
           "videoStabilizationMode": "standard",
           "videoQuality": "720p",
-          "androidCameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
-          "androidRecordAudioPermission": "Allow $(PRODUCT_NAME) to record audio",
-          "iosCameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
-          "iosMicrophonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
-          "iosRecordAudioPermission": "Allow $(PRODUCT_NAME) to record audio",
+          "androidCameraPermission": "Allow Gymprot to access your camera",
+          "androidRecordAudioPermission": "Allow Gymprot to record audio",
+          "iosCameraPermission": "Allow Gymprot to access your camera",
+          "iosMicrophonePermission": "Allow Gymprot to access your microphone",
+          "iosRecordAudioPermission": "Allow Gymprot to record audio",
           "iosVideoStabilizationMode": "auto",
           "iosVideoQuality": "720p"
         }
@@ -79,23 +76,22 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+          "locationAlwaysAndWhenInUsePermission": "Allow Gymprot to use your location."
         }
       ],
       [
         "expo-media-library",
         {
-          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",
-          "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos.",
+          "photosPermission": "Allow Gymprot to access your photos.",
+          "savePhotosPermission": "Allow Gymprot to save photos.",
           "isAccessMediaLocationEnabled": true
         }
       ],
-
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow $(PRODUCT_NAME) to access your photo",
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera"
+          "photosPermission": "Allow Gymprot to access your photo",
+          "cameraPermission": "Allow Gymprot to access your camera"
         }
       ],
       "expo-build-properties"
