@@ -91,6 +91,7 @@ export const VideosScreen = () => {
             shouldPlay
             isLooping={false}
             useNativeControls
+            onLoadStart={() => setIsVideoLoading(false)}
             style={styles.video}
             onLoad={() => setIsVideoLoading(false)}
           />
@@ -101,12 +102,12 @@ export const VideosScreen = () => {
               type={type}
               dataPoints={videoData.dataPoints}
               currentDataPointIndex={currentDataPointIndex}
-              time={videoData.dataPoints[currentDataPointIndex].time}
-              speed={videoData.dataPoints[currentDataPointIndex].speed}
+              time={videoData.dataPoints[currentDataPointIndex].videoTime}
+              speed={videoData.dataPoints[currentDataPointIndex].speed.x}
               altitude={videoData.dataPoints[currentDataPointIndex].elevation}
               altitudeChange={calculateAltitudeChange()}
               distance={videoData.dataPoints[currentDataPointIndex].distance}
-              inclination={videoData.dataPoints[currentDataPointIndex].inclination}
+              inclination={inclination}
               treadmillName={treadmillName}
               bicycleName={bicycleName}
               maxSpeed={maxSpeed}

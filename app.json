@@ -48,7 +48,8 @@
         "android.permission.ACCESS_BACKGROUND_LOCATION",
         "android.permission.ACCESS_MEDIA_LOCATION",
         "android.permission.ACCESS_NETWORK_STATE",
-        "android.permission.HIGH_SAMPLING_RATE_SENSORS"
+        "android.permission.HIGH_SAMPLING_RATE_SENSORS",
+        "ACCESS_BACKGROUND_LOCATION"
       ]
     },
     "web": {
@@ -94,7 +95,12 @@
           "cameraPermission": "Allow Gymprot to access your camera"
         }
       ],
-      "expo-build-properties"
+      [
+        "expo-document-picker",
+        {
+          "permission": "Allow Gymprot to access your documents"
+        }
+      ]
     ],
     "sdkVersion": "51.0.0"
   }

@@ -1,196 +1,131 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { FAB, List, Dialog, Button, Divider, DataTable } from 'react-native-paper';
+import { View, Text, FlatList, TouchableOpacity, Alert, Linking } from 'react-native';
+import { FAB, DataTable, List } from 'react-native-paper';
 import * as DocumentPicker from 'expo-document-picker';
+import { db } from '../../storage/Firebase';
+import { doc, setDoc, collection, getDocs } from 'firebase/firestore';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { db, auth } from '../../storage/Firebase';
-import { doc, setDoc, collection, getDocs, query, where, onSnapshot } from 'firebase/firestore';
-import { v4 as uuidv4 } from 'uuid';
+import uuid from 'uuid-random';
 import { styles } from './styles';
-import { Input } from '../../components';
-
-const formatDate = dateString => {
-  const date = new Date(dateString);
-  const day = date.getDate();
-  const month = date.getMonth() + 1;
-  const year = date.getFullYear();
-  return `${day}-${month}-${year}`;
-};
+import { useAuth } from '../../Hooks/useAuth';
 
 export const UploadScreen = () => {
   const [documents, setDocuments] = useState([]);
-  const [dialogVisible, setDialogVisible] = useState(false);
-  const [documentName, setDocumentName] = useState('');
-  const [selectedDocument, setSelectedDocument] = useState(null);
-  const [nameError, setNameError] = useState('');
-  const [userId, setUserId] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [selectedDoc, setSelectedDoc] = useState(null);
+  const [docName, setDocName] = useState('');
+  const { currentUser } = useAuth();
 
-  useEffect(() => {
-    const unsubscribe = onSnapshot(doc(db, 'users', auth.currentUser.uid), docSnap => {
-      if (docSnap.exists()) {
-        const userData = docSnap.data();
-        setUserId(auth.currentUser.uid);
-      } else {
-        alert('Erro: Usuário não encontrado.');
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    if (userId) {
-      fetchDocuments();
-    }
-  }, [userId]);
-
-  const fetchDocuments = async () => {
+  const handleDocumentSelection = async () => {
     try {
-      setLoading(true);
-      const q = query(collection(db, 'documentos'), where('userId', '==', userId));
-      const documentsSnapshot = await getDocs(q);
-      const documentsData = documentsSnapshot.docs.map(doc => doc.data());
-      documentsData.sort((a, b) => a.name.localeCompare(b.name));
-      setDocuments(documentsData);
-    } catch (error) {
-      alert('Erro ao buscar documentos:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const selectDocument = async () => {
-    try {
-      const document = await DocumentPicker.getDocumentAsync({ type: / * / });
-      if (document.type === 'success') {
-        setSelectedDocument(document);
-        setDialogVisible(true);
-      } else {
-        alert('Nenhum documento selecionado.');
-      }
-    } catch (error) {
-      alert('Erro ao selecionar documento:', error);
-    }
-  };
-
-  const handleUpload = async () => {
-    try {
-      if (!selectedDocument) {
-        console.error('Nenhum documento selecionado.');
+      const doc = await DocumentPicker.getDocumentAsync();
+      if (doc.type === 'cancel') {
+        Alert.alert('Error', 'Document selection was cancelled.');
         return;
       }
+      console.log('Document Data:', doc);
 
-      if (!documentName.trim()) {
-        setNameError('O nome do documento é obrigatório.');
-        return;
+      const response = await fetch(doc.uri);
+      if (!response.ok) {
+        throw new Error('Failed to fetch the document');
       }
-
-      setLoading(true);
-
-      const response = await fetch(selectedDocument.uri);
       const blob = await response.blob();
+      setSelectedDoc({ ...doc, blob });
+      setDocName(doc.name);
+      await handleSendDocToFirebase(doc.name, blob);
+    } catch (err) {
+      console.error('Error selecting document:', err);
+      Alert.alert('Error', 'An error occurred while selecting the document. Please try again.');
+    }
+  };
 
+  const handleSendDocToFirebase = async (fileName, blobFile) => {
+    try {
       const storage = getStorage();
-      const documentID = uuidv4();
-      const documentType = 'pdf';
+      const uniqueId = uuid();
+      const storageRef = ref(storage, `documents/${fileName}-${uniqueId}.pdf`);
+      console.log('Storage Ref:', storageRef);
 
-      const storageRef = ref(storage, `documents/${documentID}.${documentType}`);
-      const uploadTask = uploadBytesResumable(storageRef, blob);
+      const uploadTask = uploadBytesResumable(storageRef, blobFile);
 
       uploadTask.on(
         'state_changed',
-        snapshot => {},
+        snapshot => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log('Upload is ' + progress + '% done');
+        },
         error => {
           console.error('Error uploading document:', error);
-          alert('Erro ao enviar documento:', error);
+          Alert.alert('Error', 'Failed to upload the document. Please check your internet connection and try again.');
         },
         async () => {
-          const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
-
-          const documentData = {
-            id: documentID,
-            userId: userId,
-            name: documentName.trim(),
-            type: documentType,
-            createAt: new Date().toISOString(),
-            uri: downloadUrl,
-          };
-
-          const docRef = doc(db, 'documentos', documentID);
-          await setDoc(docRef, documentData);
-
-          setDocuments([...documents, documentData]);
-          setDialogVisible(false);
-          setDocumentName('');
-          setSelectedDocument(null);
-          setNameError('');
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          console.log('File available at', downloadURL);
+          await saveDocumentData(downloadURL, fileName, blobFile.size);
         },
       );
-    } catch (error) {
-      console.error('Error uploading document:', error);
-      alert('Erro ao enviar documento:', error);
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      console.error('Error uploading document:', err);
+      Alert.alert('Error', 'Failed to upload the document. Please try again.');
     }
   };
 
-  const handleDialogDismiss = () => {
-    setDialogVisible(false);
-    setDocumentName('');
-    setSelectedDocument(null);
-    setNameError('');
+  const saveDocumentData = async (downloadURL, name, size) => {
+    try {
+      const docRef = doc(collection(db, 'documents'));
+      const docData = {
+        name,
+        uri: downloadURL,
+        createdAt: new Date(),
+        size,
+        userId: currentUser.uid,
+      };
+      await setDoc(docRef, docData);
+      console.log('Document successfully written!');
+      fetchDocuments();
+    } catch (error) {
+      console.error('Error writing document: ', error);
+      Alert.alert('Error', 'Failed to save document data. Please try again.');
+    }
   };
+
+  const fetchDocuments = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, 'documents'));
+      const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setDocuments(docs);
+    } catch (error) {
+      console.error('Error fetching documents: ', error);
+      Alert.alert('Error', 'Failed to fetch documents. Please try again.');
+    }
+  };
+
+  useEffect(() => {
+    fetchDocuments();
+  }, []);
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Meus Documentos</Text>
       <DataTable.Header style={styles.subTitles}>
-        <Text style={styles.fileName}>Nome</Text>
-        <Text style={styles.fileData}>Data de Criação</Text>
+        <DataTable.Title style={styles.fileName}>Nome</DataTable.Title>
+        <DataTable.Title style={styles.fileData}>Data de Criação</DataTable.Title>
       </DataTable.Header>
-      {loading ? (
-        <ActivityIndicator animating={true} color="#581DB9" size="small" />
-      ) : (
-        <FlatList
-          data={documents}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => alert('Documento ' + item.name)}>
-              <DataTable.Row key={item.id}>
-                <List.Item
-                  title={item.name}
-                  description={formatDate(item.createAt)}
-                  left={() => <List.Icon icon="file-pdf-box" />}
-                />
-              </DataTable.Row>
-            </TouchableOpacity>
-          )}
-          style={styles.list}
-        />
-      )}
-      <FAB icon="plus" onPress={selectDocument} style={styles.fab} color="#fff" />
-      <Dialog visible={dialogVisible} style={styles.dialogContainer} onDismiss={handleDialogDismiss}>
-        <Dialog.Title style={styles.dialogTitle}>Upload de Documento</Dialog.Title>
-        <Dialog.Content>
-          <Input
-            label="Nome"
-            placeholder="Nome do Documento"
-            borderColor="#581DB9"
-            color="#581DB9"
-            returnKeyType="next"
-            value={documentName}
-            mode="outlined"
-            onChangeText={setDocumentName}
-            style={styles.input}
-            errorText={nameError}
-          />
-        </Dialog.Content>
-        <Dialog.Actions>
-          <Button onPress={handleDialogDismiss}>Cancelar</Button>
-          <Button onPress={handleUpload}>OK</Button>
-        </Dialog.Actions>
-      </Dialog>
+      <FlatList
+        style={styles.body}
+        data={documents}
+        keyExtractor={item => item.id}
+        renderItem={({ item }) => (
+          <TouchableOpacity style={styles.listItem} onPress={() => Linking.openURL(item.uri)}>
+            <List.Item
+              title={item.name}
+              description={new Date(item.createdAt.seconds * 1000).toLocaleDateString()}
+              left={props => <List.Icon {...props} icon="file" />}
+            />
+            <Text style={styles.fileData}>{item.size} bytes</Text>
+          </TouchableOpacity>
+        )}
+      />
+      <FAB icon="plus" style={styles.fab} color="white" onPress={handleDocumentSelection} />
     </View>
   );
 };

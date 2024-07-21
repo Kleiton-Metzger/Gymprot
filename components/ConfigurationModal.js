@@ -120,7 +120,6 @@ const ConfigurationModal = ({
           updatedMachines = [...userData.machines];
         }
 
-        // Check if the machine already exists
         const machineIndex = updatedMachines.findIndex(m => {
           if (newMachineConfig.type === 'Treadmill') {
             return m.Treadmill && m.Treadmill.name === newMachineConfig.name;
@@ -494,14 +493,14 @@ const styles = {
   modalIcon: {
     padding: 10,
     marginLeft: '45%',
-    bottom: 50,
+    bottom: 20,
   },
   modalIconText: {
     fontSize: 10,
     fontWeight: 'bold',
     color: 'gray',
     marginLeft: '45%',
-    bottom: 60,
+    bottom: 30,
   },
   modalSwitchContainer: {
     flexDirection: 'row',

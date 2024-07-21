@@ -5,13 +5,13 @@ const { width, height } = Dimensions.get('window');
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'red',
+    backgroundColor: 'white',
   },
   header: {
     padding: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: '10%',
+    marginBottom: '5%',
   },
   backBtn: {
     marginLeft: 10,
@@ -26,15 +26,17 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   video: {
-    width: width,
-    height: height,
+    width: '100%',
+    height: '95%',
+    marginBottom: '25%',
   },
   dataContainer: {
     position: 'absolute',
-    top: 20,
-    width: width,
+    top: 25,
+    right: 5,
+    width: '80%',
     padding: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
     zIndex: 1,
   },
   dataText: {

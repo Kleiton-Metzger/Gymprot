@@ -1,30 +1,80 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, Modal, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import { CameraView, useCameraPermissions } from 'expo-camera';
+import { View, Text, TouchableOpacity, Modal, TouchableWithoutFeedback, Platform, Alert } from 'react-native';
+import { Camera, CameraView, useCameraPermissions } from 'expo-camera';
 import * as MediaLibrary from 'expo-media-library';
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
 import { app, db } from '../../storage/Firebase';
 import uuid from 'uuid-random';
+import { Accelerometer } from 'expo-sensors';
 import * as Location from 'expo-location';
 import { doc, setDoc } from 'firebase/firestore';
 import { RadioButton, TextInput, ProgressBar } from 'react-native-paper';
 import { Button } from '../../components';
+import { Keyboard } from 'react-native';
 import { styles } from './styles';
 import { useAuth } from '../../Hooks/useAuth';
+import { MaterialIcons } from '@expo/vector-icons';
 
+// Kalman Filter implementation
+class KalmanFilter {
+  constructor(R, Q) {
+    this.R = R; // noise power desirable
+    this.Q = Q; // noise power estimated
+    this.A = 1;
+    this.B = 0;
+    this.C = 1;
+    this.cov = NaN;
+    this.x = NaN; // estimated signal without noise
+  }
+
+  filter(z, u = 0) {
+    if (isNaN(this.x)) {
+      this.x = (1 / this.C) * z;
+      this.cov = (1 / this.C) * this.Q * (1 / this.C);
+    } else {
+      const predX = this.predict(u);
+      const predCov = this.uncertainty();
+
+      const K = predCov * this.C * (1 / (this.C * predCov * this.C + this.Q));
+
+      this.x = predX + K * (z - this.C * predX);
+      this.cov = predCov - K * this.C * predCov;
+    }
+
+    return this.x;
+  }
+
+  predict(u = 0) {
+    return this.A * this.x + this.B * u;
+  }
+
+  uncertainty() {
+    return this.A * this.cov * this.A + this.R;
+  }
+
+  lastMeasurement() {
+    return this.x;
+  }
+
+  setMeasurementNoise(noise) {
+    this.Q = noise;
+  }
+
+  setProcessNoise(noise) {
+    this.R = noise;
+  }
+}
 export const CameraScreen = () => {
   const { currentUser } = useAuth();
   const cameraRef = useRef(null);
   const timerRef = useRef(null);
 
   const [permission, requestPermission] = useCameraPermissions();
-  const [hasPermission, setHasPermission] = useState(null);
   const [facing, setFacing] = useState('back');
+  const [hasPermission, setHasPermission] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [videoUri, setVideoUri] = useState(null);
   const [recordTime, setRecordTime] = useState(0);
-  const [speed, setSpeed] = useState(0);
-  const [initialElevation, setInitialElevation] = useState(null);
   const [elevation, setElevation] = useState(null);
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState('Public');
@@ -33,29 +83,41 @@ export const CameraScreen = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [dataPoints, setDataPoints] = useState([]);
   const [distance, setDistance] = useState(0);
+  const [speed, setSpeed] = useState({
+    x: 0,
+    y: 0,
+    z: 0,
+  });
 
-  const toggleCameraFacing = () => {
+  const altitudeKF = useRef(new KalmanFilter(0.01, 0.1)).current;
+
+  function toggleCameraFacing() {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
-  };
+  }
 
   useEffect(() => {
     const requestPermissions = async () => {
       const { status } = await requestPermission();
       if (status !== 'granted') {
-        console.log('Camera permission not granted');
+        Alert.alert('Camera permission not granted');
         return;
       }
 
-      const { status: mediaStatus } = await MediaLibrary.requestPermissionsAsync();
-      if (mediaStatus !== 'granted') {
-        console.log('Media Library permission not granted');
-        return;
+      if (Platform.OS === 'android') {
+        const { status: camera } = await Camera.requestCameraPermissionsAsync();
+        const { status: audioStatus } = await Camera.requestMicrophonePermissionsAsync();
+        if (audioStatus !== 'granted' || camera !== 'granted') {
+          Alert.alert('Camera or Microphone permission not granted');
+          return;
+        }
       }
 
-      const { status: locationStatus } = await Location.requestForegroundPermissionsAsync();
-      if (locationStatus !== 'granted') {
-        console.log('Location permission not granted');
-        return;
+      if (Platform.OS === 'ios') {
+        const { status: mediaStatus } = await MediaLibrary.requestPermissionsAsync();
+        if (mediaStatus !== 'granted') {
+          Alert.alert('Media Library permission not granted');
+          return;
+        }
       }
 
       setHasPermission(true);
@@ -65,41 +127,63 @@ export const CameraScreen = () => {
   }, []);
 
   useEffect(() => {
-    const fetchElevation = async () => {
+    Accelerometer.addListener(accelerometerData => {
+      setSpeed(accelerometerData);
+    });
+
+    Accelerometer.setUpdateInterval(1000);
+
+    return () => {
+      Accelerometer.removeAllListeners();
+    };
+  }, []);
+
+  useEffect(() => {
+    let locationSubscription;
+
+    const initializeLocationSubscription = async () => {
       try {
-        const location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.BestForNavigation });
-        const { altitude } = location.coords;
-
-        if (!initialElevation) {
-          setInitialElevation(altitude || 0);
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert('Permission to access location was denied');
+          return;
         }
-        setElevation(altitude || 0);
-
-        if (isRecording) {
-          const timestamp = new Date().toISOString();
-          const elevationGain = initialElevation ? (initialElevation - altitude).toFixed(2) : 0;
-
-          const newDataPoint = {
-            timestamp,
-            speed: speed.toFixed(2),
-            initialElevation: initialElevation.toFixed(2),
-            elevation: altitude.toFixed(2),
-            elevationGain,
-            Tempo: recordTime + 's',
-          };
-
-          setDataPoints(prevDataPoints => [...prevDataPoints, newDataPoint]);
+        if ((recordTime === 1 || recordTime % 5 === 0) && isRecording) {
+          console.log('iam sending DataPoints');
+          locationSubscription = await Location.watchPositionAsync(
+            { accuracy: Location.Accuracy.BestForNavigation, timeInterval: 1000, distanceInterval: 0 },
+            location => {
+              setElevation(location.coords.altitude);
+              console.log('location', location);
+              console.log('location.coords.altitude', location.coords.altitude);
+              setDataPoints([
+                ...dataPoints,
+                {
+                  speed,
+                  elevation: location.coords.altitude, // altitudeKF.filter(location.coords.altitude),
+                  videoTime: recordTime,
+                },
+              ]);
+            },
+          );
         }
       } catch (error) {
-        console.log('Error fetching elevation:', error);
+        console.error('Error initializing location subscription:', error);
       }
     };
 
-    if (isRecording) {
-      const intervalId = setInterval(fetchElevation, 5000);
-      return () => clearInterval(intervalId);
-    }
-  }, [isRecording, speed, initialElevation, elevation]);
+    initializeLocationSubscription();
+
+    return () => {
+      if (locationSubscription) {
+        try {
+          locationSubscription.remove();
+        } catch (error) {
+          console.error('Error removing location subscription:', error);
+        }
+      }
+    };
+  }, [recordTime]);
 
   const startTimer = () => {
     timerRef.current = setInterval(() => {
@@ -128,6 +212,8 @@ export const CameraScreen = () => {
         const videoRecordPromise = cameraRef.current.recordAsync({
           maxDuration: 60,
           quality: '720p',
+          stabilizationMode: 'auto',
+          autoFocus: 'on',
         });
         startTimer();
         if (videoRecordPromise) {
@@ -156,24 +242,19 @@ export const CameraScreen = () => {
       const blob = await response.blob();
       const storageRef = ref(getStorage(app), `Videos/${uuid()}.mp4`);
       const uploadTask = uploadBytesResumable(storageRef, blob);
-
-      return new Promise((resolve, reject) => {
-        uploadTask.on(
-          'state_changed',
-          snapshot => {
-            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            setUploadProgress(progress);
-          },
-          error => {
-            console.log('Error uploading video:', error);
-            reject(error);
-          },
-          async () => {
-            const videoURL = await getDownloadURL(uploadTask.snapshot.ref);
-            resolve(videoURL);
-          },
-        );
-      });
+      uploadTask.on(
+        'state_changed',
+        snapshot => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          setUploadProgress(progress);
+        },
+        error => {
+          console.log('Error uploading video:', error);
+        },
+      );
+      await uploadTask;
+      const videoURL = await getDownloadURL(storageRef);
+      return videoURL;
     } catch (error) {
       console.log('Error uploading video to Firebase:', error);
     }
@@ -192,8 +273,8 @@ export const CameraScreen = () => {
         description,
         createBy: currentUser?.userId,
         createAt: new Date().toISOString(),
-        location: { cityName, latitude, longitude },
         type: typeVideo,
+        location: { cityName, latitude, longitude },
         status,
         dataPoints,
       });
@@ -209,89 +290,89 @@ export const CameraScreen = () => {
     setShowModal(false);
   };
 
-  if (!hasPermission) {
-    return (
-      <View style={styles.container}>
-        <Text>No access to camera</Text>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
       <CameraView
         style={styles.camera}
-        type={facing === 'back' ? 'back' : 'front'}
+        videoStabilizationMode="auto"
+        videoQuality="720p"
+        autoFocus="on"
+        mode="video"
+        facing={facing}
         ref={cameraRef}
-        ratio="16:9" // Adjust ratio if needed
       >
-        <View style={styles.buttonContainer}>
+        <View style={styles.recordButtonContainer}>
           <TouchableOpacity
             style={[styles.recordButton, { backgroundColor: isRecording ? 'red' : 'white' }]}
             onPress={isRecording ? stopRecording : startRecording}
             disabled={uploadProgress > 0 && uploadProgress < 100}
-          />
-          {isRecording && (
-            <View style={styles.timerContainer}>
-              <Text style={styles.timerText}>{formatTime(recordTime)}</Text>
-            </View>
-          )}
+          ></TouchableOpacity>
         </View>
-      </CameraView>
-      <View style={styles.infoContainer}>
-        <View style={styles.infoTextContainer}>
-          <Text style={styles.infoText}>Current Speed: {speed ? speed.toFixed(2) + ' m/s' : 'N/A'}</Text>
-          <Text style={styles.infoText}>
-            Inicial Elevation: {initialElevation ? initialElevation.toFixed(2) + ' m' : 'N/A'}
-          </Text>
-          <Text style={styles.infoText}>Elevation: {elevation ? elevation.toFixed(2) + ' m' : 'N/A'}</Text>
-          <Text style={styles.infoText}>
-            Elevation Gain: {elevation ? (initialElevation - elevation).toFixed(2) + ' m' : 'N/A'}
-          </Text>
-        </View>
-      </View>
-      <Modal onRequestClose={handleModalClose} animationType="slide" visible={showModal}>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={styles.modalContainer}>
-            <TouchableOpacity style={styles.closeButton} onPress={handleModalClose}>
-              <Text style={styles.closeButtonText}>Fechar</Text>
-            </TouchableOpacity>
-            <Text style={styles.modalTitle}>Informações do Vídeo</Text>
-            <Text style={styles.modalSubtitle}>Adicione informações adicionais ao vídeo</Text>
-            <TextInput
-              label="Descrição"
-              onChangeText={setDescription}
-              value={description}
-              mode="outlined"
-              placeholder="Adicione uma breve descrição ao vídeo"
-              style={styles.descriptionInput}
-              multiline
-            />
-            <Text style={styles.modalLabel}>Status do Vídeo:</Text>
-            <RadioButton.Group onValueChange={setStatus} value={status}>
-              <RadioButton.Item label="Público" value="Public" color="green" />
-              <RadioButton.Item label="Privado" value="Private" color="red" />
-            </RadioButton.Group>
-            <Text style={styles.modalLabel}>Tipo de Exercício:</Text>
-            <RadioButton.Group onValueChange={setTypeVideo} value={typeVideo}>
-              <RadioButton.Item label="Corrida" value="Running" color="#581DB9" />
-              <RadioButton.Item label="Bicicleta" value="Cycling" color="#581DB9" />
-              <RadioButton.Item label="Caminhada" value="Walking" color="#581DB9" />
-            </RadioButton.Group>
-            <Button
-              onPress={() => {
-                addVideo(videoUri);
-                handleModalClose();
-              }}
-              label="Concluir"
-              style={styles.button}
-            />
+        {isRecording && (
+          <View style={styles.timerContainer}>
+            <Text style={styles.timerText}>{formatTime(recordTime)}</Text>
           </View>
-        </TouchableWithoutFeedback>
-      </Modal>
-      {uploadProgress > 0 && uploadProgress < 100 && (
-        <ProgressBar progress={uploadProgress / 100} color={'#581DB9'} style={styles.progressBar} />
-      )}
+        )}
+        <View style={styles.infoContainer}>
+          <Text style={styles.infoText}>Current Speed: {speed.x.toFixed(2)} m/s</Text>
+          <Text style={styles.infoText}>Current Latitude: {speed.y.toFixed(2)} m/s</Text>
+          <Text style={styles.infoText}>Current Longitude: {speed.z.toFixed(2)} m/s</Text>
+          <Text style={styles.infoText}>Current Altitude: {elevation} m</Text>
+        </View>
+        <Modal
+          onRequestClose={handleModalClose}
+          animationType="slide"
+          presentationStyle="formSheet"
+          visible={showModal}
+          onDismiss={handleModalClose}
+          contentContainerStyle={styles.modalContainer}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={{ padding: 10 }}>
+              <TouchableOpacity style={{ marginBottom: 15 }} onPress={handleModalClose}>
+                <Text style={{ color: '#581DB9', fontSize: 16, fontWeight: '600', textAlign: 'right' }}>Fechar</Text>
+              </TouchableOpacity>
+              <Text style={styles.modalTitle}>Informações do Vídeo</Text>
+              <Text style={styles.modalSubtitle}>Adicione informações adicionais ao vídeo</Text>
+              <TextInput
+                label="Descrição"
+                bordercolor="#581DB9"
+                color="#581DB9"
+                onChangeText={setDescription}
+                value={description}
+                mode="outlined"
+                placeholder="Adicione uma breve descrição ao vídeo"
+                style={styles.descriptionInput}
+                multiline={true}
+              />
+              <Text style={styles.modalLabel}>Status do Vídeo:</Text>
+              <RadioButton.Group onValueChange={value => setStatus(value)} value={status}>
+                <RadioButton.Item label="Público" value="Public" color="green" />
+                <RadioButton.Item label="Privado" value="Private" color="red" />
+              </RadioButton.Group>
+              <Text style={styles.modalLabel}>Tipo de Exercício:</Text>
+              <RadioButton.Group onValueChange={value => setTypeVideo(value)} value={typeVideo}>
+                <RadioButton.Item label="Corrida" value="Running" color="#581DB9" />
+                <RadioButton.Item label="Bicicleta" value="Cycling" color="#581DB9" />
+                <RadioButton.Item label="Caminhada" value="Walking" color="#581DB9" />
+              </RadioButton.Group>
+              <Button
+                onPress={() => {
+                  handleModalClose();
+                  addVideo(videoUri);
+                }}
+                label="Concluir"
+                style={styles.button}
+              />
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
+      </CameraView>
+      <View style={styles.ProgressBarContainer}>
+        {uploadProgress > 0 && uploadProgress < 100 && (
+          <ProgressBar progress={uploadProgress / 100} color={'#581DB9'} style={styles.progressBar} />
+        )}
+      </View>
     </View>
   );
 };

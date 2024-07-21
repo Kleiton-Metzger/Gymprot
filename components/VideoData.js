@@ -1,11 +1,10 @@
 import React, { useCallback } from 'react';
 import { View, Text } from 'react-native';
-import { styles } from '../screens/Videos/VideoRepro/styles';
 
 const VideoData = ({ dataPoints, currentDataPointIndex, type, treadmillName, bicycleName, inclination, maxSpeed }) => {
   const calculateAltitudeChange = useCallback(() => {
     if (currentDataPointIndex > 0) {
-      const currentElevation = parseFloat(dataPoints[currentDataPointIndex].initialElevation);
+      const currentElevation = parseFloat(dataPoints[currentDataPointIndex].elevation);
       const previousElevation = parseFloat(dataPoints[currentDataPointIndex - 1].elevation);
       const elevationGain = currentElevation - previousElevation;
 
@@ -30,8 +29,8 @@ const VideoData = ({ dataPoints, currentDataPointIndex, type, treadmillName, bic
   return (
     <View style={styles.sensorContainer}>
       {[
-        { label: 'Tempo:', value: `${currentDataPoint.Tempo || 'N/A'}` },
-        { label: 'Current Speed:', value: `${currentDataPoint.speed || 'N/A'} m/s` },
+        { label: 'Tempo:', value: `${currentDataPoint.videoTime || 'N/A'}` },
+        { label: 'Current Speed:', value: `${currentDataPoint.speed.x || 'N/A'} m/s` },
         { label: 'Altitude:', value: `${currentDataPoint.elevation || 'N/A'} m` },
         { label: 'Altitude Gain:', value: calculateAltitudeChange() },
       ].map((item, index) => (
@@ -95,4 +94,46 @@ const VideoData = ({ dataPoints, currentDataPointIndex, type, treadmillName, bic
   );
 };
 
+const styles = {
+  sensorContainer: {
+    padding: 10,
+    borderRadius: 10,
+  },
+  sensorItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 5,
+  },
+  sensorLabel: {
+    color: 'white',
+    fontSize: 15,
+  },
+  sensorData: {
+    color: 'white',
+    fontSize: 15,
+  },
+  machineDataContainer: {
+    marginTop: 10,
+  },
+  machineDataTitle: {
+    color: 'white',
+    fontSize: 15,
+  },
+  machineDataname: {
+    color: 'white',
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+  machineDataItem: {
+    marginTop: 5,
+  },
+  machineDataLabel: {
+    color: 'white',
+    fontSize: 15,
+  },
+  machineDataValue: {
+    color: 'white',
+    fontSize: 15,
+  },
+};
 export default VideoData;

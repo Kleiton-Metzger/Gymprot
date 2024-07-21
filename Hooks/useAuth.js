@@ -1,6 +1,5 @@
-import { Dimensions, Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { collection, doc, onSnapshot, query } from 'firebase/firestore';
+import { collection, doc, onSnapshot, query, where, getDocs, getDoc } from 'firebase/firestore';
 import { db, auth } from '../storage/Firebase';
 
 const AuthContext = createContext();
@@ -8,6 +7,10 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const [videos, setVideos] = useState([]);
+  const [originalVideos, setOriginalVideos] = useState([]);
+  const [categoria, setCategoria] = useState('');
+  const [localizacao, setLocalizacao] = useState('');
 
   const signOut = async () => {
     try {
@@ -18,43 +21,51 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // useEffect(() => {
-  const fetchUserData = async () => {
-    const usersData = {};
-    for (const userId of userId) {
-      const userDoc = await getDoc(doc(db, 'users', userId));
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        usersData[userId] = { name: userData.name, avatar: userData.photoURL };
-      } else {
-        usersData[userId] = { name: '', avatar: null };
-      }
+  const fetchUserData = async userId => {
+    const userDoc = await getDoc(doc(db, 'users', userId));
+    if (userDoc.exists()) {
+      return userDoc.data();
     }
+    return { name: '', avatar: null };
   };
 
-  const fetchUserVideos = async () => {
-    const q = query(collection(db, 'videos'), where('creatorId', '==', user?.uid));
-
-    const querySnapshot = await getDocs(q);
-    let fetchedVideos = [];
-    querySnapshot.forEach(doc => {
-      const videoData = doc.data();
-      fetchedVideos.push({ id: doc.id, ...videoData });
-    });
-    setVideos(fetchedVideos);
-  };
-
-  //}, [videos]);
   useEffect(() => {
-    try {
-      const unsub = onSnapshot(doc(db, 'users', user?.uid), doc => {
+    if (!user) return;
+    const unsub = onSnapshot(
+      doc(db, 'users', user.uid),
+      doc => {
         setCurrentUser(doc.data());
+      },
+      error => {
+        console.log('Error getting user data: ', error);
+      },
+    );
+
+    return () => unsub();
+  }, [user]);
+
+  useEffect(() => {
+    const fetchUserVideos = async () => {
+      let q = query(collection(db, 'videos'), where('createBy', '==', user.uid));
+
+      const unsubscribeVideos = onSnapshot(q, async querySnapshot => {
+        let fetchedVideos = [];
+        for (const doc of querySnapshot.docs) {
+          const videoData = doc.data();
+          const userData = await fetchUserData(videoData.createBy);
+          fetchedVideos.push({ id: doc.id, ...videoData, creatorInfo: userData });
+        }
+        setVideos(fetchedVideos);
+        setOriginalVideos(fetchedVideos);
       });
-    } catch (error) {
-      // console.log('Error getting user data: ', error);
+
+      return () => unsubscribeVideos();
+    };
+
+    if (user) {
+      fetchUserVideos();
     }
   }, [user]);
-  //console.log('currentUser', currentUser);
 
   const memoedValue = useMemo(
     () => ({
@@ -63,8 +74,11 @@ export const AuthProvider = ({ children }) => {
       currentUser,
       setCurrentUser,
       signOut,
+      videos,
+      setCategoria,
+      setLocalizacao,
     }),
-    [currentUser, user],
+    [currentUser, user, videos],
   );
 
   return <AuthContext.Provider value={memoedValue}>{children}</AuthContext.Provider>;
@@ -77,5 +91,3 @@ export function useAuth() {
 
   return context;
 }
-
-const styles = StyleSheet.create({});
