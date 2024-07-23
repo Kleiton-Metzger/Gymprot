@@ -14,56 +14,8 @@ import { Keyboard } from 'react-native';
 import { styles } from './styles';
 import { useAuth } from '../../Hooks/useAuth';
 import { MaterialIcons } from '@expo/vector-icons';
+import axios from 'axios';
 
-// Kalman Filter implementation
-class KalmanFilter {
-  constructor(R, Q) {
-    this.R = R; // noise power desirable
-    this.Q = Q; // noise power estimated
-    this.A = 1;
-    this.B = 0;
-    this.C = 1;
-    this.cov = NaN;
-    this.x = NaN; // estimated signal without noise
-  }
-
-  filter(z, u = 0) {
-    if (isNaN(this.x)) {
-      this.x = (1 / this.C) * z;
-      this.cov = (1 / this.C) * this.Q * (1 / this.C);
-    } else {
-      const predX = this.predict(u);
-      const predCov = this.uncertainty();
-
-      const K = predCov * this.C * (1 / (this.C * predCov * this.C + this.Q));
-
-      this.x = predX + K * (z - this.C * predX);
-      this.cov = predCov - K * this.C * predCov;
-    }
-
-    return this.x;
-  }
-
-  predict(u = 0) {
-    return this.A * this.x + this.B * u;
-  }
-
-  uncertainty() {
-    return this.A * this.cov * this.A + this.R;
-  }
-
-  lastMeasurement() {
-    return this.x;
-  }
-
-  setMeasurementNoise(noise) {
-    this.Q = noise;
-  }
-
-  setProcessNoise(noise) {
-    this.R = noise;
-  }
-}
 export const CameraScreen = () => {
   const { currentUser } = useAuth();
   const cameraRef = useRef(null);
@@ -82,14 +34,11 @@ export const CameraScreen = () => {
   const [typeVideo, setTypeVideo] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [dataPoints, setDataPoints] = useState([]);
+  const [speed, setSpeed] = useState(0);
   const [distance, setDistance] = useState(0);
-  const [speed, setSpeed] = useState({
-    x: 0,
-    y: 0,
-    z: 0,
-  });
-
-  const altitudeKF = useRef(new KalmanFilter(0.01, 0.1)).current;
+  const [currentPosition, setCurrentPosition] = useState(null);
+  const [latitude, setLatitude] = useState(null);
+  const [longitude, setLongitude] = useState(null);
 
   function toggleCameraFacing() {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
@@ -128,7 +77,10 @@ export const CameraScreen = () => {
 
   useEffect(() => {
     Accelerometer.addListener(accelerometerData => {
-      setSpeed(accelerometerData);
+      const currentSpeed = Math.sqrt(
+        Math.pow(accelerometerData.x, 2) + Math.pow(accelerometerData.y, 2) + Math.pow(accelerometerData.z, 2),
+      );
+      setSpeed(currentSpeed);
     });
 
     Accelerometer.setUpdateInterval(1000);
@@ -148,25 +100,38 @@ export const CameraScreen = () => {
           Alert.alert('Permission to access location was denied');
           return;
         }
-        if ((recordTime === 1 || recordTime % 5 === 0) && isRecording) {
-          console.log('iam sending DataPoints');
-          locationSubscription = await Location.watchPositionAsync(
-            { accuracy: Location.Accuracy.BestForNavigation, timeInterval: 1000, distanceInterval: 0 },
-            location => {
-              setElevation(location.coords.altitude);
-              console.log('location', location);
-              console.log('location.coords.altitude', location.coords.altitude);
-              setDataPoints([
-                ...dataPoints,
-                {
-                  speed,
-                  elevation: location.coords.altitude, // altitudeKF.filter(location.coords.altitude),
-                  videoTime: recordTime,
-                },
-              ]);
-            },
-          );
-        }
+
+        locationSubscription = await Location.watchPositionAsync(
+          { accuracy: Location.Accuracy.BestForNavigation, timeInterval: 1000, distanceInterval: 1 },
+          async location => {
+            const { latitude, longitude } = location.coords;
+            const altitude = await getAltitude(latitude, longitude); // Fetch altitude from Google Maps API
+
+            if (currentPosition) {
+              const newDistance = calculateDistance(
+                // Calculate distance between current and previous location
+                currentPosition.latitude, // Calculate distance between current and previous location
+                currentPosition.longitude,
+                latitude,
+                longitude,
+              );
+              setDistance(prevDistance => prevDistance + newDistance);
+            }
+
+            setCurrentPosition({ latitude, longitude });
+            setLatitude(latitude);
+            setLongitude(longitude);
+
+            setDataPoints(prevDataPoints => [
+              ...prevDataPoints,
+              {
+                speed,
+                elevation: altitude,
+                videoTime: recordTime,
+              },
+            ]);
+          },
+        );
       } catch (error) {
         console.error('Error initializing location subscription:', error);
       }
@@ -183,7 +148,7 @@ export const CameraScreen = () => {
         }
       }
     };
-  }, [recordTime]);
+  }, [recordTime, isRecording]);
 
   const startTimer = () => {
     timerRef.current = setInterval(() => {
@@ -207,6 +172,8 @@ export const CameraScreen = () => {
 
   const startRecording = async () => {
     setDataPoints([]);
+    setDistance(0);
+    setCurrentPosition(null);
     if (cameraRef.current) {
       try {
         const videoRecordPromise = cameraRef.current.recordAsync({
@@ -283,11 +250,39 @@ export const CameraScreen = () => {
     }
   };
 
+  const getAltitude = async (latitude, longitude) => {
+    try {
+      const response = await axios.get(
+        `https://maps.googleapis.com/maps/api/elevation/json?locations=${latitude},${longitude}&key=AIzaSyBtVgHlGmQGx5sVAuEVZHNrFINlKYVxYh0`,
+      );
+      const altitude = response.data.results[0]?.elevation || 0;
+      console.log(`Elevation fetched: ${altitude}`);
+      setElevation(altitude);
+      return altitude;
+    } catch (error) {
+      console.error('Error fetching elevation:', error);
+    }
+  };
+
   const handleModalClose = () => {
     setDescription('');
     setStatus('Public');
     setTypeVideo(null);
     setShowModal(false);
+  };
+
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371e3; // metres
+    const φ1 = (lat1 * Math.PI) / 180;
+    const φ2 = (lat2 * Math.PI) / 180;
+    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+
+    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    const distance = R * c;
+    return distance;
   };
 
   return (
@@ -314,10 +309,11 @@ export const CameraScreen = () => {
           </View>
         )}
         <View style={styles.infoContainer}>
-          <Text style={styles.infoText}>Current Speed: {speed.x.toFixed(2)} m/s</Text>
-          <Text style={styles.infoText}>Current Latitude: {speed.y.toFixed(2)} m/s</Text>
-          <Text style={styles.infoText}>Current Longitude: {speed.z.toFixed(2)} m/s</Text>
-          <Text style={styles.infoText}>Current Altitude: {elevation} m</Text>
+          <Text style={styles.infoText}>Current Speed: {speed.toFixed(2)} m/s</Text>
+          <Text style={styles.infoText}>Current Latitude: {latitude ? latitude.toFixed(6) : 'N/A'}</Text>
+          <Text style={styles.infoText}>Current Longitude: {longitude ? longitude.toFixed(6) : 'N/A'}</Text>
+          <Text style={styles.infoText}>Current Altitude: {elevation !== null ? elevation.toFixed(2) : 'N/A'} m</Text>
+          <Text style={styles.infoText}>Distance: {distance.toFixed(2)} m</Text>
         </View>
         <Modal
           onRequestClose={handleModalClose}
