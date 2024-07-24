@@ -9,24 +9,20 @@ import { doc, getDoc, updateDoc, arrayUnion, arrayRemove, where, query, collecti
 import { db } from '../../../../storage/Firebase';
 import { useAuth } from '../../../../Hooks/useAuth';
 import { Video } from 'expo-av';
+import axios from 'axios';
 
 export const FolowerProfile = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { currentUser } = useAuth();
   const { createBy, userId } = route.params;
-
   const [userData, setUserData] = useState(null);
   const [isFollowing, setIsFollowing] = useState(false);
-  const [notFollowing, setNotFollowing] = useState(true);
   const [videos, setVideos] = useState([]);
-  const [headerVisible, setHeaderVisible] = useState(true);
   const [loading, setLoading] = useState(true);
-  const [rendered, setRendered] = useState(false);
 
   const fetchUserData = async () => {
     try {
-      setLoading(true);
       const userDocRef = doc(db, 'users', createBy || userId);
       const docSnap = await getDoc(userDocRef);
       if (docSnap.exists()) {
@@ -35,23 +31,14 @@ export const FolowerProfile = () => {
         setIsFollowing(
           userData.seguidores && userData.seguidores.some(seguidor => seguidor.userId === currentUser?.userId),
         );
-        setNotFollowing(
-          !userData.seguidores || !userData.seguidores.some(seguidor => seguidor.userId === currentUser?.userId),
-        );
-      } else {
-        setIsFollowing(false);
-        setNotFollowing(true);
       }
     } catch (error) {
       console.error('Error fetching user data: ', error);
-    } finally {
-      setLoading(false);
     }
   };
 
   const fetchVideos = async () => {
     try {
-      setLoading(true);
       const videosRef = collection(db, 'videos');
       const q = query(videosRef, where('createBy', '==', createBy || userId), where('status', '==', 'Public'));
       const querySnapshot = await getDocs(q);
@@ -59,57 +46,49 @@ export const FolowerProfile = () => {
       setVideos(videosData);
     } catch (error) {
       console.error('Error fetching videos: ', error);
-    } finally {
-      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchUserData();
-    fetchVideos();
-  }, []);
-  useEffect(() => {
-    fetchUserData();
-    fetchVideos();
+    const fetchData = async () => {
+      setLoading(true);
+      await fetchUserData();
+      await fetchVideos();
+      setLoading(false);
+    };
+    fetchData();
   }, []);
 
-  useEffect(() => {
-    if (!loading && userData && videos.length > 0) {
-      setRendered(true);
+  const sendNotification = async () => {
+    try {
+      await axios.post(`https://app.nativenotify.com/api/notification`, {
+        subID: 'kleitnmetzgre31@gmail.com',
+        appId: 22648,
+        appToken: 'ORCAvOl2Mp53Ll26YDq01d',
+        title: 'New Follower',
+        message: 'You have a new follower',
+      });
+    } catch (error) {
+      console.error('Error sending notification:', error);
     }
-  }, [loading, userData, videos]);
+  };
 
   const handleSeguir = async () => {
     try {
-      // Atualiza imediatamente a UI
+      const userDocRef = doc(db, 'users', createBy);
+      const currentUserDocRef = doc(db, 'users', currentUser.userId);
+
       if (isFollowing) {
         setUserData(prevUserData => ({
           ...prevUserData,
           seguidores: prevUserData.seguidores.filter(seguidor => seguidor.userId !== currentUser.userId),
         }));
-        setIsFollowing(false);
-        setNotFollowing(true);
-      } else {
-        setUserData(prevUserData => ({
-          ...prevUserData,
-          seguidores: [...prevUserData.seguidores, { userId: currentUser.userId, name: currentUser.name }],
-        }));
-        setIsFollowing(true);
-        setNotFollowing(false);
-      }
-
-      // Atualiza a base de dados posteriormente
-      const userDocRef = doc(db, 'users', createBy);
-      const currentUserDocRef = doc(db, 'users', currentUser.userId);
-
-      if (isFollowing) {
         await updateDoc(userDocRef, {
           seguidores: arrayRemove({
             userId: currentUser.userId,
             name: currentUser.name,
           }),
         });
-
         await updateDoc(currentUserDocRef, {
           seguindo: arrayRemove({
             userId: createBy,
@@ -117,29 +96,36 @@ export const FolowerProfile = () => {
           }),
         });
       } else {
+        setUserData(prevUserData => ({
+          ...prevUserData,
+          seguidores: [...prevUserData.seguidores, { userId: currentUser.userId, name: currentUser.name }],
+        }));
         await updateDoc(userDocRef, {
           seguidores: arrayUnion({
             userId: currentUser.userId,
             name: currentUser.name,
           }),
         });
-
         await updateDoc(currentUserDocRef, {
           seguindo: arrayUnion({
             userId: createBy,
             name: userData?.name,
           }),
         });
+
+        await sendNotification();
       }
+
+      setIsFollowing(!isFollowing);
     } catch (error) {
       console.error('Error following user: ', error);
     }
   };
 
-  if (!rendered) {
+  if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="normal" color="#0000ff" />
+        <ActivityIndicator size="large" color="#0000ff" />
       </View>
     );
   }
@@ -169,13 +155,13 @@ export const FolowerProfile = () => {
                   <View style={styles.userFollow}>
                     <View style={styles.seguidoresContainer}>
                       <Text style={styles.segdrTxt}>Seguidor</Text>
-                      <Text style={styles.segdrNum}>{userData?.seguidores?.length || 0} </Text>
+                      <Text style={styles.segdrNum}>{userData?.seguidores?.length || 0}</Text>
                     </View>
                     <View style={styles.buttonContainer}>
                       <SeguirBTN
                         label={isFollowing ? 'Não seguir' : 'Seguir'}
                         onPress={handleSeguir}
-                        notFollowing={notFollowing}
+                        notFollowing={!isFollowing}
                       />
                     </View>
                     <View>
@@ -216,11 +202,6 @@ export const FolowerProfile = () => {
                     removeClippedSubviews={true}
                     ListFooterComponent={<View style={{ marginBottom: 80 }} />}
                     ListEmptyComponent={() => <Text style={styles.emptyText}>Nenhum vídeo encontrado</Text>}
-                    onScroll={event => {
-                      const currentOffset = event.nativeEvent.contentOffset.y;
-                      const headerHeight = 40;
-                      setHeaderVisible(currentOffset <= headerHeight || currentOffset === 0);
-                    }}
                   />
                 </View>
               );
@@ -234,7 +215,7 @@ export const FolowerProfile = () => {
   );
 };
 
-const UserInfo = ({ userName, location, tipo, creatorAvatar, navigation }) => (
+const UserInfo = ({ userName, location, creatorAvatar }) => (
   <View style={styles.userInfoContainer}>
     {creatorAvatar ? (
       <Image source={{ uri: creatorAvatar }} style={styles.avatarUser} />
@@ -251,7 +232,8 @@ const UserInfo = ({ userName, location, tipo, creatorAvatar, navigation }) => (
     </View>
   </View>
 );
-const VideoItem = ({ video, tipo }) => (
+
+const VideoItem = ({ video }) => (
   <View style={styles.videoItem}>
     <Video
       source={{ uri: video }}

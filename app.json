@@ -40,18 +40,17 @@
       "package": "com.gymprot.app",
       "versionCode": 1,
       "permissions": [
-        "CAMERA",
-        "RECORD_AUDIO",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_BACKGROUND_LOCATION",
         "android.permission.ACCESS_MEDIA_LOCATION",
         "android.permission.ACCESS_NETWORK_STATE",
         "android.permission.HIGH_SAMPLING_RATE_SENSORS",
-        "ACCESS_BACKGROUND_LOCATION",
-        "NOTIFICATIONS"
+        "android.permission.NOTIFICATIONS"
       ]
     },
     "web": {
@@ -102,8 +101,21 @@
         {
           "permission": "Allow Gymprot to access your documents"
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./local/assets/notification-icon.png",
+          "color": "#ffffff"
+        }
       ]
     ],
-    "sdkVersion": "51.0.0"
+    "sdkVersion": "51.0.0",
+    "extra": {
+      "eas": {
+        "projectId": "101aef06-ad94-49bf-bc1c-6b869d35d4db"
+      }
+    },
+    "owner": "kleiton_metzger"
   }
 }

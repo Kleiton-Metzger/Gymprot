@@ -3,14 +3,17 @@ import { View, StyleSheet, TouchableOpacity, Text, SafeAreaView, ScrollView } fr
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../../Hooks/useAuth';
+import { unregisterIndieDevice } from 'native-notify';
 
 export const Configurations = () => {
   const navigation = useNavigation();
   const { currentUser, signOut } = useAuth();
+  const { email } = currentUser.email;
 
   const handleSignOut = async () => {
     try {
       await signOut();
+      unregisterIndieDevice(currentUser.email, 22648, 'ORCAvOl2Mp53Ll26YDq01d');
       navigation.replace('Login');
     } catch (error) {
       console.log('Error signing out:', error.message);
@@ -20,7 +23,7 @@ export const Configurations = () => {
   if (!currentUser) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#581DB9" />
       </View>
     );
   }
@@ -45,6 +48,8 @@ export const Configurations = () => {
           <Text style={styles.settingText}>Sair</Text>
         </TouchableOpacity>
       </ScrollView>
+      <View style={{ flex: 1 }} />
+      <Text style={{ textAlign: 'center', marginBottom: 20, color: '#A0A0A0' }}>Versão 1.0.0</Text>
     </SafeAreaView>
   );
 };
