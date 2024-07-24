@@ -15,7 +15,7 @@ export const Following = () => {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.listContainer}>
         {seguindo.length === 0 ? (
-          <Text style={styles.listText}>Ainda não está seguindo ninguém.</Text>
+          <Text style={styles.listText}>Ainda não segue ninguém.</Text>
         ) : (
           seguindo.map((following, index) => (
             <View key={index} style={styles.listItem}>

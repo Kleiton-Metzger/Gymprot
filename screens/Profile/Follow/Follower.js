@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, StyleSheet, Text, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../../Hooks/useAuth';
 
@@ -18,7 +17,7 @@ export const Follower = () => {
         ) : (
           seguidores.map((follower, index) => (
             <View key={index} style={styles.listItem}>
-              <TouchableOpacity onPress={() => navigation.navigate('FolowerProfile', { user: follower })}>
+              <TouchableOpacity onPress={() => navigation.navigate('FolowerProfile', { userId: follower.userId })}>
                 <Text style={styles.followerName}>{follower.name}</Text>
               </TouchableOpacity>
             </View>
@@ -34,22 +33,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 15,
-    paddingBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
-    position: 'relative',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: 'black',
-  },
   listContainer: {
     padding: 20,
   },
@@ -61,11 +44,11 @@ const styles = StyleSheet.create({
   },
   followerName: {
     fontSize: 16,
-    color: 'black',
+    fontWeight: 'bold',
   },
   listText: {
     fontSize: 16,
-    color: 'black',
+    color: 'grey',
     textAlign: 'center',
   },
 });
