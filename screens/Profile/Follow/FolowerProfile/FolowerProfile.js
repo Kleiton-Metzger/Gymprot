@@ -14,7 +14,8 @@ export const FolowerProfile = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { currentUser } = useAuth();
-  const { createBy } = route.params;
+  const { createBy, userId } = route.params;
+
   const [userData, setUserData] = useState(null);
   const [isFollowing, setIsFollowing] = useState(false);
   const [notFollowing, setNotFollowing] = useState(true);
@@ -26,7 +27,7 @@ export const FolowerProfile = () => {
   const fetchUserData = async () => {
     try {
       setLoading(true);
-      const userDocRef = doc(db, 'users', createBy);
+      const userDocRef = doc(db, 'users', createBy || userId);
       const docSnap = await getDoc(userDocRef);
       if (docSnap.exists()) {
         const userData = docSnap.data();
@@ -52,7 +53,7 @@ export const FolowerProfile = () => {
     try {
       setLoading(true);
       const videosRef = collection(db, 'videos');
-      const q = query(videosRef, where('createBy', '==', createBy), where('status', '==', 'Public'));
+      const q = query(videosRef, where('createBy', '==', createBy || userId), where('status', '==', 'Public'));
       const querySnapshot = await getDocs(q);
       const videosData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setVideos(videosData);

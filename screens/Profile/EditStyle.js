@@ -6,11 +6,17 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
   },
+  email: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'black',
+  },
+
   body: {
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
-    marginTop: '20%',
+    marginTop: '15%',
   },
   inputContainer: {
     width: '100%',

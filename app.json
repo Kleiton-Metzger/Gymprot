@@ -28,7 +28,8 @@
         "NSLocationTemporaryUsageDescriptionDictionary": {
           "Access location in the background": "We need your location to track your movement even when the app is in the background."
         },
-        "NSSENSORSUsageDescription": "Allow Gymprot to access your sensors"
+        "NSSENSORSUsageDescription": "Allow Gymprot to access your sensors",
+        "useNextNotificationsApi": true
       }
     },
     "android": {
@@ -49,7 +50,8 @@
         "android.permission.ACCESS_MEDIA_LOCATION",
         "android.permission.ACCESS_NETWORK_STATE",
         "android.permission.HIGH_SAMPLING_RATE_SENSORS",
-        "ACCESS_BACKGROUND_LOCATION"
+        "ACCESS_BACKGROUND_LOCATION",
+        "NOTIFICATIONS"
       ]
     },
     "web": {

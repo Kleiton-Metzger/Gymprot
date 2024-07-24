@@ -20,6 +20,11 @@ import {
   ForgotPassword,
   FolowerProfile,
   VideosScreen,
+  Notifications,
+  Configurations,
+  FollowList,
+  Follower,
+  Following,
 } from './screens';
 import { getTabIconName } from './utils';
 import { AuthProvider } from './Hooks/useAuth';
@@ -121,6 +126,31 @@ export default function App() {
                 presentation: 'transparentModal',
                 animationTypeForReplace: 'push',
               }}
+            />
+            <Stack.Screen
+              name="NotificationaScreen"
+              component={Notifications}
+              options={{ headerShown: false, gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="ConfigurationsScreen"
+              component={Configurations}
+              options={{ headerShown: false, gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="FollowListScreen"
+              component={FollowList}
+              options={{ headerShown: false, gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="FollowerScreen"
+              component={Follower}
+              options={{ headerShown: false, gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="FollowingScreen"
+              component={Following}
+              options={{ headerShown: false, gestureEnabled: false }}
             />
           </Stack.Navigator>
         </NavigationContainer>

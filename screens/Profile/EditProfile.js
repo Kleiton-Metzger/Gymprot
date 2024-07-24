@@ -202,6 +202,7 @@ export const EditProfile = () => {
         >
           <Ionicons name="arrow-back" size={30} />
         </TouchableOpacity>
+
         <View style={styles.body}>
           <TouchableOpacity onPress={pickImage}>
             {newAvatar ? (
@@ -227,6 +228,7 @@ export const EditProfile = () => {
               textContentType="name"
               keyboardType="default"
             />
+
             <View style={styles.rowContainer}>
               <Input
                 mode="outlined"
