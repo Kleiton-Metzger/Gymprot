@@ -13,7 +13,7 @@ export default function SplashScreen() {
           marginTop: 20,
         }}
       >
-        Welcome to Gymprot App
+        Gymprot App
       </Text>
     </View>
   );

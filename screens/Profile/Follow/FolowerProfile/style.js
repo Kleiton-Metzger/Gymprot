@@ -159,6 +159,11 @@ const styles = StyleSheet.create({
     height: 200,
     marginBottom: 10,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
 
 export { styles };

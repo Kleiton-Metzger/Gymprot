@@ -5,7 +5,7 @@ const { width } = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f2f2f2',
+    backgroundColor: 'white',
   },
   videoItem: {
     width: '100%',
@@ -118,12 +118,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   descriptionInput: {
-    height: 100,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'lightgrey',
-    padding: 10,
-    marginBottom: 10,
+    marginBottom: 20,
+    backgroundColor: 'white',
   },
   modalLabel: {
     fontSize: 16,

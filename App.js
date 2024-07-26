@@ -20,6 +20,11 @@ import {
   ForgotPassword,
   FolowerProfile,
   VideosScreen,
+  Notifications,
+  Configurations,
+  FollowList,
+  Follower,
+  Following,
 } from './screens';
 import { getTabIconName } from './utils';
 import { AuthProvider } from './Hooks/useAuth';
@@ -57,6 +62,11 @@ export default function App() {
           tabBarInactiveTintColor: 'gray',
           tabBarStyle: {
             display: 'flex',
+            position: 'absolute',
+
+            backgroundColor: 'white',
+            borderTopWidth: 0.5,
+            elevation: 0,
           },
           tabBarIcon: ({ focused, color, size }) => {
             const iconName = getTabIconName(route, focused);
@@ -75,8 +85,8 @@ export default function App() {
 
   return (
     <PaperProvider>
-      <NavigationContainer>
-        <AuthProvider>
+      <AuthProvider>
+        <NavigationContainer>
           <StatusBar backgroundColor="white" barStyle="dark-content" />
           <Stack.Navigator>
             <Stack.Screen name="Login" component={Login} options={{ headerShown: false, gestureEnabled: false }} />
@@ -117,9 +127,34 @@ export default function App() {
                 animationTypeForReplace: 'push',
               }}
             />
+            <Stack.Screen
+              name="NotificationaScreen"
+              component={Notifications}
+              options={{ headerShown: false, gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="ConfigurationsScreen"
+              component={Configurations}
+              options={{ headerShown: false, gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="FollowListScreen"
+              component={FollowList}
+              options={{ headerShown: false, gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="FollowerScreen"
+              component={Follower}
+              options={{ headerShown: false, gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="FollowingScreen"
+              component={Following}
+              options={{ headerShown: false, gestureEnabled: false }}
+            />
           </Stack.Navigator>
-        </AuthProvider>
-      </NavigationContainer>
+        </NavigationContainer>
+      </AuthProvider>
     </PaperProvider>
   );
 }

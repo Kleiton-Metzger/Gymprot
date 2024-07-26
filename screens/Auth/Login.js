@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { auth, signInWithEmailAndPassword } from '../../storage/Firebase';
 import { DismissKeyboard, Logo, Header, Input, Button } from '../../components';
 import { useAuth } from '../../Hooks/useAuth';
-
+import { registerIndieID } from 'native-notify';
 export const Login = () => {
   const navigation = useNavigation();
 
@@ -15,11 +15,14 @@ export const Login = () => {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const { user, setUser } = useAuth();
+
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
       setUser(user);
       if (loading) setLoading(false);
       if (user) {
+        registerIndieID(email, 22648, 'ORCAvOl2Mp53Ll26YDq01d');
+
         navigation.replace('ProfileScreen');
       }
     });

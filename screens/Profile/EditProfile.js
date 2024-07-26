@@ -85,12 +85,15 @@ export const EditProfile = () => {
         updates.avatar = photoURL;
       }
 
+      // Navega para o perfil imediatamente
+      navigation.navigate('Profile');
+
+      // Atualiza os dados do usuário no banco de dados posteriormente
       if (Object.keys(updates).length > 0) {
         await setDoc(doc(db, 'users', currentUser.uid), updates, { merge: true });
         console.log('Profile updated successfully');
       }
 
-      navigation.navigate('Profile');
       setUploading(false);
     } catch (error) {
       console.error('Error updating profile: ', error);
@@ -190,7 +193,7 @@ export const EditProfile = () => {
   const showDialog = () => setVisible(true);
 
   return (
-    <DismissKeyboard>
+    <DismissKeyboard style={{ flex: 1, backgroundColor: '#fff' }}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
@@ -199,6 +202,7 @@ export const EditProfile = () => {
         >
           <Ionicons name="arrow-back" size={30} />
         </TouchableOpacity>
+
         <View style={styles.body}>
           <TouchableOpacity onPress={pickImage}>
             {newAvatar ? (
@@ -224,6 +228,7 @@ export const EditProfile = () => {
               textContentType="name"
               keyboardType="default"
             />
+
             <View style={styles.rowContainer}>
               <Input
                 mode="outlined"

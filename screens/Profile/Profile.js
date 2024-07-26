@@ -1,57 +1,28 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Button, Image, SafeAreaView, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Image, SafeAreaView, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Avatar, ActivityIndicator } from 'react-native-paper';
 import { useAuth } from '../../Hooks/useAuth';
-import { getUSerSex } from '../../utils/gender';
-import { styles } from './ProfStyle';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { AreaChart, BarChart, Grid, LineChart, PieChart, XAxis, YAxis } from 'react-native-svg-charts';
-import * as shape from 'd3-shape';
 import { Octicons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { styles } from './ProfStyle';
 
 export const Profile = () => {
   const navigation = useNavigation();
   const { currentUser, signOut } = useAuth();
-  const data = [50, 10, 40, 95, -4, -24, 85, 91, 35, 53, -53, 24, 50, -20, -80];
-  const contentInset = { top: 20, bottom: 20 };
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      navigation.replace('Login');
-    } catch (error) {
-      console.log('Error signing out:', error.message);
-    }
-  };
-
-  if (!currentUser) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color="#0000ff" />
-      </View>
-    );
-  }
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.editContainer}>
-          <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('EditProfileScreen')}>
-            <MaterialCommunityIcons name="account-edit-outline" size={35} color="black" style={styles.editIcon} />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.perfilTextContainer}>
-          <Text style={styles.perfilText}>Perfil</Text>
-        </View>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity onPress={handleSignOut} activeOpacity={0.7}>
-            <MaterialCommunityIcons name="logout" size={25} color="black" style={styles.logoutbtn} />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('NotificationaScreen')}>
+          <Octicons name="bell" size={24} color="#581DB9" style={styles.notifyIcon} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('ConfigurationsScreen')} activeOpacity={0.7}>
+          <MaterialCommunityIcons name="cog-outline" size={27} color="#581DB9" style={styles.defyIcon} />
+        </TouchableOpacity>
       </View>
-      <View style={{ height: 1, backgroundColor: 'lightgray', width: '100%' }} />
-      <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+
+      <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.userDataContainer}>
           <Image
             style={styles.avatar}
@@ -59,34 +30,34 @@ export const Profile = () => {
           />
           <View style={styles.userDatas}>
             <Text style={styles.userName}>{currentUser.name}</Text>
-            <Text style={styles.userEmail}>{currentUser.email}</Text>
             <View style={styles.userFollow}>
               <View style={styles.seguidoresContainer}>
-                <Text style={styles.segdrTxt}> Seguidores</Text>
-                <Text style={styles.segdrNum}> {currentUser.seguidores ? currentUser.seguidores.length : 0 || 0}</Text>
+                <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('FollowListScreen')}>
+                  <Text style={styles.segdrTxt}>Seguidores</Text>
+                  <Text style={styles.segdrNum}>{currentUser.seguidores ? currentUser.seguidores.length : 0}</Text>
+                </TouchableOpacity>
               </View>
               <View>
-                <Text style={styles.segdrTxt}> Seguindo</Text>
-                <Text style={styles.segdrNum}> {currentUser.seguindo ? currentUser.seguindo.length : 0 || 0}</Text>
+                <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('FollowListScreen')}>
+                  <Text style={styles.segdrTxt}>Seguindo</Text>
+                  <Text style={styles.segdrNum}>{currentUser.seguindo ? currentUser.seguindo.length : 0}</Text>
+                </TouchableOpacity>
               </View>
             </View>
           </View>
         </View>
 
-        <View style={styles.bioContainer}>
-          <Text style={styles.bioText}>{currentUser.bio}</Text>
+        <View style={styles.statsContainer}>
+          <Text style={styles.statsTitle}>Meus Status</Text>
+          <View style={styles.statsContent}>
+            <Text style={styles.stat}>0 Atividades</Text>
+            <Text style={styles.stat}>0 segundos</Text>
+            <Text style={styles.stat}>0 km</Text>
+          </View>
         </View>
-        <View style={{ height: 1, width: '95%', alignSelf: 'center', backgroundColor: 'lightgrey' }} />
 
-        <View style={styles.bodyContainer}>
-          <Text style={styles.bodyTitle}>Body</Text>
-          <View style={styles.graphContainer}>
-            <View style={{ flexDirection: 'row', height: 200, padding: 20 }}></View>
-          </View>
-
-          <View style={styles.graphContainer}>
-            <View style={{ flexDirection: 'row', height: 200, padding: 20 }}></View>
-          </View>
+        <View style={styles.achievementsContainer}>
+          <Text style={styles.achievementsTitle}>Desafios Concluídos</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -9,7 +9,6 @@ import {
   LogBox,
   SafeAreaView,
   Modal,
-  TextInput,
   TouchableWithoutFeedback,
   Keyboard,
   Alert,
@@ -25,6 +24,7 @@ import { Button } from '../../../components/common/Button';
 import { Menu, Divider, RadioButton } from 'react-native-paper';
 import VideosScreen from '../VideoRepro/VideoRepre';
 import { useNavigation } from '@react-navigation/native';
+import { TextInput } from 'react-native-paper';
 
 const { width, height } = Dimensions.get('window');
 LogBox.ignoreLogs(['Sending `onAnimatedValueUpdate` with no listeners registered.']);
@@ -124,7 +124,7 @@ export const PublicScreen = ({ navigation }) => {
       <FlatList
         showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={
-          <View style={{ height: 1, width: width * 0.9, alignSelf: 'center', backgroundColor: 'lightgrey' }} />
+          <View style={{ height: 1, width: width * 0.9, alignSelf: 'center', backgroundColor: 'whitesmoke' }} />
         }
         data={filteredVideos}
         renderItem={({ item }) => (
@@ -190,14 +190,15 @@ export const PublicScreen = ({ navigation }) => {
             <Text style={styles.modalSubtitle}>Edite as informações do vídeo</Text>
             <TextInput
               label="Descrição"
-              bordercolor="#581DB9"
-              onChangeText={setDescription}
-              value={description}
               mode="outlined"
               placeholder="Adicione uma breve descrição ao vídeo"
-              style={styles.descriptionInput}
+              style={styles.modalInput}
+              value={description}
+              onChangeText={setDescription}
               multiline={true}
+              bordercolor="#581DB9"
             />
+
             <Text style={styles.modalLabel}>Status do Vídeo:</Text>
             <RadioButton.Group onValueChange={value => setStatus(value)} value={status}>
               <RadioButton.Item label="Público" value="Public" color="green" />
@@ -213,7 +214,6 @@ export const PublicScreen = ({ navigation }) => {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
-
       <Modal
         visible={showDeleteConfirmation}
         animationType="slide"
