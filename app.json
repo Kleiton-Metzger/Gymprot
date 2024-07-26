@@ -103,6 +103,12 @@
         }
       ],
       [
+        "expo-document-picker",
+        {
+          "iCloudContainerEnvironment": "Allow Gymprot to access your iCloud documents"
+        }
+      ],
+      [
         "expo-notifications",
         {
           "icon": "./assets/logo.pngg",
