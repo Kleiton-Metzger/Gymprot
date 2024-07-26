@@ -35,7 +35,7 @@ export const UploadScreen = () => {
   const uploadDocument = async () => {
     try {
       const storage = getStorage();
-      const storageRef = ref(storage, `documents/${currentUser.uid}/${docName}`);
+      const storageRef = ref(storage, `documents/${docName}`);
 
       const response = await fetch(selectedDoc);
       const blob = await response.blob();
@@ -51,6 +51,21 @@ export const UploadScreen = () => {
             console.log('Upload is running');
             break;
         }
+      });
+      uploadTask.then(async snapshot => {
+        console.log('Upload complete');
+        const downloadURL = await getDownloadURL(storageRef);
+        console.log('File available at', downloadURL);
+        const document = {
+          id: uuid(),
+          name: docName,
+          uri: downloadURL,
+          size: snapshot.totalBytes,
+          createdAt: new Date().toISOString(),
+          userId: currentUser.userId,
+        };
+        await setDoc(doc(collection(db, 'documents')), document);
+        setDocuments([...documents, document]);
       });
     } catch (error) {
       console.log('Erro ao enviar documento:', error);
@@ -75,7 +90,7 @@ export const UploadScreen = () => {
               description={new Date(item.createdAt).toLocaleDateString()}
               left={props => <List.Icon {...props} icon="file" />}
             />
-            <Text style={styles.fileData}>{item.size} bytes</Text>
+            <Text style={styles.fileData}>{item.createdAt}</Text>
           </TouchableOpacity>
         )}
       />
