@@ -7,7 +7,7 @@ export const Follower = () => {
   const navigation = useNavigation();
   const { currentUser } = useAuth();
 
-  const { seguidores = [] } = currentUser || {};
+  const seguidores = currentUser?.seguidores || [];
 
   return (
     <SafeAreaView style={styles.container}>
@@ -17,7 +17,7 @@ export const Follower = () => {
         ) : (
           seguidores.map((follower, index) => (
             <View key={index} style={styles.listItem}>
-              <TouchableOpacity onPress={() => navigation.navigate('FolowerProfile', { userId: follower.userId })}>
+              <TouchableOpacity onPress={() => navigation.navigate('FolowerProfile', { createBy: follower.userId })}>
                 <Text style={styles.followerName}>{follower.name}</Text>
               </TouchableOpacity>
             </View>

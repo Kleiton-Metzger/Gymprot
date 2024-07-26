@@ -105,8 +105,20 @@
       [
         "expo-notifications",
         {
-          "icon": "./local/assets/notification-icon.png",
-          "color": "#ffffff"
+          "icon": "./assets/logo.pngg",
+          "color": "transparent",
+          "notificationPermission": {
+            "ios": {
+              "allowAlert": true,
+              "allowBadge": true,
+              "allowSound": true
+            },
+            "android": {
+              "allowAlert": true,
+              "allowBadge": true,
+              "allowSound": true
+            }
+          }
         }
       ]
     ],

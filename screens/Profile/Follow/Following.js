@@ -9,8 +9,6 @@ export const Following = () => {
 
   const { seguindo = [] } = currentUser || {};
 
-  console.log(seguindo);
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.listContainer}>

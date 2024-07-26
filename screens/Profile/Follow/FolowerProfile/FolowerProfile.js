@@ -11,62 +11,104 @@ import { useAuth } from '../../../../Hooks/useAuth';
 import { Video } from 'expo-av';
 import axios from 'axios';
 
-export const FolowerProfile = () => {
-  const navigation = useNavigation();
-  const route = useRoute();
-  const { currentUser } = useAuth();
-  const { createBy, userId } = route.params;
+const useFetchUserData = (createBy, userId) => {
   const [userData, setUserData] = useState(null);
   const [isFollowing, setIsFollowing] = useState(false);
+  const { currentUser } = useAuth();
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userDocRef = doc(db, 'users', createBy || userId);
+        const docSnap = await getDoc(userDocRef);
+        if (docSnap.exists()) {
+          const userData = docSnap.data();
+          setUserData(userData);
+          setIsFollowing(userData.seguidores?.some(seguidor => seguidor.userId === currentUser?.userId));
+        }
+      } catch (error) {
+        console.error('Error fetching user data: ', error);
+      }
+    };
+
+    fetchUserData();
+  }, [createBy, userId, currentUser]);
+
+  return { userData, setUserData, isFollowing, setIsFollowing };
+};
+
+const useFetchVideos = (createBy, userId) => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchUserData = async () => {
-    try {
-      const userDocRef = doc(db, 'users', createBy || userId);
-      const docSnap = await getDoc(userDocRef);
-      if (docSnap.exists()) {
-        const userData = docSnap.data();
-        setUserData(userData);
-        setIsFollowing(
-          userData.seguidores && userData.seguidores.some(seguidor => seguidor.userId === currentUser?.userId),
-        );
-      }
-    } catch (error) {
-      console.error('Error fetching user data: ', error);
-    }
-  };
-
-  const fetchVideos = async () => {
-    try {
-      const videosRef = collection(db, 'videos');
-      const q = query(videosRef, where('createBy', '==', createBy || userId), where('status', '==', 'Public'));
-      const querySnapshot = await getDocs(q);
-      const videosData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setVideos(videosData);
-    } catch (error) {
-      console.error('Error fetching videos: ', error);
-    }
-  };
-
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      await fetchUserData();
-      await fetchVideos();
-      setLoading(false);
+    const fetchVideos = async () => {
+      try {
+        const videosRef = collection(db, 'videos');
+        const q = query(videosRef, where('createBy', '==', createBy || userId), where('status', '==', 'Public'));
+        const querySnapshot = await getDocs(q);
+        const videosData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setVideos(videosData);
+      } catch (error) {
+        console.error('Error fetching videos: ', error);
+      } finally {
+        setLoading(false);
+      }
     };
-    fetchData();
-  }, []);
+
+    fetchVideos();
+  }, [createBy, userId]);
+
+  return { videos, loading };
+};
+
+const UserInfo = ({ userName, location, creatorAvatar }) => (
+  <View style={styles.userInfoContainer}>
+    <Image
+      source={creatorAvatar ? { uri: creatorAvatar } : require('../../../../assets/avatar.png')}
+      style={styles.avatarUser}
+    />
+    <View style={styles.userInfoTextContainer}>
+      <Text style={styles.userNameU}>{userName}</Text>
+      <View style={styles.locationContainer}>
+        <Feather name="map-pin" size={15} color="black" style={styles.locationIcon} />
+        <Text style={styles.location}>{location}</Text>
+      </View>
+    </View>
+  </View>
+);
+
+const VideoItem = ({ video }) => (
+  <View style={styles.videoItem}>
+    <Video
+      source={{ uri: video }}
+      style={styles.video}
+      useNativeControls
+      isLooping={false}
+      resizeMode="cover"
+      isMuted
+    />
+  </View>
+);
+
+export const FolowerProfile = () => {
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { createBy, userId } = route.params;
+  const { currentUser } = useAuth();
+  const { userData, setUserData, isFollowing, setIsFollowing } = useFetchUserData(createBy, userId);
+  const { videos, loading } = useFetchVideos(createBy, userId);
 
   const sendNotification = async () => {
     try {
-      await axios.post(`https://app.nativenotify.com/api/notification`, {
-        subID: 'kleitnmetzgre31@gmail.com',
+      await axios.post('https://app.nativenotify.com/api/notification', {
+        subID: createBy,
         appId: 22648,
         appToken: 'ORCAvOl2Mp53Ll26YDq01d',
-        title: 'New Follower',
-        message: 'You have a new follower',
+        title: 'You have a new follower',
+        body: `${currentUser.name} started following you`,
+        dateSent: '7-24-2024 8:29PM',
+        pushData: { type: 'follow', userId: currentUser.userId },
       });
     } catch (error) {
       console.error('Error sending notification:', error);
@@ -125,11 +167,10 @@ export const FolowerProfile = () => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#581DB9" style={{ marginTop: 20 }} />
       </View>
     );
   }
-
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.header}>
@@ -154,8 +195,12 @@ export const FolowerProfile = () => {
 
                   <View style={styles.userFollow}>
                     <View style={styles.seguidoresContainer}>
-                      <Text style={styles.segdrTxt}>Seguidor</Text>
-                      <Text style={styles.segdrNum}>{userData?.seguidores?.length || 0}</Text>
+                      <TouchableOpacity
+                        onPress={() => navigation.navigate('FollowListScreen', { userId: userData.id })}
+                      >
+                        <Text style={styles.segdrTxt}>Seguidor</Text>
+                        <Text style={styles.segdrNum}>{userData?.seguidores?.length || 0}</Text>
+                      </TouchableOpacity>
                     </View>
                     <View style={styles.buttonContainer}>
                       <SeguirBTN
@@ -165,8 +210,12 @@ export const FolowerProfile = () => {
                       />
                     </View>
                     <View>
-                      <Text style={styles.segdrTxt}>Seguindo</Text>
-                      <Text style={styles.segdrNum}>{userData?.seguindo?.length || 0}</Text>
+                      <TouchableOpacity
+                        onPress={() => navigation.navigate('FollowListScreen', { userId: userData.id })}
+                      >
+                        <Text style={styles.segdrTxt}>Seguindo</Text>
+                        <Text style={styles.segdrNum}>{userData?.seguindo?.length || 0}</Text>
+                      </TouchableOpacity>
                     </View>
                   </View>
                 </View>
@@ -214,34 +263,3 @@ export const FolowerProfile = () => {
     </SafeAreaView>
   );
 };
-
-const UserInfo = ({ userName, location, creatorAvatar }) => (
-  <View style={styles.userInfoContainer}>
-    {creatorAvatar ? (
-      <Image source={{ uri: creatorAvatar }} style={styles.avatarUser} />
-    ) : (
-      <Image source={require('../../../../assets/avatar.png')} style={styles.avatarUser} />
-    )}
-
-    <View style={styles.userInfoTextContainer}>
-      <Text style={styles.userNameU}>{userName}</Text>
-      <View style={styles.locationContainer}>
-        <Feather name="map-pin" size={15} color="black" style={styles.locationIcon} />
-        <Text style={styles.location}>{location}</Text>
-      </View>
-    </View>
-  </View>
-);
-
-const VideoItem = ({ video }) => (
-  <View style={styles.videoItem}>
-    <Video
-      source={{ uri: video }}
-      style={styles.video}
-      useNativeControls
-      isLooping={false}
-      resizeMode="cover"
-      isMuted
-    />
-  </View>
-);

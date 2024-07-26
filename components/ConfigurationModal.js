@@ -324,7 +324,12 @@ const ConfigurationModal = ({
           )}
           <View style={styles.modalSwitchContainer}>
             <Text style={styles.modalSwitchText}>Default</Text>
-            <Switch value={isDefault} onValueChange={value => setIsDefault(value)} />
+            <Switch
+              ios_backgroundColor={'#767577'}
+              trackColor={{ false: '#767577', true: '#581DB9' }}
+              value={isDefault}
+              onValueChange={value => setIsDefault(value)}
+            />
           </View>
           <TouchableOpacity onPress={handleResetInputs}>
             <MaterialCommunityIcons

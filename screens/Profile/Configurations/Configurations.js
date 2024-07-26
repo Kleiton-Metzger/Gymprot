@@ -8,7 +8,6 @@ import { unregisterIndieDevice } from 'native-notify';
 export const Configurations = () => {
   const navigation = useNavigation();
   const { currentUser, signOut } = useAuth();
-  const { email } = currentUser.email;
 
   const handleSignOut = async () => {
     try {
@@ -37,19 +36,23 @@ export const Configurations = () => {
       </View>
 
       <ScrollView contentContainerStyle={styles.settingsContainer}>
-        <TouchableOpacity style={styles.setting} onPress={() => navigation.navigate('EditProfileScreen')}>
+        <TouchableOpacity style={styles.setting} onPress={() => navigation.navigate('EditProfileScreen')} opacity={0.8}>
           <Text style={styles.settingText}>Editar Perfil</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.setting} onPress={() => navigation.navigate('NotificationaScreen')}>
+        <TouchableOpacity
+          style={styles.setting}
+          onPress={() => navigation.navigate('NotificationaScreen')}
+          opacity={0.8}
+        >
           <Text style={styles.settingText}>Notificações</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.setting} onPress={() => handleSignOut()}>
+        <TouchableOpacity style={styles.setting} onPress={() => handleSignOut()} opacity={0.8}>
           <Text style={styles.settingText}>Sair</Text>
         </TouchableOpacity>
       </ScrollView>
       <View style={{ flex: 1 }} />
-      <Text style={{ textAlign: 'center', marginBottom: 20, color: '#A0A0A0' }}>Versão 1.0.0</Text>
+      <Text style={{ textAlign: 'center', marginBottom: 20, color: 'black' }}>Versão 1.0.0</Text>
     </SafeAreaView>
   );
 };
@@ -57,7 +60,7 @@ export const Configurations = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#E0E0E0',
   },
   header: {
     flexDirection: 'row',
