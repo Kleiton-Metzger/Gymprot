@@ -8,6 +8,7 @@ import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/
 import uuid from 'uuid-random';
 import { styles } from './styles';
 import { useAuth } from '../../Hooks/useAuth';
+import * as FileSystem from 'expo-file-system';
 
 export const UploadScreen = () => {
   const [documents, setDocuments] = useState([]);
@@ -17,91 +18,59 @@ export const UploadScreen = () => {
 
   const handleDocumentSelection = async () => {
     try {
-      const doc = await DocumentPicker.getDocumentAsync();
-      if (doc.type === 'cancel') {
-        Alert.alert('Error', 'Document selection was cancelled.');
-        return;
+      const document = await DocumentPicker.getDocumentAsync();
+      if (document.type !== 'cancel') {
+        setSelectedDoc(document.assets[0].uri);
+        setDocName(document.assets[0].name);
+        console.log('Documento selecionado:', document);
+        Alert.alert('Enviar Documento', `Deseja enviar o documento ${document.assets[0].name}?`, [
+          { text: 'Cancelar', style: 'cancel' },
+          { text: 'Enviar', onPress: () => uploadDocument() },
+        ]);
       }
-      console.log('Document Data:', doc);
-
-      const response = await fetch(doc.uri);
-      if (!response.ok) {
-        throw new Error('Failed to fetch the document');
-      }
-      const blob = await response.blob();
-      setSelectedDoc({ ...doc, blob });
-      setDocName(doc.name);
-      await handleSendDocToFirebase(doc.name, blob);
-    } catch (err) {
-      console.error('Error selecting document:', err);
-      Alert.alert('Error', 'An error occurred while selecting the document. Please try again.');
+    } catch (error) {
+      console.log(error);
     }
   };
-
-  const handleSendDocToFirebase = async (fileName, blobFile) => {
+  const uploadDocument = async () => {
     try {
       const storage = getStorage();
-      const uniqueId = uuid();
-      const storageRef = ref(storage, `documents/${fileName}-${uniqueId}.pdf`);
-      console.log('Storage Ref:', storageRef);
+      const storageRef = ref(storage, `documents/${docName}`);
 
-      const uploadTask = uploadBytesResumable(storageRef, blobFile);
-
-      uploadTask.on(
-        'state_changed',
-        snapshot => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log('Upload is ' + progress + '% done');
-        },
-        error => {
-          console.error('Error uploading document:', error);
-          Alert.alert('Error', 'Failed to upload the document. Please check your internet connection and try again.');
-        },
-        async () => {
-          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-          console.log('File available at', downloadURL);
-          await saveDocumentData(downloadURL, fileName, blobFile.size);
-        },
-      );
-    } catch (err) {
-      console.error('Error uploading document:', err);
-      Alert.alert('Error', 'Failed to upload the document. Please try again.');
-    }
-  };
-
-  const saveDocumentData = async (downloadURL, name, size) => {
-    try {
-      const docRef = doc(collection(db, 'documents'));
-      const docData = {
-        name,
-        uri: downloadURL,
-        createdAt: new Date(),
-        size,
-        userId: currentUser.uid,
-      };
-      await setDoc(docRef, docData);
-      console.log('Document successfully written!');
-      fetchDocuments();
+      const response = await fetch(selectedDoc);
+      const blob = await response.blob();
+      const uploadTask = uploadBytesResumable(storageRef, blob);
+      uploadTask.on('state_changed', snapshot => {
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log(`Upload is ${progress}% done`);
+        switch (snapshot.state) {
+          case 'paused':
+            console.log('Upload is paused');
+            break;
+          case 'running':
+            console.log('Upload is running');
+            break;
+        }
+      });
+      uploadTask.then(async snapshot => {
+        console.log('Upload complete');
+        const downloadURL = await getDownloadURL(storageRef);
+        console.log('File available at', downloadURL);
+        const document = {
+          id: uuid(),
+          name: docName,
+          uri: downloadURL,
+          size: snapshot.totalBytes,
+          createdAt: new Date().toISOString(),
+          userId: currentUser.userId,
+        };
+        await setDoc(doc(collection(db, 'documents')), document);
+        setDocuments([...documents, document]);
+      });
     } catch (error) {
-      console.error('Error writing document: ', error);
-      Alert.alert('Error', 'Failed to save document data. Please try again.');
+      console.log('Erro ao enviar documento:', error);
     }
   };
-
-  const fetchDocuments = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, 'documents'));
-      const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setDocuments(docs);
-    } catch (error) {
-      console.error('Error fetching documents: ', error);
-      Alert.alert('Error', 'Failed to fetch documents. Please try again.');
-    }
-  };
-
-  useEffect(() => {
-    fetchDocuments();
-  }, []);
 
   return (
     <View style={styles.container}>
@@ -118,10 +87,10 @@ export const UploadScreen = () => {
           <TouchableOpacity style={styles.listItem} onPress={() => Linking.openURL(item.uri)}>
             <List.Item
               title={item.name}
-              description={new Date(item.createdAt.seconds * 1000).toLocaleDateString()}
+              description={new Date(item.createdAt).toLocaleDateString()}
               left={props => <List.Icon {...props} icon="file" />}
             />
-            <Text style={styles.fileData}>{item.size} bytes</Text>
+            <Text style={styles.fileData}>{item.createdAt}</Text>
           </TouchableOpacity>
         )}
       />
