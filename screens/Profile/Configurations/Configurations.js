@@ -39,6 +39,9 @@ export const Configurations = () => {
         <TouchableOpacity style={styles.setting} onPress={() => navigation.navigate('EditProfileScreen')} opacity={0.8}>
           <Text style={styles.settingText}>Editar Perfil</Text>
         </TouchableOpacity>
+        <View
+          style={{ height: 1, width: '90%', alignSelf: 'center', backgroundColor: 'lightgrey', marginBottom: 10 }}
+        />
         <TouchableOpacity
           style={styles.setting}
           onPress={() => navigation.navigate('NotificationaScreen')}
@@ -46,7 +49,9 @@ export const Configurations = () => {
         >
           <Text style={styles.settingText}>Notificações</Text>
         </TouchableOpacity>
-
+        <View
+          style={{ height: 1, width: '90%', alignSelf: 'center', backgroundColor: 'lightgrey', marginBottom: 10 }}
+        />
         <TouchableOpacity style={styles.setting} onPress={() => handleSignOut()} opacity={0.8}>
           <Text style={styles.settingText}>Sair</Text>
         </TouchableOpacity>
@@ -60,7 +65,7 @@ export const Configurations = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#E0E0E0',
+    backgroundColor: 'white',
   },
   header: {
     flexDirection: 'row',
