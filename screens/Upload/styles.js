@@ -2,7 +2,7 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#E8E8E8',
+    backgroundColor: 'white',
     padding: 20,
   },
   title: {
@@ -15,21 +15,19 @@ export const styles = StyleSheet.create({
   },
   subTitles: {
     flexDirection: 'row',
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#581DB9',
     justifyContent: 'space-between',
     marginBottom: 10,
-    paddingVertical: 10,
   },
   fileName: {
-    fontWeight: '500',
+    fontWeight: 'bold',
     fontSize: 18,
     color: '#333',
   },
   fileData: {
-    fontWeight: '500',
+    fontWeight: 'bold',
     fontSize: 18,
     color: '#333',
+    left: 30,
   },
   fab: {
     backgroundColor: '#581DB9',
@@ -48,37 +46,81 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between',
     borderBottomWidth: 0.5,
     borderBottomColor: '#581DB9',
-    paddingVertical: 10,
+    height: 50,
   },
-  ModalContainer: {
+  deleteButtonContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    left: 40,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainer: {
     backgroundColor: 'white',
     padding: 20,
     borderRadius: 20,
     width: '90%',
-    height: '30%',
-    alignSelf: 'center',
-    marginTop: '70%',
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#581DB9',
     textAlign: 'center',
+    marginBottom: 20,
   },
   input: {
     marginBottom: 20,
     backgroundColor: 'white',
   },
-  bnts: {
+  confirmationButtonsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
+    justifyContent: 'center',
   },
-  sendbtn: {
+  modalButton: {
+    marginVertical: 20,
+    paddingVertical: 10,
     backgroundColor: '#581DB9',
-    width: '45%',
+    borderRadius: 10,
+    alignItems: 'center',
+    width: '50%',
+    alignSelf: 'center',
   },
-  cancelbtn: {
-    width: '45%',
+  listname: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'black',
+    alignSelf: 'center',
+    right: 10,
+  },
+  listDta: {
+    fontWeight: '500',
+    fontSize: 18,
+    color: '#333',
+    left: 80,
+  },
+  progressContainer: {
+    width: '100%',
+    backgroundColor: 'white',
+    padding: 10,
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  progressText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#581DB9',
+    marginBottom: 10,
+    alignSelf: 'center',
+  },
+  progress: {
+    width: '100%',
+    height: 10,
+    borderRadius: 10,
+    backgroundColor: '#E0E0E0',
   },
 });

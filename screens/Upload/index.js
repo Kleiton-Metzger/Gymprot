@@ -1,20 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Alert, Linking } from 'react-native';
-import { FAB, DataTable, List } from 'react-native-paper';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  Alert,
+  Linking,
+  Modal,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from 'react-native';
+import { FAB, DataTable, TextInput, ProgressBar, IconButton, MD3Colors } from 'react-native-paper';
 import * as DocumentPicker from 'expo-document-picker';
-import { db } from '../../storage/Firebase';
-import { doc, setDoc, collection, getDocs } from 'firebase/firestore';
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { db, storage } from '../../storage/Firebase';
+import { doc, setDoc, collection, onSnapshot, query, where, deleteDoc, getDoc } from 'firebase/firestore';
+import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import uuid from 'uuid-random';
 import { styles } from './styles';
 import { useAuth } from '../../Hooks/useAuth';
-import * as FileSystem from 'expo-file-system';
+import { Button } from '../../components';
 
 export const UploadScreen = () => {
   const [documents, setDocuments] = useState([]);
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [docName, setDocName] = useState('');
   const { currentUser } = useAuth();
+  const [showModal, setShowModal] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const handleDocumentSelection = async () => {
     try {
@@ -23,15 +35,13 @@ export const UploadScreen = () => {
         setSelectedDoc(document.assets[0].uri);
         setDocName(document.assets[0].name);
         console.log('Documento selecionado:', document);
-        Alert.alert('Enviar Documento', `Deseja enviar o documento ${document.assets[0].name}?`, [
-          { text: 'Cancelar', style: 'cancel' },
-          { text: 'Enviar', onPress: () => uploadDocument() },
-        ]);
+        setShowModal(true);
       }
     } catch (error) {
       console.log(error);
     }
   };
+
   const uploadDocument = async () => {
     try {
       const storage = getStorage();
@@ -40,35 +50,65 @@ export const UploadScreen = () => {
       const response = await fetch(selectedDoc);
       const blob = await response.blob();
       const uploadTask = uploadBytesResumable(storageRef, blob);
+
       uploadTask.on('state_changed', snapshot => {
         const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        console.log(`Upload is ${progress}% done`);
-        switch (snapshot.state) {
-          case 'paused':
-            console.log('Upload is paused');
-            break;
-          case 'running':
-            console.log('Upload is running');
-            break;
-        }
+        setUploadProgress(progress / 100);
       });
+
       uploadTask.then(async snapshot => {
         console.log('Upload complete');
         const downloadURL = await getDownloadURL(storageRef);
         console.log('File available at', downloadURL);
+
         const document = {
           id: uuid(),
           name: docName,
           uri: downloadURL,
           size: snapshot.totalBytes,
           createdAt: new Date().toISOString(),
-          userId: currentUser.userId,
+          createdBy: currentUser.userId,
         };
+
         await setDoc(doc(collection(db, 'documents')), document);
-        setDocuments([...documents, document]);
+        setShowModal(false);
+        setUploadProgress(0);
       });
     } catch (error) {
       console.log('Erro ao enviar documento:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (currentUser) {
+      const documentsCollection = collection(db, 'documents');
+      const q = query(documentsCollection, where('createdBy', '==', currentUser.userId));
+
+      const unsubscribe = onSnapshot(q, snapshot => {
+        const documentsData = snapshot.docs.map(doc => doc.data());
+        setDocuments(documentsData);
+      });
+
+      return () => unsubscribe();
+    }
+  }, [currentUser]);
+
+  const handleDeleteDocument = async (documentUri, documentName) => {
+    console.log('Deleting document:', documentName);
+    console.log('Deleting document:', documentUri);
+    try {
+      const storageRef = ref(storage, documentUri);
+      await deleteObject(storageRef);
+      console.log('Document deleted from storage');
+
+      const q = query(collection(db, 'documents'), where('uri', '==', documentUri));
+      const querySnapshot = await getDoc(q);
+      querySnapshot.forEach(async doc => {
+        await deleteDoc(doc.ref);
+        console.log('Document deleted from firestore');
+      });
+    } catch (error) {
+      console.log('Erro ao deletar documento:', error);
     }
   };
 
@@ -80,21 +120,55 @@ export const UploadScreen = () => {
         <DataTable.Title style={styles.fileData}>Data de Criação</DataTable.Title>
       </DataTable.Header>
       <FlatList
-        style={styles.body}
         data={documents}
         keyExtractor={item => item.id}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.listItem} onPress={() => Linking.openURL(item.uri)}>
-            <List.Item
-              title={item.name}
-              description={new Date(item.createdAt).toLocaleDateString()}
-              left={props => <List.Icon {...props} icon="file" />}
-            />
-            <Text style={styles.fileData}>{item.createdAt}</Text>
-          </TouchableOpacity>
+          <DataTable.Row style={styles.listItem}>
+            <DataTable.Cell style={styles.listname}>{item.name}</DataTable.Cell>
+            <DataTable.Cell style={styles.listDta}>{item.createdAt.split('T')[0]}</DataTable.Cell>
+            <DataTable.Cell style={styles.deleteButtonContainer}>
+              <IconButton
+                icon="delete"
+                color={MD3Colors.red}
+                size={24}
+                onPress={() => handleDeleteDocument(item.uri, item.name)}
+              />
+            </DataTable.Cell>
+          </DataTable.Row>
         )}
       />
+
       <FAB icon="plus" style={styles.fab} color="white" onPress={handleDocumentSelection} />
+      <Modal visible={showModal} animationType="slide" transparent>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalTitle}>Adicionar Documento</Text>
+              <TextInput
+                mode="outlined"
+                placeholder="Nome do Documento"
+                style={styles.input}
+                label="Nome do Documento"
+                value={docName}
+                onChangeText={setDocName}
+              />
+              <View style={styles.confirmationButtonsContainer}>
+                <Button
+                  onPress={() => setShowModal(false)}
+                  label="Cancelar"
+                  style={[styles.modalButton, { marginRight: 10 }]}
+                />
+                <Button onPress={uploadDocument} label="Enviar" style={styles.modalButton} />
+              </View>
+              <View style={styles.progressContainer}>
+                <Text style={styles.progressText}>Progresso de Upload</Text>
+                <ProgressBar progress={uploadProgress} color="#581DB9" style={styles.progress} />
+                <Text style={styles.progressText}>{Math.round(uploadProgress * 100)}%</Text>
+              </View>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </View>
   );
 };
