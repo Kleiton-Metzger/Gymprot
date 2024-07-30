@@ -1,9 +1,12 @@
-export const getUSerSex = gender => {
-  if (gender === '1') {
-    return 'Masculino';
-  } else if (gender === '2') {
-    return 'Feminino';
-  } else {
-    return 'Não informado';
+export const getUserSex = genderCode => {
+  switch (genderCode) {
+    case '1':
+      return 'Masculino';
+    case '2':
+      return 'Feminino';
+    case '3':
+      return 'Outro';
+    default:
+      return 'Não especificado';
   }
 };
