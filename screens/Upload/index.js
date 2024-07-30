@@ -10,6 +10,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { FAB, DataTable, TextInput, ProgressBar, IconButton, MD3Colors } from 'react-native-paper';
 import * as DocumentPicker from 'expo-document-picker';
 import { db, storage } from '../../storage/Firebase';
@@ -32,6 +33,7 @@ import uuid from 'uuid-random';
 import { styles } from './styles';
 import { useAuth } from '../../Hooks/useAuth';
 import { Button } from '../../components';
+import { Octicons } from '@expo/vector-icons';
 
 export const UploadScreen = () => {
   const [documents, setDocuments] = useState([]);
@@ -113,17 +115,14 @@ export const UploadScreen = () => {
         text: 'Delete',
         style: 'destructive',
         onPress: async () => {
-          // Optimistic UI update
           setDocuments(prevDocuments => prevDocuments.filter(doc => doc.id !== documentId));
 
           try {
-            // Delete from Firebase Storage
             const storage = getStorage();
             const storageRef = ref(storage, `documents/${documentName}`);
             await deleteObject(storageRef);
             console.log('Document deleted from storage');
 
-            // Delete from Firestore
             const documentsCollection = collection(db, 'documents');
             const q = query(documentsCollection, where('id', '==', documentId));
             const querySnapshot = await getDocs(q);
@@ -141,7 +140,6 @@ export const UploadScreen = () => {
             console.error('Error deleting document:', error);
             Alert.alert('Error', 'There was an issue deleting the document.');
 
-            // Revert optimistic UI update on failure
             setDocuments(prevDocuments => [
               ...prevDocuments,
               {
@@ -173,14 +171,27 @@ export const UploadScreen = () => {
             <DataTable.Cell style={styles.listname}>{item.name}</DataTable.Cell>
             <DataTable.Cell style={styles.listDta}>{item.createdAt.split('T')[0]}</DataTable.Cell>
             <DataTable.Cell style={styles.deleteButtonContainer}>
-              <IconButton
-                icon="delete"
-                color={MD3Colors.red}
-                size={24}
+              <Feather
+                name="trash-2"
+                size={20}
+                color="red"
                 onPress={() => handleDeleteDocument(item.uri, item.id, item.name)}
               />
             </DataTable.Cell>
           </DataTable.Row>
+        )}
+        ListEmptyComponent={() => (
+          <Text
+            style={{
+              textAlign: 'center',
+              marginTop: 20,
+              fontSize: 16,
+              fontWeight: 'bold',
+              color: '#581DB9',
+            }}
+          >
+            Nenhum documento encontrado!
+          </Text>
         )}
       />
 

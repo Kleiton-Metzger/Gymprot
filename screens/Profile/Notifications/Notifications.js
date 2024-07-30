@@ -16,7 +16,7 @@ import { Button } from '../../../components/common/Button';
 import { getIndieNotificationInbox, deleteIndieNotificationInbox } from 'native-notify';
 import { getNotificationInbox } from 'native-notify';
 import axios from 'axios';
-import { Octicons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import { useAuth } from '../../../Hooks/useAuth';
 
 export const Notifications = () => {
@@ -101,7 +101,7 @@ export const Notifications = () => {
                   style={styles.deleteButton}
                   onPress={() => confirmDeleteNotification(notification.notification_id)}
                 >
-                  <Octicons name="trash" size={24} color="red" />
+                  <Feather name="trash-2" size={20} color="red" />
                 </TouchableOpacity>
               </View>
             ))
