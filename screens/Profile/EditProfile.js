@@ -12,6 +12,7 @@ import { useAuth } from '../../Hooks/useAuth';
 import { auth, db } from '../../storage/Firebase';
 import { styles } from './EditStyle';
 import { Ionicons } from '@expo/vector-icons';
+import { getUserSex } from '../../utils/gender';
 
 export const EditProfile = () => {
   const { currentUser } = useAuth();
@@ -23,7 +24,7 @@ export const EditProfile = () => {
   const [newHeight, setHeight] = useState(currentUser.height);
   const [newGender, setGender] = useState(currentUser.gender);
   const [newAvatar, setAvatar] = useState(currentUser.avatar);
-  const [newBio, setBio] = useState(currentUser.bio); // Adicionando estado para a bio
+  const [newBio, setBio] = useState(currentUser.bio);
   const [visible, setVisible] = useState(false);
   const [password, setPassword] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -68,8 +69,8 @@ export const EditProfile = () => {
       if (newAge && newAge.trim() !== '' && newAge !== currentUser.age) updates.age = newAge.trim();
       if (newWeight && newWeight.trim() !== '' && newWeight !== currentUser.weight) updates.weight = newWeight.trim();
       if (newHeight && newHeight.trim() !== '' && newHeight !== currentUser.height) updates.height = newHeight.trim();
-      if (newGender && newGender.trim() !== currentUser.gender) updates.gender = newGender.trim();
-      if (newBio && newBio.trim() !== '' && newBio !== currentUser.bio) updates.bio = newBio.trim(); // Adicionando atualização para a bio
+      if (newGender && newGender.trim() !== currentUser.gender) updates.gender = getUserSex(newGender.trim());
+      if (newBio && newBio.trim() !== '' && newBio !== currentUser.bio) updates.bio = newBio.trim();
 
       if (password.trim() !== '') {
         try {
@@ -77,27 +78,38 @@ export const EditProfile = () => {
           console.log('Password updated successfully');
         } catch (error) {
           console.error('Error updating password:', error);
+          alert('Failed to update password. Please try again.');
+          return;
         }
       }
 
       if (newAvatar && currentUser.avatar !== newAvatar) {
-        const photoURL = await handleUpdateAvatar(currentUser.uid);
-        updates.avatar = photoURL;
+        try {
+          const photoURL = await handleUpdateAvatar(currentUser.uid);
+          updates.avatar = photoURL;
+        } catch (error) {
+          console.error('Error updating avatar:', error);
+          alert('Failed to update avatar. Please try again.');
+          return;
+        }
       }
 
-      // Navega para o perfil imediatamente
-      navigation.navigate('Profile');
-
-      // Atualiza os dados do usuário no banco de dados posteriormente
       if (Object.keys(updates).length > 0) {
-        await setDoc(doc(db, 'users', currentUser.uid), updates, { merge: true });
-        console.log('Profile updated successfully');
+        try {
+          await setDoc(doc(db, 'users', currentUser.uid), updates, { merge: true });
+          console.log('Profile updated successfully');
+        } catch (error) {
+          console.error('Error updating profile: ', error);
+          alert('Failed to update profile. Please try again.');
+        }
       }
 
       setUploading(false);
+      navigation.navigate('Profile');
     } catch (error) {
       console.error('Error updating profile: ', error);
       setUploading(false);
+      alert('An error occurred while updating your profile. Please try again.');
     }
   };
 
@@ -193,8 +205,8 @@ export const EditProfile = () => {
   const showDialog = () => setVisible(true);
 
   return (
-    <DismissKeyboard style={{ flex: 1, backgroundColor: '#fff' }}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
+    <DismissKeyboard>
+      <KeyboardAvoidingView style={styles.container}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={{ position: 'absolute', left: 20, top: 15 }}
@@ -271,7 +283,7 @@ export const EditProfile = () => {
             />
             <Input
               mode="outlined"
-              label="Bio"
+              label="Biografia"
               color="#581DB9"
               underline="#581DB9"
               returnKeyType="next"
@@ -287,7 +299,7 @@ export const EditProfile = () => {
             />
             <Input
               mode="outlined"
-              label="Password"
+              label="Palavra-passe"
               color="#581DB9"
               underline="#581DB9"
               returnKeyType="done"
@@ -300,15 +312,7 @@ export const EditProfile = () => {
             />
             <Text style={styles.genderopcText}>Selecione o gênero</Text>
             <TouchableOpacity onPress={showDialog} style={styles.genderButton}>
-              <Text style={styles.genderButtonText}>
-                {newGender
-                  ? newGender === '1'
-                    ? 'Masculino'
-                    : newGender === '2'
-                    ? 'Feminino'
-                    : 'Outro'
-                  : 'Selecione o Gênero'}
-              </Text>
+              <Text style={styles.genderButtonText}>{newGender ? getUserSex(newGender) : 'Selecione o Gênero'}</Text>
             </TouchableOpacity>
             <Portal>
               <Dialog visible={visible} onDismiss={hideDialog}>

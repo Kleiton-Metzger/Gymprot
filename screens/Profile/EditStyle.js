@@ -5,6 +5,8 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
+    backgroundColor: 'white',
+    height: '100%',
   },
   email: {
     fontSize: 16,
@@ -17,6 +19,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     marginTop: '15%',
+    backgroundColor: 'white',
   },
   inputContainer: {
     width: '100%',
