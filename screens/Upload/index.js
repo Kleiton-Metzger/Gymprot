@@ -13,8 +13,21 @@ import {
 import { FAB, DataTable, TextInput, ProgressBar, IconButton, MD3Colors } from 'react-native-paper';
 import * as DocumentPicker from 'expo-document-picker';
 import { db, storage } from '../../storage/Firebase';
-import { doc, setDoc, collection, onSnapshot, query, where, deleteDoc, getDoc } from 'firebase/firestore';
+import {
+  collection,
+  onSnapshot,
+  query,
+  where,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  updateDoc,
+  setDoc,
+} from 'firebase/firestore';
+
 import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
+
 import uuid from 'uuid-random';
 import { styles } from './styles';
 import { useAuth } from '../../Hooks/useAuth';
@@ -93,23 +106,56 @@ export const UploadScreen = () => {
     }
   }, [currentUser]);
 
-  const handleDeleteDocument = async (documentUri, documentName) => {
-    console.log('Deleting document:', documentName);
-    console.log('Deleting document:', documentUri);
-    try {
-      const storageRef = ref(storage, documentUri);
-      await deleteObject(storageRef);
-      console.log('Document deleted from storage');
+  const handleDeleteDocument = async (documentUri, documentId, documentName) => {
+    Alert.alert('Delete Document', `Are you sure you want to delete the document "${documentName}"?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          // Optimistic UI update
+          setDocuments(prevDocuments => prevDocuments.filter(doc => doc.id !== documentId));
 
-      const q = query(collection(db, 'documents'), where('uri', '==', documentUri));
-      const querySnapshot = await getDoc(q);
-      querySnapshot.forEach(async doc => {
-        await deleteDoc(doc.ref);
-        console.log('Document deleted from firestore');
-      });
-    } catch (error) {
-      console.log('Erro ao deletar documento:', error);
-    }
+          try {
+            // Delete from Firebase Storage
+            const storage = getStorage();
+            const storageRef = ref(storage, `documents/${documentName}`);
+            await deleteObject(storageRef);
+            console.log('Document deleted from storage');
+
+            // Delete from Firestore
+            const documentsCollection = collection(db, 'documents');
+            const q = query(documentsCollection, where('id', '==', documentId));
+            const querySnapshot = await getDocs(q);
+
+            if (!querySnapshot.empty) {
+              const documentRef = querySnapshot.docs[0].ref;
+              await deleteDoc(documentRef);
+              console.log('Document deleted from Firestore');
+            } else {
+              console.log('Document not found in Firestore');
+            }
+
+            Alert.alert('Success', 'Document deleted successfully.');
+          } catch (error) {
+            console.error('Error deleting document:', error);
+            Alert.alert('Error', 'There was an issue deleting the document.');
+
+            // Revert optimistic UI update on failure
+            setDocuments(prevDocuments => [
+              ...prevDocuments,
+              {
+                id: documentId,
+                name: documentName,
+                uri: documentUri,
+                createdAt: new Date().toISOString(),
+                createdBy: currentUser.userId,
+              },
+            ]);
+          }
+        },
+      },
+    ]);
   };
 
   return (
@@ -131,7 +177,7 @@ export const UploadScreen = () => {
                 icon="delete"
                 color={MD3Colors.red}
                 size={24}
-                onPress={() => handleDeleteDocument(item.uri, item.name)}
+                onPress={() => handleDeleteDocument(item.uri, item.id, item.name)}
               />
             </DataTable.Cell>
           </DataTable.Row>
