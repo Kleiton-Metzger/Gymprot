@@ -39,6 +39,7 @@ export const CameraScreen = () => {
   const [currentPosition, setCurrentPosition] = useState(null);
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
+  const [inclinacao, setInclinacao] = useState({ x: 0.05, y: -0.97, z: -0.25, tolerance: 0.1 });
 
   function toggleCameraFacing() {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
@@ -79,7 +80,34 @@ export const CameraScreen = () => {
     Accelerometer.addListener(accelerometerData => {
       const currentSpeed = Math.sqrt(
         Math.pow(accelerometerData.x, 2) + Math.pow(accelerometerData.y, 2) + Math.pow(accelerometerData.z, 2),
+        /*console.log(
+          'X:',
+          accelerometerData.x.toFixed(2),
+          'Y:',
+          accelerometerData.y.toFixed(2),
+          'Z:',
+          accelerometerData.z.toFixed(2),
+        ),*/
+
+        console.log(
+          (parseFloat(inclinacao.x) + inclinacao.tolerance).toFixed(2),
+          parseFloat(accelerometerData.x).toFixed(2),
+        ),
       );
+
+      if (
+        parseFloat(inclinacao.x) + inclinacao.tolerance > parseFloat(accelerometerData.x) &&
+        parseFloat(inclinacao.x) - inclinacao.tolerance < parseFloat(accelerometerData.x) &&
+        parseFloat(inclinacao.y) + inclinacao.tolerance > parseFloat(accelerometerData.y) &&
+        parseFloat(inclinacao.y) - inclinacao.tolerance < parseFloat(accelerometerData.y) &&
+        parseFloat(inclinacao.z) + inclinacao.tolerance > parseFloat(accelerometerData.z) &&
+        parseFloat(inclinacao.z) - inclinacao.tolerance < parseFloat(accelerometerData.z)
+      ) {
+        console.log('Em Pé');
+      } else {
+        console.log('Deitado');
+      }
+
       setSpeed(currentSpeed);
     });
 
@@ -105,12 +133,11 @@ export const CameraScreen = () => {
           { accuracy: Location.Accuracy.BestForNavigation, timeInterval: 1000, distanceInterval: 1 },
           async location => {
             const { latitude, longitude } = location.coords;
-            const altitude = await getAltitude(latitude, longitude); // Fetch altitude from Google Maps API
+            const altitude = await getAltitude(latitude, longitude);
 
             if (currentPosition) {
               const newDistance = calculateDistance(
-                // Calculate distance between current and previous location
-                currentPosition.latitude, // Calculate distance between current and previous location
+                currentPosition.latitude,
                 currentPosition.longitude,
                 latitude,
                 longitude,
@@ -121,6 +148,7 @@ export const CameraScreen = () => {
             setCurrentPosition({ latitude, longitude });
             setLatitude(latitude);
             setLongitude(longitude);
+            setElevation(altitude);
 
             setDataPoints(prevDataPoints => [
               ...prevDataPoints,
@@ -213,10 +241,14 @@ export const CameraScreen = () => {
         'state_changed',
         snapshot => {
           const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          setUploadProgress(progress);
+          setUploadProgress(progress / 100);
         },
         error => {
           console.log('Error uploading video:', error);
+          setUploadProgress(0);
+        },
+        () => {
+          setUploadProgress(0);
         },
       );
       await uploadTask;
@@ -224,6 +256,7 @@ export const CameraScreen = () => {
       return videoURL;
     } catch (error) {
       console.log('Error uploading video to Firebase:', error);
+      setUploadProgress(0);
     }
   };
 
@@ -256,7 +289,6 @@ export const CameraScreen = () => {
         `https://maps.googleapis.com/maps/api/elevation/json?locations=${latitude},${longitude}&key=AIzaSyBtVgHlGmQGx5sVAuEVZHNrFINlKYVxYh0`,
       );
       const altitude = response.data.results[0]?.elevation || 0;
-      console.log(`Elevation fetched: ${altitude}`);
       setElevation(altitude);
       return altitude;
     } catch (error) {
@@ -272,7 +304,7 @@ export const CameraScreen = () => {
   };
 
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371e3; // metres
+    const R = 6371e3;
     const φ1 = (lat1 * Math.PI) / 180;
     const φ2 = (lat2 * Math.PI) / 180;
     const Δφ = ((lat2 - lat1) * Math.PI) / 180;
@@ -364,11 +396,12 @@ export const CameraScreen = () => {
           </TouchableWithoutFeedback>
         </Modal>
       </CameraView>
-      <View style={styles.ProgressBarContainer}>
-        {uploadProgress > 0 && uploadProgress < 100 && (
-          <ProgressBar progress={uploadProgress / 100} color={'#581DB9'} style={styles.progressBar} />
-        )}
-      </View>
+      {uploadProgress > 0 && uploadProgress < 100 && (
+        <View style={styles.progressContainer}>
+          <ProgressBar progress={uploadProgress} color="#581DB9" style={styles.progress} />
+          <Text style={styles.progressText}>{Math.round(uploadProgress * 100)}%</Text>
+        </View>
+      )}
     </View>
   );
 };

@@ -106,15 +106,24 @@ export const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 10,
   },
-  ProgressBarContainer: {
-    position: 'absolute',
-    bottom: 0,
+  progressContainer: {
+    width: '100%',
+    backgroundColor: 'white',
+    padding: 10,
+    borderRadius: 10,
+    bottom: 90,
+  },
+  progressText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#581DB9',
+    marginBottom: 10,
+    alignSelf: 'center',
+  },
+  progress: {
     width: '100%',
     height: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  ProgressBar: {
-    height: 10,
-    backgroundColor: 'red',
+    backgroundColor: 'gray',
+    borderRadius: 10,
   },
 });
