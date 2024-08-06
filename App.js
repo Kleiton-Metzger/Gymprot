@@ -25,6 +25,7 @@ import {
   FollowList,
   Follower,
   Following,
+  PdfViewer,
 } from './screens';
 import { getTabIconName } from './utils';
 import { AuthProvider } from './Hooks/useAuth';
@@ -150,6 +151,11 @@ export default function App() {
             <Stack.Screen
               name="FollowingScreen"
               component={Following}
+              options={{ headerShown: false, gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="PdfViewer"
+              component={PdfViewer}
               options={{ headerShown: false, gestureEnabled: false }}
             />
           </Stack.Navigator>

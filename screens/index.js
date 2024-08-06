@@ -8,3 +8,4 @@ export * from './Videos/VideoRepro/VideoRepre';
 
 export * from './Profile';
 export * from './Auth';
+export * from './PDFViewer/PdfViewer';

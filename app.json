@@ -82,6 +82,13 @@
         }
       ],
       [
+        "expo-notifications",
+        {
+          "icon": "./assets/logo.png",
+          "color": "#ffffff"
+        }
+      ],
+      [
         "expo-media-library",
         {
           "photosPermission": "Allow Gymprot to access your photos.",
@@ -111,7 +118,7 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/logo.pngg",
+          "icon": "./assets/logo-black.png",
           "color": "transparent",
           "notificationPermission": {
             "ios": {
