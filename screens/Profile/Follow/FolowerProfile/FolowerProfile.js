@@ -99,16 +99,16 @@ export const FolowerProfile = () => {
   const { userData, setUserData, isFollowing, setIsFollowing } = useFetchUserData(createBy, userId);
   const { videos, loading } = useFetchVideos(createBy, userId);
 
-  const sendNotification = async () => {
+  const sendNotification = async followedUserData => {
     try {
       await axios.post('https://app.nativenotify.com/api/notification', {
-        subID: createBy,
+        subID: followedUserData.id,
         appId: 22648,
         appToken: 'ORCAvOl2Mp53Ll26YDq01d',
         title: 'You have a new follower',
         body: `${currentUser.name} started following you`,
-        dateSent: '7-24-2024 8:29PM',
-        pushData: { type: 'follow', userId: currentUser.userId },
+        dateSent: new Date().toISOString(),
+        pushData: JSON.stringify({ type: 'follow', userId: currentUser.userId }),
       });
     } catch (error) {
       console.error('Error sending notification:', error);
@@ -155,7 +155,7 @@ export const FolowerProfile = () => {
           }),
         });
 
-        await sendNotification();
+        await sendNotification(userData); // Pass userData to sendNotification
       }
 
       setIsFollowing(!isFollowing);
@@ -171,6 +171,7 @@ export const FolowerProfile = () => {
       </View>
     );
   }
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.header}>
@@ -204,7 +205,7 @@ export const FolowerProfile = () => {
                     </View>
                     <View style={styles.buttonContainer}>
                       <SeguirBTN
-                        label={isFollowing ? 'Não seguir' : 'Seguir'}
+                        label={isFollowing ? 'A seguir' : 'Seguir'}
                         onPress={handleSeguir}
                         notFollowing={!isFollowing}
                       />

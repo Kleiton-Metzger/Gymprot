@@ -55,7 +55,7 @@ export const Login = () => {
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1, height: '100%' }}>
       <DismissKeyboard>
         <View style={styles.container}>
           <Logo />

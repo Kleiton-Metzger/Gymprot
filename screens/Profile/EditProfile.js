@@ -1,30 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Text } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import uuid from 'uuid-random';
-
-import { DismissKeyboard, Input, Button as BTN, BackBtn } from '../../components';
+import { DismissKeyboard, Input, Button as BTN } from '../../components';
 import { Dialog, Portal, Button as PaperButton, RadioButton, Avatar, ActivityIndicator } from 'react-native-paper';
 import { useAuth } from '../../Hooks/useAuth';
 import { auth, db } from '../../storage/Firebase';
 import { styles } from './EditStyle';
 import { Ionicons } from '@expo/vector-icons';
-import { getUserSex } from '../../utils/gender';
 
 export const EditProfile = () => {
   const { currentUser } = useAuth();
   const navigation = useNavigation();
-  const [userData, setUserData] = useState(null);
-  const [newName, setName] = useState(currentUser.name);
-  const [newAge, setAge] = useState(currentUser.age);
-  const [newWeight, setWeight] = useState(currentUser.weight);
-  const [newHeight, setHeight] = useState(currentUser.height);
-  const [newGender, setGender] = useState(currentUser.gender);
-  const [newAvatar, setAvatar] = useState(currentUser.avatar);
-  const [newBio, setBio] = useState(currentUser.bio);
+  const [newName, setName] = useState(currentUser.name || '');
+  const [newAge, setAge] = useState(currentUser.age || '');
+  const [newWeight, setWeight] = useState(currentUser.weight || '');
+  const [newHeight, setHeight] = useState(currentUser.height || '');
+  const [newGender, setGender] = useState(currentUser.gender || ''); // Ensure this is a string
+  const [newAvatar, setAvatar] = useState(currentUser.avatar || '');
+  const [newBio, setBio] = useState(currentUser.bio || '');
   const [visible, setVisible] = useState(false);
   const [password, setPassword] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -65,13 +62,15 @@ export const EditProfile = () => {
 
       const updates = {};
 
-      if (newName && newName.trim() !== '' && newName !== currentUser.name) updates.name = newName.trim();
-      if (newAge && newAge.trim() !== '' && newAge !== currentUser.age) updates.age = newAge.trim();
-      if (newWeight && newWeight.trim() !== '' && newWeight !== currentUser.weight) updates.weight = newWeight.trim();
-      if (newHeight && newHeight.trim() !== '' && newHeight !== currentUser.height) updates.height = newHeight.trim();
-      if (newGender && newGender.trim() !== currentUser.gender) updates.gender = getUserSex(newGender.trim());
-      if (newBio && newBio.trim() !== '' && newBio !== currentUser.bio) updates.bio = newBio.trim();
+      // Update profile fields
+      if (newName.trim() !== currentUser.name) updates.name = newName.trim();
+      if (newAge.trim() !== currentUser.age) updates.age = newAge.trim();
+      if (newWeight.trim() !== currentUser.weight) updates.weight = newWeight.trim();
+      if (newHeight.trim() !== currentUser.height) updates.height = newHeight.trim();
+      if (newGender.trim() !== currentUser.gender) updates.gender = newGender.trim(); // Ensure this is a string
+      if (newBio.trim() !== currentUser.bio) updates.bio = newBio.trim();
 
+      // Update password if provided
       if (password.trim() !== '') {
         try {
           await currentUser.updatePassword(password.trim());
@@ -79,10 +78,12 @@ export const EditProfile = () => {
         } catch (error) {
           console.error('Error updating password:', error);
           alert('Failed to update password. Please try again.');
+          setUploading(false);
           return;
         }
       }
 
+      // Handle avatar upload
       if (newAvatar && currentUser.avatar !== newAvatar) {
         try {
           const photoURL = await handleUpdateAvatar(currentUser.uid);
@@ -90,10 +91,12 @@ export const EditProfile = () => {
         } catch (error) {
           console.error('Error updating avatar:', error);
           alert('Failed to update avatar. Please try again.');
+          setUploading(false);
           return;
         }
       }
 
+      // Update user document in Firestore
       if (Object.keys(updates).length > 0) {
         try {
           await setDoc(doc(db, 'users', currentUser.uid), updates, { merge: true });
@@ -312,16 +315,16 @@ export const EditProfile = () => {
             />
             <Text style={styles.genderopcText}>Selecione o gênero</Text>
             <TouchableOpacity onPress={showDialog} style={styles.genderButton}>
-              <Text style={styles.genderButtonText}>{newGender ? getUserSex(newGender) : 'Selecione o Gênero'}</Text>
+              <Text style={styles.genderButtonText}>{newGender || 'Selecione o Gênero'}</Text>
             </TouchableOpacity>
             <Portal>
               <Dialog visible={visible} onDismiss={hideDialog}>
                 <Dialog.Title>Gênero</Dialog.Title>
                 <Dialog.Content>
                   <RadioButton.Group onValueChange={newValue => setGender(newValue)} value={newGender}>
-                    <RadioButton.Item label="Masculino" value="1" />
-                    <RadioButton.Item label="Feminino" value="2" />
-                    <RadioButton.Item label="Outro" value="3" />
+                    <RadioButton.Item label="Masculino" value="Masculino" />
+                    <RadioButton.Item label="Feminino" value="Feminino" />
+                    <RadioButton.Item label="Outro" value="Outro" />
                   </RadioButton.Group>
                 </Dialog.Content>
                 <Dialog.Actions>
