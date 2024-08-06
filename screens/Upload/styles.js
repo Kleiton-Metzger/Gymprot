@@ -90,6 +90,7 @@ export const styles = StyleSheet.create({
     width: '50%',
     alignSelf: 'center',
   },
+
   listname: {
     fontSize: 18,
     fontWeight: 'bold',

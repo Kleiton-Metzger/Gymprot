@@ -192,7 +192,7 @@ export const PrivateScreen = ({ navigation }) => {
               label="Descrição"
               mode="outlined"
               placeholder="Adicione uma breve descrição ao vídeo"
-              style={styles.modalInput}
+              style={styles.descriptionInput}
               value={description}
               onChangeText={setDescription}
               multiline={true}

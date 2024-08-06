@@ -26,20 +26,20 @@ import {
   updateDoc,
   setDoc,
 } from 'firebase/firestore';
-
 import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
-
 import uuid from 'uuid-random';
 import { styles } from './styles';
 import { useAuth } from '../../Hooks/useAuth';
 import { Button } from '../../components';
-import { Octicons } from '@expo/vector-icons';
+import { Octicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
 export const UploadScreen = () => {
+  const navigation = useNavigation();
+  const { currentUser } = useAuth();
   const [documents, setDocuments] = useState([]);
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [docName, setDocName] = useState('');
-  const { currentUser } = useAuth();
   const [showModal, setShowModal] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
@@ -167,7 +167,13 @@ export const UploadScreen = () => {
         data={documents}
         keyExtractor={item => item.id}
         renderItem={({ item }) => (
-          <DataTable.Row style={styles.listItem}>
+          <DataTable.Row onPress={() => navigation.navigate('PdfViewer', { uri: item.uri, name: item.name })}>
+            <MaterialCommunityIcons
+              style={{ marginRight: 15, marginTop: 12 }}
+              name="file-pdf-box"
+              size={24}
+              color="red"
+            />
             <DataTable.Cell style={styles.listname}>{item.name}</DataTable.Cell>
             <DataTable.Cell style={styles.listDta}>{item.createdAt.split('T')[0]}</DataTable.Cell>
             <DataTable.Cell style={styles.deleteButtonContainer}>
