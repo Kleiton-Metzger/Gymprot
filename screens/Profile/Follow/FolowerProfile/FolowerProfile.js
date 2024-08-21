@@ -173,7 +173,7 @@ export const FolowerProfile = () => {
           }),
         });
 
-        await sendNotification(userData); // Pass userData to sendNotification
+        await sendNotification(userData);
       }
 
       setIsFollowing(!isFollowing);
