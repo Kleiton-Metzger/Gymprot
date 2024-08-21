@@ -1,6 +1,7 @@
-import { Dimensions, StyleSheet, useWindowDimensions } from 'react-native';
+import { Dimensions, StyleSheet } from 'react-native';
 import { overlay } from 'react-native-paper';
-const { width, height } = Dimensions.get('window'); //pegar a largura e altura da tela
+
+const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
@@ -11,7 +12,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    //backgroundColor: 'red',
   },
   uavatar: {
     width: 40,
@@ -21,14 +21,13 @@ const styles = StyleSheet.create({
     marginLeft: 13,
   },
   filterIcon: {
-    right: 20,
     position: 'absolute',
+    right: 20,
     flexDirection: 'row',
   },
   searchContainer: {
     padding: 10,
-    // backgroundColor: 'red',
-    width,
+    width: '100%',
   },
   searchBar: {
     borderRadius: 20,
@@ -38,32 +37,6 @@ const styles = StyleSheet.create({
   videoGridContainer: {
     backgroundColor: 'white',
   },
-  videoItem: {
-    width: '100%',
-    height: 200,
-    justifyContent: 'center',
-    alignItems: 'center',
-    margin: 5,
-    borderRadius: 20,
-  },
-  userName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 5,
-    color: '#581DB9',
-  },
-
-  location: {
-    fontSize: 14,
-    color: 'gray',
-  },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 20,
-    marginRight: 10,
-    backgroundColor: 'darkgray',
-  },
   infoContainer: {
     flex: 1,
     margin: 5,
@@ -71,7 +44,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    width,
+    width: '95%',
     alignSelf: 'center',
   },
   userInfoContainer: {
@@ -79,22 +52,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 10,
+    backgroundColor: 'darkgray',
+  },
   userInfoTextContainer: {
     flex: 1,
   },
-  creatorName: {
-    fontSize: 14,
-    color: 'gray',
-  },
-  bio: {
-    fontSize: 14,
-    color: 'gray',
-  },
-  emptyText: {
-    textAlign: 'center',
-    marginTop: 20,
+  userName: {
     fontSize: 16,
     fontWeight: 'bold',
+    marginBottom: 5,
     color: '#581DB9',
   },
   locationContainer: {
@@ -105,9 +76,27 @@ const styles = StyleSheet.create({
   locationIcon: {
     marginRight: 5,
   },
+  location: {
+    fontSize: 14,
+    color: 'gray',
+  },
   tipo: {
     fontSize: 14,
     color: 'gray',
+  },
+  videoItem: {
+    width: '100%',
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: 5,
+    borderRadius: 20,
+  },
+  videoContainer: {
+    width: '105%',
+    height: '100%',
+    borderRadius: 20,
+    overflow: 'hidden',
   },
   video: {
     width: '100%',
@@ -115,11 +104,19 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderRadius: 20,
   },
-  videoContainer: {
-    width: '100%',
-    height: 200,
-    borderRadius: 20,
-    overflow: 'hidden',
+  playButton: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -25 }, { translateY: -25 }], // Centraliza o botão
+    zIndex: 1,
+  },
+  emptyText: {
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#581DB9',
   },
 });
 

@@ -145,11 +145,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'gray',
   },
+  videoContainer: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
   video: {
     width: '100%',
     height: '100%',
     overflow: 'hidden',
     borderRadius: 20,
+  },
+  playButton: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -25 }, { translateY: -25 }], // Centraliza o botão
+    zIndex: 1,
   },
   videoGridContainer: {
     paddingBottom: 80,

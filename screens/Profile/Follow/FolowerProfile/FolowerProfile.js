@@ -78,18 +78,36 @@ const UserInfo = ({ userName, location, creatorAvatar }) => (
   </View>
 );
 
-const VideoItem = ({ video }) => (
-  <View style={styles.videoItem}>
-    <Video
-      source={{ uri: video }}
-      style={styles.video}
-      useNativeControls
-      isLooping={false}
-      resizeMode="cover"
-      isMuted
-    />
-  </View>
-);
+const VideoItem = ({ video }) => {
+  const navigation = useNavigation();
+
+  return (
+    <TouchableOpacity
+      onPress={() => navigation.navigate('VideosScreen', { videoURL: video })}
+      style={styles.videoItem}
+      activeOpacity={0.8}
+    >
+      <View style={styles.videoContainer}>
+        <Video
+          style={styles.video}
+          source={{ uri: video }}
+          resizeMode="cover"
+          isMuted={true}
+          shouldPlay={false}
+          useNativeControls={false}
+          isLooping={false}
+        />
+        <TouchableOpacity
+          onPress={() => navigation.navigate('VideosScreen', { videoURL: video })}
+          activeOpacity={0.8}
+          style={styles.playButton}
+        >
+          <Feather name="play-circle" size={50} color="#581DB9" />
+        </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
+  );
+};
 
 export const FolowerProfile = () => {
   const navigation = useNavigation();

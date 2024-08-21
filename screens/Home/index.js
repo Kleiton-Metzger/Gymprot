@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image, FlatList, SafeAreaView, Dimensions } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { collection, onSnapshot, query, where, doc, getDoc } from 'firebase/firestore';
 import { db } from '../../storage/Firebase';
 import { Video } from 'expo-av';
 import { useAuth } from '../../Hooks/useAuth';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
 import { Searchbar } from 'react-native-paper';
 import styles from './styles';
 import { DismissKeyboard } from '../../components';
+import { useNavigation } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
 
@@ -152,7 +151,7 @@ export const HomeScreen = () => {
               userId={item.createBy}
               bio={item?.creatorInfo?.bio}
             />
-            <VideoItem video={item.videoURL} tipo={item.type} />
+            <VideoItem video={item.videoURL} navigation={navigation} />
           </View>
         )}
         keyExtractor={item => item.id.toString()}
@@ -209,17 +208,29 @@ const UserInfo = ({ userName, location, tipo, creatorAvatar, navigation, current
   </View>
 );
 
-const VideoItem = ({ video, tipo }) => (
-  <TouchableOpacity style={styles.videoItem} activeOpacity={0.8}>
+const VideoItem = ({ video, navigation }) => (
+  <TouchableOpacity
+    onPress={() => navigation.navigate('VideosScreen', { videoURL: video })}
+    style={styles.videoItem}
+    activeOpacity={0.8}
+  >
     <View style={styles.videoContainer}>
       <Video
         style={styles.video}
         source={{ uri: video }}
-        useNativeControls
-        isLooping={false}
         resizeMode="cover"
-        isMuted
+        isMuted={true}
+        shouldPlay={false}
+        useNativeControls={false}
+        isLooping={false}
       />
+      <TouchableOpacity
+        onPress={() => navigation.navigate('VideosScreen', { videoURL: video })}
+        activeOpacity={0.8}
+        style={styles.playButton}
+      >
+        <Feather name="play-circle" size={50} color="#581DB9" />
+      </TouchableOpacity>
     </View>
   </TouchableOpacity>
 );
