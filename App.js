@@ -129,7 +129,7 @@ export default function App() {
               }}
             />
             <Stack.Screen
-              name="NotificationaScreen"
+              name="NotificationScreen"
               component={Notifications}
               options={{ headerShown: false, gestureEnabled: false }}
             />
