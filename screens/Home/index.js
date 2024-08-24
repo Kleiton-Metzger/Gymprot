@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, memo, useCallback } from 'react';
 import { View, Text, TouchableOpacity, Image, FlatList, SafeAreaView, Dimensions } from 'react-native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import {
@@ -48,13 +48,14 @@ export const HomeScreen = () => {
 
       const unsubscribeVideos = onSnapshot(q, async querySnapshot => {
         let fetchedVideos = [];
-        querySnapshot.forEach(async doc => {
+        const promises = querySnapshot.docs.map(async doc => {
           const videoData = doc.data();
           if (videoData.createBy !== currentUser?.userId) {
             const userData = await getUserData(videoData.createBy);
             fetchedVideos.push({ id: doc.id, ...videoData, creatorInfo: userData });
           }
         });
+        await Promise.all(promises);
         setVideos(fetchedVideos);
         setOriginalVideos(fetchedVideos);
       });
@@ -98,6 +99,10 @@ export const HomeScreen = () => {
     setVideos(filteredVideos);
   };
 
+  const handleCategoriaChange = useCallback(categoria => {
+    setCategoria(prevCategoria => (categoria === prevCategoria ? '' : categoria));
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
       <DismissKeyboard>
@@ -114,19 +119,19 @@ export const HomeScreen = () => {
               iconName="walk"
               categoria="Walking"
               currentCategoria={categoria}
-              setCategoria={setCategoria}
+              setCategoria={handleCategoriaChange}
             />
             <FilterButton
               iconName="run-fast"
               categoria="Running"
               currentCategoria={categoria}
-              setCategoria={setCategoria}
+              setCategoria={handleCategoriaChange}
             />
             <FilterButton
               iconName="bike"
               categoria="Cycling"
               currentCategoria={categoria}
-              setCategoria={setCategoria}
+              setCategoria={handleCategoriaChange}
             />
           </View>
         </View>
@@ -174,8 +179,8 @@ export const HomeScreen = () => {
   );
 };
 
-const FilterButton = ({ iconName, categoria, currentCategoria, setCategoria }) => (
-  <TouchableOpacity onPress={() => setCategoria(categoria === currentCategoria ? '' : categoria)}>
+const FilterButton = memo(({ iconName, categoria, currentCategoria, setCategoria }) => (
+  <TouchableOpacity onPress={() => setCategoria(categoria)}>
     <MaterialCommunityIcons
       name={iconName}
       size={27}
@@ -183,7 +188,7 @@ const FilterButton = ({ iconName, categoria, currentCategoria, setCategoria }) =
       style={{ marginRight: 5 }}
     />
   </TouchableOpacity>
-);
+));
 
 const UserInfo = ({ userName, location, tipo, creatorAvatar, navigation, currentUser, userId, bio }) => (
   <View style={styles.userInfoContainer}>
@@ -247,7 +252,7 @@ const VideoItem = memo(({ videoId, video, navigation, currentUser }) => {
     checkIfLiked();
   }, [videoId, currentUser?.userId]);
 
-  const handleLike = async () => {
+  const handleLike = useCallback(async () => {
     if (!currentUser?.userId) return;
 
     try {
@@ -274,7 +279,7 @@ const VideoItem = memo(({ videoId, video, navigation, currentUser }) => {
     } catch (error) {
       console.error('Error updating like: ', error);
     }
-  };
+  }, [videoId, isLiked, currentUser?.userId]);
 
   return (
     <View style={styles.videoItemContainer}>
