@@ -20,7 +20,7 @@ import { Searchbar } from 'react-native-paper';
 import styles from './styles';
 import { DismissKeyboard } from '../../components';
 import CommentsModal from '../../components/CommentsModal';
-
+import ReportModal from '../../components/ReportModal';
 import { useNavigation } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
@@ -34,6 +34,7 @@ export const HomeScreen = () => {
   const [categoria, setCategoria] = useState('');
   const [localizacao, setLocalizacao] = useState('');
   const [usersData, setUsersData] = useState({});
+  const [reportedVideos, setReportedVideos] = useState(new Set()); // State to track reported videos
 
   useEffect(() => {
     const fetchUserVideos = async () => {
@@ -54,7 +55,8 @@ export const HomeScreen = () => {
           const videoData = doc.data();
           if (videoData.createBy !== currentUser?.userId) {
             const userData = await getUserData(videoData.createBy);
-            fetchedVideos.push({ id: doc.id, ...videoData, creatorInfo: userData });
+            const isReported = videoData.reports?.includes(currentUser?.userId) || false;
+            fetchedVideos.push({ id: doc.id, ...videoData, creatorInfo: userData, isReported });
           }
         });
         await Promise.all(promises);
@@ -169,7 +171,15 @@ export const HomeScreen = () => {
               userId={item.createBy}
               bio={item?.creatorInfo?.bio}
             />
-            <VideoItem videoId={item.id} video={item.videoURL} navigation={navigation} currentUser={currentUser} />
+            <VideoItem
+              videoId={item.id}
+              video={item.videoURL}
+              navigation={navigation}
+              currentUser={currentUser}
+              setReportedVideos={setReportedVideos}
+              reportedVideos={reportedVideos}
+              isReported={item.isReported} // Pass the isReported prop
+            />
           </View>
         )}
         keyExtractor={item => item.id.toString()}
@@ -226,9 +236,10 @@ const UserInfo = ({ userName, location, tipo, creatorAvatar, navigation, current
   </View>
 );
 
-const VideoItem = memo(({ videoId, video, navigation, currentUser }) => {
+const VideoItem = memo(({ videoId, video, navigation, currentUser, setReportedVideos, reportedVideos, isReported }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [reportModalVisible, setReportModalVisible] = useState(false);
 
   useEffect(() => {
     const checkIfLiked = async () => {
@@ -284,6 +295,32 @@ const VideoItem = memo(({ videoId, video, navigation, currentUser }) => {
     }
   }, [videoId, isLiked, currentUser?.userId]);
 
+  const handleReport = useCallback(async () => {
+    if (!currentUser?.userId) return;
+
+    try {
+      const q = query(collection(db, 'videos'), where('id', '==', videoId));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        const videoDoc = querySnapshot.docs[0].ref;
+        const videoData = querySnapshot.docs[0].data();
+        const reports = videoData.reports || [];
+
+        if (!reports.includes(currentUser.userId)) {
+          await updateDoc(videoDoc, {
+            reports: arrayUnion(currentUser.userId),
+          });
+          setReportedVideos(prevSet => new Set(prevSet).add(videoId));
+        }
+      } else {
+        console.log('No document found with this video ID');
+      }
+    } catch (error) {
+      console.error('Error reporting video: ', error);
+    }
+  }, [videoId, currentUser?.userId]);
+
   return (
     <View style={styles.videoItemContainer}>
       <TouchableOpacity
@@ -319,13 +356,21 @@ const VideoItem = memo(({ videoId, video, navigation, currentUser }) => {
           <MaterialCommunityIcons name="heart" size={20} color={isLiked ? 'red' : 'black'} />
           <Text style={styles.iconText}>Gosto</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.iconItem} onPress={() => console.log('Denunciar')} activeOpacity={0.8}>
-          <Feather name="flag" size={20} color="black" />
+        <TouchableOpacity
+          style={styles.iconItem}
+          onPress={() => {
+            setReportModalVisible(true);
+            handleReport();
+          }}
+          activeOpacity={0.8}
+        >
+          <MaterialCommunityIcons name="flag" size={20} color={isReported ? 'red' : 'black'} />
           <Text style={styles.iconText}>Denunciar</Text>
         </TouchableOpacity>
       </View>
 
       <CommentsModal visible={modalVisible} onClose={() => setModalVisible(false)} videoId={videoId} />
+      <ReportModal visible={reportModalVisible} onClose={() => setReportModalVisible(false)} videoId={videoId} />
     </View>
   );
 });
