@@ -1,5 +1,4 @@
 import { Dimensions, StyleSheet } from 'react-native';
-import { overlay } from 'react-native-paper';
 
 const { width } = Dimensions.get('window');
 
@@ -46,6 +45,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '95%',
     alignSelf: 'center',
+    marginBottom: 20,
   },
   userInfoContainer: {
     flexDirection: 'row',
@@ -84,32 +84,43 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'gray',
   },
-  videoItem: {
+
+  videoItemContainer: {
+    marginBottom: 20,
     width: '100%',
-    height: 200,
-    justifyContent: 'center',
-    alignItems: 'center',
-    margin: 5,
-    borderRadius: 20,
   },
   videoContainer: {
     width: '105%',
-    height: '100%',
+    height: 200,
     borderRadius: 20,
     overflow: 'hidden',
+    alignSelf: 'center',
   },
   video: {
     width: '100%',
     height: '100%',
-    overflow: 'hidden',
     borderRadius: 20,
   },
   playButton: {
     position: 'absolute',
     top: '50%',
     left: '50%',
-    transform: [{ translateX: -25 }, { translateY: -25 }], // Centraliza o botão
+    transform: [{ translateX: -25 }, { translateY: -25 }],
     zIndex: 1,
+  },
+  iconsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  iconItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  iconText: {
+    marginLeft: 5,
+    fontSize: 14,
+    color: 'gray',
   },
   emptyText: {
     textAlign: 'center',

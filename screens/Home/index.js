@@ -1,7 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { View, Text, TouchableOpacity, Image, FlatList, SafeAreaView, Dimensions } from 'react-native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
-import { collection, onSnapshot, query, where, doc, getDoc } from 'firebase/firestore';
+import {
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+  collection,
+  onSnapshot,
+  query,
+  where,
+  doc,
+  getDoc,
+  getDocs,
+} from 'firebase/firestore';
 import { db } from '../../storage/Firebase';
 import { Video } from 'expo-av';
 import { useAuth } from '../../Hooks/useAuth';
@@ -151,7 +162,7 @@ export const HomeScreen = () => {
               userId={item.createBy}
               bio={item?.creatorInfo?.bio}
             />
-            <VideoItem video={item.videoURL} navigation={navigation} />
+            <VideoItem videoId={item.id} video={item.videoURL} navigation={navigation} currentUser={currentUser} />
           </View>
         )}
         keyExtractor={item => item.id.toString()}
@@ -208,29 +219,103 @@ const UserInfo = ({ userName, location, tipo, creatorAvatar, navigation, current
   </View>
 );
 
-const VideoItem = ({ video, navigation }) => (
-  <TouchableOpacity
-    onPress={() => navigation.navigate('VideosScreen', { videoURL: video })}
-    style={styles.videoItem}
-    activeOpacity={0.8}
-  >
-    <View style={styles.videoContainer}>
-      <Video
-        style={styles.video}
-        source={{ uri: video }}
-        resizeMode="cover"
-        isMuted={true}
-        shouldPlay={false}
-        useNativeControls={false}
-        isLooping={false}
-      />
+const VideoItem = memo(({ videoId, video, navigation, currentUser }) => {
+  const [isLiked, setIsLiked] = useState(false);
+
+  useEffect(() => {
+    const checkIfLiked = async () => {
+      if (!currentUser?.userId) return;
+
+      try {
+        const q = query(collection(db, 'videos'), where('id', '==', videoId));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          querySnapshot.forEach(doc => {
+            const videoData = doc.data();
+            const likes = videoData.likes || [];
+            setIsLiked(likes.includes(currentUser.userId));
+          });
+        } else {
+          console.log('No document found with this video ID');
+        }
+      } catch (error) {
+        console.error('Error checking like status: ', error);
+      }
+    };
+
+    checkIfLiked();
+  }, [videoId, currentUser?.userId]);
+
+  const handleLike = async () => {
+    if (!currentUser?.userId) return;
+
+    try {
+      const q = query(collection(db, 'videos'), where('id', '==', videoId));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        const videoDoc = querySnapshot.docs[0].ref;
+
+        if (isLiked) {
+          await updateDoc(videoDoc, {
+            likes: arrayRemove(currentUser.userId),
+          });
+          setIsLiked(false);
+        } else {
+          await updateDoc(videoDoc, {
+            likes: arrayUnion(currentUser.userId),
+          });
+          setIsLiked(true);
+        }
+      } else {
+        console.log('No document found with this video ID');
+      }
+    } catch (error) {
+      console.error('Error updating like: ', error);
+    }
+  };
+
+  return (
+    <View style={styles.videoItemContainer}>
       <TouchableOpacity
         onPress={() => navigation.navigate('VideosScreen', { videoURL: video })}
+        style={styles.videoItem}
         activeOpacity={0.8}
-        style={styles.playButton}
       >
-        <Feather name="play-circle" size={50} color="#581DB9" />
+        <View style={styles.videoContainer}>
+          <Video
+            style={styles.video}
+            source={{ uri: video }}
+            resizeMode="cover"
+            isMuted={true}
+            shouldPlay={false}
+            useNativeControls={false}
+            isLooping={false}
+          />
+          <TouchableOpacity
+            onPress={() => navigation.navigate('VideosScreen', { videoURL: video })}
+            activeOpacity={0.8}
+            style={styles.playButton}
+          >
+            <Feather name="play-circle" size={50} color="#581DB9" />
+          </TouchableOpacity>
+        </View>
       </TouchableOpacity>
+      <View style={styles.iconsContainer}>
+        <TouchableOpacity style={styles.iconItem} onPress={() => console.log('Comentários')} activeOpacity={0.8}>
+          <Feather name="message-circle" size={20} color="black" />
+          <Text style={styles.iconText}>Comentários</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.iconItem} onPress={handleLike} activeOpacity={0.8}>
+          <MaterialCommunityIcons name="heart" size={20} color={isLiked ? 'red' : 'black'} />
+          <Text style={styles.iconText}>Gosto</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.iconItem} onPress={() => console.log('Denunciar')} activeOpacity={0.8}>
+          <Feather name="flag" size={20} color="black" />
+          <Text style={styles.iconText}>Denunciar</Text>
+        </TouchableOpacity>
+      </View>
     </View>
-  </TouchableOpacity>
-);
+  );
+});
