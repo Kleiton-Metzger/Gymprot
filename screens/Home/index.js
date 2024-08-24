@@ -19,6 +19,8 @@ import { useAuth } from '../../Hooks/useAuth';
 import { Searchbar } from 'react-native-paper';
 import styles from './styles';
 import { DismissKeyboard } from '../../components';
+import CommentsModal from '../../components/CommentsModal';
+
 import { useNavigation } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
@@ -226,6 +228,7 @@ const UserInfo = ({ userName, location, tipo, creatorAvatar, navigation, current
 
 const VideoItem = memo(({ videoId, video, navigation, currentUser }) => {
   const [isLiked, setIsLiked] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
     const checkIfLiked = async () => {
@@ -308,7 +311,7 @@ const VideoItem = memo(({ videoId, video, navigation, currentUser }) => {
         </View>
       </TouchableOpacity>
       <View style={styles.iconsContainer}>
-        <TouchableOpacity style={styles.iconItem} onPress={() => console.log('Comentários')} activeOpacity={0.8}>
+        <TouchableOpacity style={styles.iconItem} onPress={() => setModalVisible(true)} activeOpacity={0.8}>
           <Feather name="message-circle" size={20} color="black" />
           <Text style={styles.iconText}>Comentários</Text>
         </TouchableOpacity>
@@ -321,6 +324,8 @@ const VideoItem = memo(({ videoId, video, navigation, currentUser }) => {
           <Text style={styles.iconText}>Denunciar</Text>
         </TouchableOpacity>
       </View>
+
+      <CommentsModal visible={modalVisible} onClose={() => setModalVisible(false)} videoId={videoId} />
     </View>
   );
 });

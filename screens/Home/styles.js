@@ -129,6 +129,34 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#581DB9',
   },
+  commentSection: {
+    marginTop: 10,
+    paddingHorizontal: 10,
+  },
+  commentInput: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+  },
+  commentContainer: {
+    marginBottom: 5,
+  },
+  commentUserName: {
+    fontWeight: 'bold',
+  },
+  commentText: {
+    marginTop: 2,
+  },
+  commentList: {
+    paddingBottom: 10,
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: 'gray',
+  },
 });
 
 export default styles;
