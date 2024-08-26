@@ -2279,11 +2279,6 @@
   resolved "https://registry.yarnpkg.com/@react-native-firebase/storage/-/storage-20.4.0.tgz#9e5821ed53a93b4f8523b14553a4ac427d54a292"
   integrity sha512-aqrg+Uo56hOODWjdnJddzFtMXZKj344Yv07R5VYcZOF9RMCMUyYTSPemG0k2tCrPoQnwl9ESWSlPqnUOUQskRg==
 
-"@react-native-picker/picker@2.7.5":
-  version "2.7.5"
-  resolved "https://registry.yarnpkg.com/@react-native-picker/picker/-/picker-2.7.5.tgz#e43fcd65f260fa4f23e974ccb9fb7c1f7a9ff94a"
-  integrity sha512-vhMaOLkXSUb+YKVbukMJToU4g+89VMhBG2U9+cLYF8X8HtFRidrHjohGqT8/OyesDuKIXeLIP+UFYI9Q9CRA9Q==
-
 "@react-native/assets-registry@0.74.87":
   version "0.74.87"
   resolved "https://registry.yarnpkg.com/@react-native/assets-registry/-/assets-registry-0.74.87.tgz#7dda64e48db14597e19e15f679e31abbb1c1fb4d"
@@ -7830,7 +7825,7 @@ promzard@^1.0.0:
   dependencies:
     read "^3.0.1"
 
-prop-types@*, prop-types@^15.6.0, prop-types@^15.6.2, prop-types@^15.7.2, prop-types@^15.8.1:
+prop-types@*, prop-types@^15.5.10, prop-types@^15.6.0, prop-types@^15.6.2, prop-types@^15.7.2, prop-types@^15.8.1:
   version "15.8.1"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.8.1.tgz#67d87bf1a694f48435cf332c24af10214a3140b5"
   integrity sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==
@@ -8026,6 +8021,13 @@ react-native-maps@1.14.0:
   integrity sha512-ai7h4UdRLGPFCguz1fI8n4sKLEh35nZXHAH4nSWyAeHGrN8K9GjICu9Xd4Q5Ok4h+WwrM6Xz5pGbF3Qm1tO6iQ==
   dependencies:
     "@types/geojson" "^7946.0.13"
+
+react-native-modal-selector@^2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/react-native-modal-selector/-/react-native-modal-selector-2.1.2.tgz#c9fae030baf8bb2c5419e766ff63c31fc946f396"
+  integrity sha512-+Cvoz/yNUFmfIkJ7xkmlLR2nhJOUhx00S6BPqp2Ruy8LkmaiNr7WMZ4BzsgzylyEgZ84Q+42HQ0v0QzJYobviA==
+  dependencies:
+    prop-types "^15.5.10"
 
 react-native-pager-view@6.3.0:
   version "6.3.0"
