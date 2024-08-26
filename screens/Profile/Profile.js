@@ -74,7 +74,6 @@ export const Profile = () => {
       return;
     }
 
-    // Use Math.max with default value to handle cases with no data points
     let maxSpeedCalc = Math.max(...filteredVideos.flatMap(video => video.dataPoints.map(dp => dp.speed))) || 0;
 
     let totalDistanceCalc = filteredVideos.reduce((total, video) => {
@@ -153,16 +152,16 @@ export const Profile = () => {
               activeOpacity={0.7}
               onPress={() => navigation.navigate('FollowListScreen')}
             >
-              <Text style={styles.followText}>Seguindo</Text>
+              <Text style={styles.followText}>A seguir</Text>
               <Text style={styles.followNumber}>{currentUser.seguindo ? currentUser.seguindo.length : 0}</Text>
             </TouchableOpacity>
           </View>
         </View>
       </View>
 
-      <View style={styles.statsContainer}>
-        <Text style={styles.statsTitle}>Minhas Atividades</Text>
-        <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+        <View style={styles.statsContainer}>
+          <Text style={styles.statsTitle}>Minhas Atividades</Text>
           <View style={styles.statsContent}>
             <View style={[styles.statBox, { backgroundColor: '#F8E4D9' }]}>
               <Text style={{ ...styles.stat, fontWeight: 'bold' }}>Caminhada</Text>
@@ -189,70 +188,69 @@ export const Profile = () => {
               <Text style={styles.stat}>0 Calorias</Text>
             </View>
           </View>
+        </View>
 
-          <View style={styles.achievementsContainer}>
-            <Text style={styles.achievementsTitle}>Histórico de Atividades</Text>
-            <View style={styles.chartContainer}>
-              <BarChart
-                data={data}
-                width={screenWidth - 40}
-                height={220}
-                yAxisSuffix=" Min"
-                chartConfig={chartConfig}
-                verticalLabelRotation={0}
-                style={styles.chart}
-                yAxisInterval={1}
-              />
-            </View>
+        <View style={styles.achievementsContainer}>
+          <Text style={styles.achievementsTitle}>Histórico Semanal</Text>
+          <View style={styles.chartContainer}>
+            <BarChart
+              data={data}
+              width={screenWidth - 40}
+              height={220}
+              yAxisSuffix=" Min"
+              chartConfig={chartConfig}
+              verticalLabelRotation={0}
+              style={styles.chart}
+              yAxisInterval={1}
+            />
+          </View>
+        </View>
+
+        <View style={styles.recordContainer}>
+          <Text style={styles.recordTitle}>Recordes</Text>
+          <View style={styles.recordContent}>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={[styles.filterIcon, { backgroundColor: activeFilter === 'Walking' ? '#581DB9' : 'lightgray' }]}
+              onPress={() => handleFilterPress('Walking')}
+            >
+              <Image source={require('../../assets/walk.png')} style={styles.filterImage} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={[styles.filterIcon, { backgroundColor: activeFilter === 'Running' ? '#581DB9' : 'lightgray' }]}
+              onPress={() => handleFilterPress('Running')}
+            >
+              <Image source={require('../../assets/run.png')} style={styles.filterImage} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={[styles.filterIcon, { backgroundColor: activeFilter === 'Cycling' ? '#581DB9' : 'lightgray' }]}
+              onPress={() => handleFilterPress('Cycling')}
+            >
+              <Image source={require('../../assets/cycle.png')} style={styles.filterImage} />
+            </TouchableOpacity>
           </View>
 
-          <View style={styles.recordContainer}>
-            <Text style={styles.recordTitle}>Gravações</Text>
-            <View style={styles.recordContent}>
-              <TouchableOpacity
-                activeOpacity={0.7}
-                style={[styles.filterIcon, { backgroundColor: activeFilter === 'Walking' ? '#581DB9' : 'lightgray' }]}
-                onPress={() => handleFilterPress('Walking')}
-              >
-                <Image source={require('../../assets/walk.png')} style={styles.filterImage} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                activeOpacity={0.7}
-                style={[styles.filterIcon, { backgroundColor: activeFilter === 'Running' ? '#581DB9' : 'lightgray' }]}
-                onPress={() => handleFilterPress('Running')}
-              >
-                <Image source={require('../../assets/run.png')} style={styles.filterImage} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                activeOpacity={0.7}
-                style={[styles.filterIcon, { backgroundColor: activeFilter === 'Cycling' ? '#581DB9' : 'lightgray' }]}
-                onPress={() => handleFilterPress('Cycling')}
-              >
-                <Image source={require('../../assets/cycle.png')} style={styles.filterImage} />
-              </TouchableOpacity>
+          <View style={styles.recordData}>
+            <View style={styles.recordItem}>
+              <MaterialCommunityIcons name="gauge-full" size={24} color="gray" />
+              <Text style={styles.recordText}>Max.Velocidade</Text>
+              <Text style={styles.recordNumber}>{maxSpeed.toFixed(2)} km/h</Text>
             </View>
-
-            {/* Dados de Gravação */}
-            <View style={styles.recordData}>
-              <View style={styles.recordItem}>
-                <MaterialCommunityIcons name="gauge-full" size={24} color="gray" />
-                <Text style={styles.recordText}>Max.Velocidade</Text>
-                <Text style={styles.recordNumber}>{maxSpeed.toFixed(2)} km/h</Text>
-              </View>
-              <View style={styles.recordItem}>
-                <MaterialCommunityIcons name="map-marker-distance" size={24} color="gray" />
-                <Text style={styles.recordText}>Distância</Text>
-                <Text style={styles.recordNumber}>{totalDistance.toFixed(2)} km</Text>
-              </View>
-              <View style={styles.recordItem}>
-                <MaterialCommunityIcons name="clock" size={24} color="gray" />
-                <Text style={styles.recordText}>Tempo</Text>
-                <Text style={styles.recordNumber}>{totalTime} min</Text>
-              </View>
+            <View style={styles.recordItem}>
+              <MaterialCommunityIcons name="map-marker-distance" size={24} color="gray" />
+              <Text style={styles.recordText}>Distância</Text>
+              <Text style={styles.recordNumber}>{totalDistance.toFixed(2)} km</Text>
+            </View>
+            <View style={styles.recordItem}>
+              <MaterialCommunityIcons name="clock" size={24} color="gray" />
+              <Text style={styles.recordText}>Tempo</Text>
+              <Text style={styles.recordNumber}>{totalTime} min</Text>
             </View>
           </View>
-        </ScrollView>
-      </View>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };

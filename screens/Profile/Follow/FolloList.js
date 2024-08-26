@@ -27,7 +27,7 @@ export const FollowList = () => {
           tabBarLabelStyle: { fontSize: 14, fontWeight: 'bold' },
         }}
       >
-        <Tab.Screen name="Following" component={Following} options={{ tabBarLabel: 'Seguindo' }} />
+        <Tab.Screen name="Following" component={Following} options={{ tabBarLabel: 'A seguir' }} />
         <Tab.Screen name="Follower" component={Follower} options={{ tabBarLabel: 'Seguidores' }} />
       </Tab.Navigator>
     </SafeAreaView>

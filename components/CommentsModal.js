@@ -23,7 +23,7 @@ const CommentsModal = ({ visible, onClose, videoId }) => {
         videoId,
         userId: currentUser.userId,
         userName: currentUser.name,
-        userAvatar: currentUser.avatar || 'https://example.com/path/to/default-avatar.jpg', // Fallback URL
+        userAvatar: currentUser.avatar || null,
         comment,
         timestamp: new Date(),
       });
@@ -110,15 +110,16 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   button: {
-    width: '100%',
+    width: '50%',
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
+    marginBottom: 20,
   },
   submitButton: {
-    backgroundColor: '#007BFF',
+    backgroundColor: '#581DB9',
   },
   closeButton: {
     position: 'absolute',

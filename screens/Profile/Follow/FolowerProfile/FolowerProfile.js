@@ -232,7 +232,7 @@ export const FolowerProfile = () => {
                       <TouchableOpacity
                         onPress={() => navigation.navigate('FollowListScreen', { userId: userData.id })}
                       >
-                        <Text style={styles.segdrTxt}>Seguindo</Text>
+                        <Text style={styles.segdrTxt}>A seguir</Text>
                         <Text style={styles.segdrNum}>{userData?.seguindo?.length || 0}</Text>
                       </TouchableOpacity>
                     </View>

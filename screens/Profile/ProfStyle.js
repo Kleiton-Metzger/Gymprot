@@ -1,6 +1,6 @@
 import { StyleSheet, Dimensions } from 'react-native';
 
-const { height } = Dimensions.get('window');
+const { height, width } = Dimensions.get('window');
 
 export const styles = StyleSheet.create({
   container: {
@@ -69,6 +69,7 @@ export const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
+    paddingBottom: 20,
   },
   statsContent: {
     flexDirection: 'row',
@@ -78,7 +79,7 @@ export const styles = StyleSheet.create({
   statBox: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: '30%',
+    width: width * 0.28,
     borderRadius: 10,
     paddingVertical: 10,
     marginVertical: 5,
@@ -126,6 +127,8 @@ export const styles = StyleSheet.create({
     backgroundColor: '#F4F4F4',
     borderRadius: 10,
     padding: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   chart: {
     width: '100%',
@@ -136,6 +139,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 10,
     backgroundColor: '#F4F4F4',
     borderRadius: 10,
+    paddingBottom: 20,
   },
   recordTitle: {
     fontSize: 18,
@@ -150,7 +154,7 @@ export const styles = StyleSheet.create({
     marginBottom: 10,
   },
   filterIcon: {
-    width: 80,
+    width: width * 0.25,
     height: 35,
     borderRadius: 20,
     backgroundColor: 'lightgray',
@@ -167,18 +171,6 @@ export const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 10,
     paddingVertical: 10,
-  },
-  recordBox: {
-    width: '30%',
-    alignItems: 'center',
-    marginVertical: 5,
-    backgroundColor: '#F4F4F4',
-    padding: 10,
-    borderRadius: 10,
-  },
-  recordValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
   },
   recordItem: {
     flexDirection: 'row',
