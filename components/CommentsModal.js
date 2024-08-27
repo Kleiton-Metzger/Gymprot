@@ -44,24 +44,33 @@ const CommentsModal = ({ visible, onClose, videoId }) => {
             <MaterialCommunityIcons name="close-circle" size={28} color="#333" />
           </TouchableOpacity>
           <Text style={styles.header}>Adicionar Comentário</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Escreva seu comentário"
-            value={comment}
-            onChangeText={setComment}
-            multiline
-            numberOfLines={4}
-            placeholderTextColor="#888"
-          />
-          <TouchableOpacity
-            style={[styles.button, styles.submitButton]}
-            onPress={handleCommentSubmit}
-            disabled={loading}
-          >
-            {loading ? <ActivityIndicator size="small" color="#fff" /> : <Feather name="send" size={20} color="#fff" />}
-            <Text style={styles.buttonText}>{loading ? 'A enviar...' : 'Enviar'}</Text>
-          </TouchableOpacity>
-          <CommentsList style={styles.commentsContainer} videoId={videoId} />
+
+          <View style={styles.inputRow}>
+            <TextInput
+              style={styles.input}
+              placeholder="Escreva seu comentário"
+              value={comment}
+              onChangeText={setComment}
+              multiline
+              numberOfLines={4}
+              placeholderTextColor="#888"
+            />
+            <TouchableOpacity
+              style={[styles.button, styles.submitButton]}
+              onPress={handleCommentSubmit}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Feather name="send" size={20} color="#fff" />
+              )}
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.commentsContainer}>
+            <CommentsList videoId={videoId} />
+          </View>
         </View>
       </View>
     </Modal>
@@ -96,27 +105,28 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     color: '#333',
   },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
   input: {
-    width: '100%',
-    height: 100,
+    flex: 1,
+    height: 50,
     borderColor: '#ddd',
     borderWidth: 1,
     borderRadius: 10,
     paddingHorizontal: 15,
-    paddingVertical: 10,
-    marginBottom: 20,
-    textAlignVertical: 'top',
     fontSize: 16,
     color: '#333',
+    marginRight: 10,
   },
   button: {
-    width: '50%',
-    paddingVertical: 12,
+    width: 50,
+    height: 50,
     borderRadius: 10,
     alignItems: 'center',
-    flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: 20,
   },
   submitButton: {
     backgroundColor: '#581DB9',
@@ -127,14 +137,9 @@ const styles = StyleSheet.create({
     right: 10,
     padding: 5,
   },
-  buttonText: {
-    color: '#fff',
-    fontWeight: '600',
-    marginLeft: 10,
-  },
   commentsContainer: {
     width: '100%',
-    marginTop: 20,
+    maxHeight: 200,
   },
 });
 

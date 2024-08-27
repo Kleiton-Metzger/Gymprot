@@ -178,7 +178,7 @@ export const HomeScreen = () => {
               currentUser={currentUser}
               setReportedVideos={setReportedVideos}
               reportedVideos={reportedVideos}
-              isReported={item.isReported} // Pass the isReported prop
+              isReported={item.isReported}
             />
           </View>
         )}

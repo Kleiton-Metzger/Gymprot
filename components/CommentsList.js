@@ -14,7 +14,6 @@ const CommentsList = ({ videoId }) => {
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        // Query to get comments for a specific video
         const commentsQuery = query(collection(db, 'comments'), where('videoId', '==', videoId));
 
         const unsubscribe = onSnapshot(commentsQuery, async querySnapshot => {
@@ -35,7 +34,7 @@ const CommentsList = ({ videoId }) => {
             const avatars = {};
             for (const userId of userIds) {
               try {
-                const userDocRef = doc(db, 'users', userId); // Use doc with userId
+                const userDocRef = doc(db, 'users', userId);
                 const userDocSnap = await getDoc(userDocRef);
                 if (userDocSnap.exists()) {
                   const userData = userDocSnap.data();
@@ -89,8 +88,12 @@ const CommentsList = ({ videoId }) => {
             style={styles.avatar}
           />
 
-          <Text style={styles.userName}>{item.userName}:</Text>
-          <Text>{item.comment}</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.userName}>{item.userName}:</Text>
+            <Text>{item.comment}</Text>
+            <Text style={styles.timestamp}>{new Date(item.timestamp?.toDate()).toLocaleString()}</Text>
+          </View>
+
           {currentUser.userId === item.userId && (
             <TouchableOpacity onPress={() => handleDeleteComment(item.id)} style={styles.deleteButton}>
               <MaterialCommunityIcons name="delete" size={20} color="red" />
@@ -116,19 +119,18 @@ const styles = StyleSheet.create({
   },
   commentContainer: {
     padding: 10,
-    marginVertical: 5,
-    borderRadius: 8,
+    marginVertical: 8,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: '#DDDDDD',
     backgroundColor: '#FFFFFF',
-    width: '98%',
     flexDirection: 'row',
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   userName: {
     fontWeight: 'bold',
@@ -137,20 +139,33 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     marginLeft: 10,
-    padding: 5,
-    borderRadius: 5,
+    padding: 8,
+    borderRadius: 8,
     backgroundColor: '#FFEFEF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    elevation: 2,
   },
   emptyText: {
     color: '#666',
     fontStyle: 'italic',
   },
   avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     marginRight: 10,
     backgroundColor: '#F0F0F0',
+    borderWidth: 1,
+    borderColor: '#CCCCCC',
+  },
+  timestamp: {
+    marginTop: 5,
+    fontSize: 12,
+    color: '#888888',
+    alignSelf: 'flex-end',
   },
 });
 
