@@ -109,10 +109,10 @@ export const UploadScreen = () => {
   }, [currentUser]);
 
   const handleDeleteDocument = async (documentUri, documentId, documentName) => {
-    Alert.alert('Delete Document', `Are you sure you want to delete the document "${documentName}"?`, [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert('Apagar Doucmentos', `Certeza que deseja apagar o documento "${documentName}"?`, [
+      { text: 'Cancelar', style: 'cancel' },
       {
-        text: 'Delete',
+        text: 'Apagar',
         style: 'destructive',
         onPress: async () => {
           setDocuments(prevDocuments => prevDocuments.filter(doc => doc.id !== documentId));
@@ -130,15 +130,15 @@ export const UploadScreen = () => {
             if (!querySnapshot.empty) {
               const documentRef = querySnapshot.docs[0].ref;
               await deleteDoc(documentRef);
-              console.log('Document deleted from Firestore');
+              console.log('Documento apagado da Firestore');
             } else {
-              console.log('Document not found in Firestore');
+              console.log('Documento não encontrado na Firestore');
             }
 
-            Alert.alert('Success', 'Document deleted successfully.');
+            Alert.alert('Success', 'Documento apagado com sucesso!');
           } catch (error) {
             console.error('Error deleting document:', error);
-            Alert.alert('Error', 'There was an issue deleting the document.');
+            Alert.alert('Error', 'Houve um erro ao apagar o documento. Por favor, tente novamente.');
 
             setDocuments(prevDocuments => [
               ...prevDocuments,
