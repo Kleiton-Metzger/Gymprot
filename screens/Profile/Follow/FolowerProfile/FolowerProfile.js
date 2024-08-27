@@ -10,6 +10,7 @@ import { db } from '../../../../storage/Firebase';
 import { useAuth } from '../../../../Hooks/useAuth';
 import { Video } from 'expo-av';
 import axios from 'axios';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const useFetchUserData = (createBy, userId) => {
   const [userData, setUserData] = useState(null);
@@ -82,30 +83,46 @@ const VideoItem = ({ video }) => {
   const navigation = useNavigation();
 
   return (
-    <TouchableOpacity
-      onPress={() => navigation.navigate('VideosScreen', { videoURL: video })}
-      style={styles.videoItem}
-      activeOpacity={0.8}
-    >
-      <View style={styles.videoContainer}>
-        <Video
-          style={styles.video}
-          source={{ uri: video }}
-          resizeMode="cover"
-          isMuted={true}
-          shouldPlay={false}
-          useNativeControls={false}
-          isLooping={false}
-        />
-        <TouchableOpacity
-          onPress={() => navigation.navigate('VideosScreen', { videoURL: video })}
-          activeOpacity={0.8}
-          style={styles.playButton}
-        >
-          <Feather name="play-circle" size={50} color="#581DB9" />
+    <View style={styles.videoItemContainer}>
+      <TouchableOpacity
+        onPress={() => navigation.navigate('VideosScreen', { videoURL: video })}
+        style={styles.videoItem}
+        activeOpacity={0.8}
+      >
+        <View style={styles.videoContainer}>
+          <Video
+            style={styles.video}
+            source={{ uri: video }}
+            resizeMode="cover"
+            isMuted={true}
+            shouldPlay={false}
+            useNativeControls={false}
+            isLooping={false}
+          />
+          <TouchableOpacity
+            onPress={() => navigation.navigate('VideosScreen', { videoURL: video })}
+            activeOpacity={0.8}
+            style={styles.playButton}
+          >
+            <Feather name="play-circle" size={50} color="#581DB9" />
+          </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
+      <View style={styles.iconsContainer}>
+        <TouchableOpacity style={styles.iconItem} activeOpacity={0.8}>
+          <Feather name="message-circle" size={20} color="black" />
+          <Text style={styles.iconText}>Comentários</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.iconItem} activeOpacity={0.8}>
+          <MaterialCommunityIcons name="heart" size={20} color="black" />
+          <Text style={styles.iconText}>Gosto</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.iconItem} activeOpacity={0.8}>
+          <MaterialCommunityIcons name="flag" size={20} color="black" />
+          <Text style={styles.iconText}>Denunciar</Text>
         </TouchableOpacity>
       </View>
-    </TouchableOpacity>
+    </View>
   );
 };
 
@@ -191,7 +208,7 @@ export const FolowerProfile = () => {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.bckButton} onPress={() => navigation.goBack()}>
           <Feather name="arrow-left" size={30} color="black" />
