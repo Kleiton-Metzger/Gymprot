@@ -1,16 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TouchableOpacity, Image, FlatList, ActivityIndicator } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { Feather } from '@expo/vector-icons';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from './style';
 import { SeguirBTN } from '../../../../components/common/seguirButton';
-import { doc, getDoc, updateDoc, arrayUnion, arrayRemove, where, query, collection, getDocs } from 'firebase/firestore';
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+  where,
+  query,
+  collection,
+  getDocs,
+  onSnapshot,
+} from 'firebase/firestore';
 import { db } from '../../../../storage/Firebase';
 import { useAuth } from '../../../../Hooks/useAuth';
 import { Video } from 'expo-av';
 import axios from 'axios';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import CommentsModal from '../../../../components/CommentsModal';
+import ReportModal from '../../../../components/ReportModal';
 
 const useFetchUserData = (createBy, userId) => {
   const [userData, setUserData] = useState(null);
@@ -40,6 +52,7 @@ const useFetchUserData = (createBy, userId) => {
 
 const useFetchVideos = (createBy, userId) => {
   const [videos, setVideos] = useState([]);
+  const [videoIds, setVideoIds] = useState([]); // New state for video IDs
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -50,6 +63,10 @@ const useFetchVideos = (createBy, userId) => {
         const querySnapshot = await getDocs(q);
         const videosData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setVideos(videosData);
+
+        // Update videoIds state
+        const ids = querySnapshot.docs.map(doc => doc.id);
+        setVideoIds(ids);
       } catch (error) {
         console.error('Error fetching videos: ', error);
       } finally {
@@ -60,7 +77,7 @@ const useFetchVideos = (createBy, userId) => {
     fetchVideos();
   }, [createBy, userId]);
 
-  return { videos, loading };
+  return { videos, videoIds, loading }; // Return videoIds
 };
 
 const UserInfo = ({ userName, location, creatorAvatar }) => (
@@ -79,8 +96,80 @@ const UserInfo = ({ userName, location, creatorAvatar }) => (
   </View>
 );
 
-const VideoItem = ({ video }) => {
+const VideoItem = ({ video, videoId }) => {
   const navigation = useNavigation();
+  const { currentUser } = useAuth();
+  const [isLiked, setIsLiked] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [reportModalVisible, setReportModalVisible] = useState(false);
+
+  useEffect(() => {
+    const checkIfLiked = async () => {
+      if (!currentUser?.userId) return;
+
+      try {
+        const q = query(collection(db, 'videos'), where('id', '==', videoId));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          querySnapshot.forEach(doc => {
+            const videoData = doc.data();
+            const likes = videoData.likes || [];
+            setIsLiked(likes.includes(currentUser.userId));
+          });
+        }
+      } catch (error) {
+        console.error('Error checking like status: ', error);
+      }
+    };
+
+    checkIfLiked();
+  }, [videoId, currentUser?.userId]);
+
+  const handleLike = useCallback(async () => {
+    if (!currentUser?.userId) return;
+
+    try {
+      const q = query(collection(db, 'videos'), where('id', '==', videoId));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        const videoDoc = querySnapshot.docs[0].ref;
+
+        if (isLiked) {
+          await updateDoc(videoDoc, { likes: arrayRemove(currentUser.userId) });
+          setIsLiked(false);
+        } else {
+          await updateDoc(videoDoc, { likes: arrayUnion(currentUser.userId) });
+          setIsLiked(true);
+        }
+      }
+    } catch (error) {
+      console.error('Error updating like: ', error);
+    }
+  }, [videoId, isLiked, currentUser?.userId]);
+
+  const handleReport = useCallback(async () => {
+    if (!currentUser?.userId) return;
+
+    try {
+      const q = query(collection(db, 'videos'), where('id', '==', videoId));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        const videoDoc = querySnapshot.docs[0].ref;
+        const videoData = querySnapshot.docs[0].data();
+        const reports = videoData.reports || [];
+
+        if (!reports.includes(currentUser.userId)) {
+          await updateDoc(videoDoc, { reports: arrayUnion(currentUser.userId) });
+          setReportedVideos(prevSet => new Set(prevSet).add(videoId));
+        }
+      }
+    } catch (error) {
+      console.error('Error reporting video: ', error);
+    }
+  }, [videoId, currentUser?.userId]);
 
   return (
     <View style={styles.videoItemContainer}>
@@ -109,19 +198,21 @@ const VideoItem = ({ video }) => {
         </View>
       </TouchableOpacity>
       <View style={styles.iconsContainer}>
-        <TouchableOpacity style={styles.iconItem} activeOpacity={0.8}>
+        <TouchableOpacity style={styles.iconItem} activeOpacity={0.8} onPress={() => setModalVisible(true)}>
           <Feather name="message-circle" size={20} color="black" />
           <Text style={styles.iconText}>Comentários</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.iconItem} activeOpacity={0.8}>
-          <MaterialCommunityIcons name="heart" size={20} color="black" />
+        <TouchableOpacity style={styles.iconItem} activeOpacity={0.8} onPress={handleLike}>
+          <MaterialCommunityIcons name="heart" size={20} color={isLiked ? 'red' : 'black'} />
           <Text style={styles.iconText}>Gosto</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.iconItem} activeOpacity={0.8}>
+        <TouchableOpacity style={styles.iconItem} activeOpacity={0.8} onPress={() => setReportModalVisible(true)}>
           <MaterialCommunityIcons name="flag" size={20} color="black" />
           <Text style={styles.iconText}>Denunciar</Text>
         </TouchableOpacity>
       </View>
+      <CommentsModal visible={modalVisible} onClose={() => setModalVisible(false)} videoId={videoId} />
+      <ReportModal visible={reportModalVisible} onClose={() => setReportModalVisible(false)} videoId={videoId} />
     </View>
   );
 };
@@ -132,7 +223,7 @@ export const FolowerProfile = () => {
   const { createBy, userId } = route.params;
   const { currentUser } = useAuth();
   const { userData, setUserData, isFollowing, setIsFollowing } = useFetchUserData(createBy, userId);
-  const { videos, loading } = useFetchVideos(createBy, userId);
+  const { videos, videoIds, loading } = useFetchVideos(createBy, userId); // Destructure videoIds
 
   const sendNotification = async followedUserData => {
     try {
@@ -228,7 +319,6 @@ export const FolowerProfile = () => {
                     source={userData?.avatar ? { uri: userData.avatar } : require('../../../../assets/avatar.png')}
                     style={styles.avatar}
                   />
-
                   <View style={styles.userFollow}>
                     <View style={styles.seguidoresContainer}>
                       <TouchableOpacity
@@ -279,7 +369,7 @@ export const FolowerProfile = () => {
                           creatorAvatar={userData?.avatar}
                           location={item.location?.cityName || ''}
                         />
-                        <VideoItem video={item?.videoURL} />
+                        <VideoItem video={item?.videoURL} videoId={item?.id} />
                       </View>
                     )}
                     keyExtractor={item => item.id.toString()}

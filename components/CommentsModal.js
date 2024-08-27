@@ -23,7 +23,6 @@ const CommentsModal = ({ visible, onClose, videoId }) => {
         videoId,
         userId: currentUser.userId,
         userName: currentUser.name,
-        userAvatar: currentUser.avatar || null,
         comment,
         timestamp: new Date(),
       });
