@@ -44,7 +44,7 @@ export const Configurations = () => {
         />
         <TouchableOpacity
           style={styles.setting}
-          onPress={() => navigation.navigate('NotificationaScreen')}
+          onPress={() => navigation.navigate('NotificationScreen')}
           opacity={0.8}
         >
           <Text style={styles.settingText}>Notificações</Text>
