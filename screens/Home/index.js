@@ -1,5 +1,14 @@
-import React, { useState, useEffect, memo, useCallback } from 'react';
-import { View, Text, TouchableOpacity, Image, FlatList, SafeAreaView, Dimensions } from 'react-native';
+import React, { useState, useEffect, useCallback, memo } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  FlatList,
+  SafeAreaView,
+  Dimensions,
+  ActivityIndicator,
+} from 'react-native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import {
   updateDoc,
@@ -34,18 +43,20 @@ export const HomeScreen = () => {
   const [categoria, setCategoria] = useState('');
   const [localizacao, setLocalizacao] = useState('');
   const [usersData, setUsersData] = useState({});
-  const [reportedVideos, setReportedVideos] = useState(new Set()); // State to track reported videos
+  const [reportedVideos, setReportedVideos] = useState(new Set());
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUserVideos = async () => {
+      setLoading(true);
       let q = collection(db, 'videos');
       q = query(q, where('status', '==', 'Public'));
 
-      if (categoria !== '') {
+      if (categoria) {
         q = query(q, where('type', '==', categoria));
       }
 
-      if (localizacao !== '') {
+      if (localizacao) {
         q = query(q, where('location.cityName', '==', localizacao));
       }
 
@@ -62,6 +73,7 @@ export const HomeScreen = () => {
         await Promise.all(promises);
         setVideos(fetchedVideos);
         setOriginalVideos(fetchedVideos);
+        setLoading(false);
       });
 
       return () => unsubscribeVideos();
@@ -85,27 +97,41 @@ export const HomeScreen = () => {
     }
   };
 
-  const handleSearch = text => {
-    setSearchPhrase(text);
+  const handleSearch = useCallback(
+    text => {
+      setSearchPhrase(text);
 
-    if (!text || text.trim() === '') {
-      setVideos([...originalVideos]);
-      return;
-    }
+      if (!text.trim()) {
+        setVideos([...originalVideos]);
+        return;
+      }
 
-    const searchText = text.toLowerCase();
+      const searchText = text.toLowerCase();
+      const filteredVideos = originalVideos.filter(item => {
+        const location = item.location?.cityName.toLowerCase();
+        return location.includes(searchText);
+      });
 
-    const filteredVideos = originalVideos.filter(item => {
-      const location = item.location?.cityName.toLowerCase();
-      return location.includes(searchText);
-    });
-
-    setVideos(filteredVideos);
-  };
+      setVideos(filteredVideos);
+    },
+    [originalVideos],
+  );
 
   const handleCategoriaChange = useCallback(categoria => {
     setCategoria(prevCategoria => (categoria === prevCategoria ? '' : categoria));
   }, []);
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ActivityIndicator
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+          size="large"
+          color="#581DB9"
+        />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -209,9 +235,7 @@ const UserInfo = ({ userName, location, tipo, creatorAvatar, navigation, current
         if (currentUser && currentUser.userId === userId) {
           navigation.navigate('Profile');
         } else {
-          navigation.navigate('FolowerProfile', {
-            createBy: userId,
-          });
+          navigation.navigate('FolowerProfile', { createBy: userId });
         }
       }}
       activeOpacity={0.8}
@@ -255,8 +279,6 @@ const VideoItem = memo(({ videoId, video, navigation, currentUser, setReportedVi
             const likes = videoData.likes || [];
             setIsLiked(likes.includes(currentUser.userId));
           });
-        } else {
-          console.log('No document found with this video ID');
         }
       } catch (error) {
         console.error('Error checking like status: ', error);
@@ -277,18 +299,12 @@ const VideoItem = memo(({ videoId, video, navigation, currentUser, setReportedVi
         const videoDoc = querySnapshot.docs[0].ref;
 
         if (isLiked) {
-          await updateDoc(videoDoc, {
-            likes: arrayRemove(currentUser.userId),
-          });
+          await updateDoc(videoDoc, { likes: arrayRemove(currentUser.userId) });
           setIsLiked(false);
         } else {
-          await updateDoc(videoDoc, {
-            likes: arrayUnion(currentUser.userId),
-          });
+          await updateDoc(videoDoc, { likes: arrayUnion(currentUser.userId) });
           setIsLiked(true);
         }
-      } else {
-        console.log('No document found with this video ID');
       }
     } catch (error) {
       console.error('Error updating like: ', error);
@@ -308,13 +324,9 @@ const VideoItem = memo(({ videoId, video, navigation, currentUser, setReportedVi
         const reports = videoData.reports || [];
 
         if (!reports.includes(currentUser.userId)) {
-          await updateDoc(videoDoc, {
-            reports: arrayUnion(currentUser.userId),
-          });
+          await updateDoc(videoDoc, { reports: arrayUnion(currentUser.userId) });
           setReportedVideos(prevSet => new Set(prevSet).add(videoId));
         }
-      } else {
-        console.log('No document found with this video ID');
       }
     } catch (error) {
       console.error('Error reporting video: ', error);
@@ -333,7 +345,7 @@ const VideoItem = memo(({ videoId, video, navigation, currentUser, setReportedVi
             style={styles.video}
             source={{ uri: video }}
             resizeMode="cover"
-            isMuted={true}
+            isMuted
             shouldPlay={false}
             useNativeControls={false}
             isLooping={false}
