@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { View, Text, TouchableOpacity, Image, FlatList, ActivityIndicator } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -52,7 +52,7 @@ const useFetchUserData = (createBy, userId) => {
 
 const useFetchVideos = (createBy, userId) => {
   const [videos, setVideos] = useState([]);
-  const [videoIds, setVideoIds] = useState([]); // New state for video IDs
+  const [videoIds, setVideoIds] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -64,7 +64,6 @@ const useFetchVideos = (createBy, userId) => {
         const videosData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setVideos(videosData);
 
-        // Update videoIds state
         const ids = querySnapshot.docs.map(doc => doc.id);
         setVideoIds(ids);
       } catch (error) {
@@ -77,7 +76,7 @@ const useFetchVideos = (createBy, userId) => {
     fetchVideos();
   }, [createBy, userId]);
 
-  return { videos, videoIds, loading }; // Return videoIds
+  return { videos, videoIds, loading };
 };
 
 const UserInfo = ({ userName, location, creatorAvatar }) => (
@@ -96,26 +95,26 @@ const UserInfo = ({ userName, location, creatorAvatar }) => (
   </View>
 );
 
-const VideoItem = ({ video, videoId }) => {
+const VideoItem = memo(({ video, videoId }) => {
   const navigation = useNavigation();
   const { currentUser } = useAuth();
   const [isLiked, setIsLiked] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [reportModalVisible, setReportModalVisible] = useState(false);
+  const [isReported, setIsReported] = useState(false);
 
   useEffect(() => {
     const checkIfLiked = async () => {
       if (!currentUser?.userId) return;
-
       try {
         const q = query(collection(db, 'videos'), where('id', '==', videoId));
         const querySnapshot = await getDocs(q);
-
         if (!querySnapshot.empty) {
           querySnapshot.forEach(doc => {
             const videoData = doc.data();
             const likes = videoData.likes || [];
             setIsLiked(likes.includes(currentUser.userId));
+            setIsReported(videoData.reports?.includes(currentUser.userId) || false);
           });
         }
       } catch (error) {
@@ -128,14 +127,11 @@ const VideoItem = ({ video, videoId }) => {
 
   const handleLike = useCallback(async () => {
     if (!currentUser?.userId) return;
-
     try {
       const q = query(collection(db, 'videos'), where('id', '==', videoId));
       const querySnapshot = await getDocs(q);
-
       if (!querySnapshot.empty) {
         const videoDoc = querySnapshot.docs[0].ref;
-
         if (isLiked) {
           await updateDoc(videoDoc, { likes: arrayRemove(currentUser.userId) });
           setIsLiked(false);
@@ -151,19 +147,16 @@ const VideoItem = ({ video, videoId }) => {
 
   const handleReport = useCallback(async () => {
     if (!currentUser?.userId) return;
-
     try {
       const q = query(collection(db, 'videos'), where('id', '==', videoId));
       const querySnapshot = await getDocs(q);
-
       if (!querySnapshot.empty) {
         const videoDoc = querySnapshot.docs[0].ref;
         const videoData = querySnapshot.docs[0].data();
         const reports = videoData.reports || [];
-
         if (!reports.includes(currentUser.userId)) {
           await updateDoc(videoDoc, { reports: arrayUnion(currentUser.userId) });
-          setReportedVideos(prevSet => new Set(prevSet).add(videoId));
+          setIsReported(true);
         }
       }
     } catch (error) {
@@ -207,7 +200,7 @@ const VideoItem = ({ video, videoId }) => {
           <Text style={styles.iconText}>Gosto</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.iconItem} activeOpacity={0.8} onPress={() => setReportModalVisible(true)}>
-          <MaterialCommunityIcons name="flag" size={20} color="black" />
+          <MaterialCommunityIcons name="flag" size={20} color={isReported ? 'red' : 'black'} />
           <Text style={styles.iconText}>Denunciar</Text>
         </TouchableOpacity>
       </View>
@@ -215,7 +208,7 @@ const VideoItem = ({ video, videoId }) => {
       <ReportModal visible={reportModalVisible} onClose={() => setReportModalVisible(false)} videoId={videoId} />
     </View>
   );
-};
+});
 
 export const FolowerProfile = () => {
   const navigation = useNavigation();
@@ -223,7 +216,7 @@ export const FolowerProfile = () => {
   const { createBy, userId } = route.params;
   const { currentUser } = useAuth();
   const { userData, setUserData, isFollowing, setIsFollowing } = useFetchUserData(createBy, userId);
-  const { videos, videoIds, loading } = useFetchVideos(createBy, userId); // Destructure videoIds
+  const { videos, videoIds, loading } = useFetchVideos(createBy, userId);
 
   const sendNotification = async followedUserData => {
     try {
@@ -293,7 +286,7 @@ export const FolowerProfile = () => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#581DB9" style={{ marginTop: 20 }} />
+        <ActivityIndicator size="large" color="#581DB9" style={{ marginTop: 20, alignSelf: 'center', flex: 1 }} />
       </View>
     );
   }
@@ -306,7 +299,7 @@ export const FolowerProfile = () => {
         </TouchableOpacity>
         <Text style={styles.title}>{userData?.name}</Text>
       </View>
-      <View style={{ height: 1, backgroundColor: 'lightgray', width: '100%' }} />
+      <View style={{ backgroundColor: '#E5E4E2', width: '100%' }} />
       <FlatList
         showsVerticalScrollIndicator={false}
         data={['profile', 'bio', 'videos']}

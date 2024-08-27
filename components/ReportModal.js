@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Modal, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { db } from '../storage/Firebase';
-import { collection, addDoc, updateDoc, doc, increment } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, query, where, getDocs, doc } from 'firebase/firestore';
 import { useAuth } from '../Hooks/useAuth';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import ModalSelector from 'react-native-modal-selector';
@@ -14,7 +14,7 @@ const ReportModal = ({ visible, onClose, videoId }) => {
 
   const handleReportSubmit = async () => {
     if (!reportReason || !currentUser?.userId) {
-      Alert.alert('Erro', 'Você deve selecionar um motivo e estar com a sessão iniciada para reportar um vídeo.');
+      Alert.alert('Erro', 'Você deve selecionar um motivo e estar logado para reportar.');
       return;
     }
 
@@ -29,20 +29,25 @@ const ReportModal = ({ visible, onClose, videoId }) => {
         timestamp: new Date(),
       });
 
-      const videoDocRef = doc(db, 'videos', videoId);
-      await updateDoc(videoDocRef, {
-        reportCount: increment(1),
+      const videosRef = collection(db, 'videos');
+      const q = query(videosRef, where('id', '==', videoId));
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach(async videoDoc => {
+        const videoRef = doc(db, 'videos', videoDoc.id);
+        await updateDoc(videoRef, {
+          reports: doc(db, 'videos', videoDoc.id).reports
+            ? [...doc(db, 'videos', videoDoc.id).reports, currentUser.userId]
+            : [currentUser.userId],
+        });
+        setLoading(false);
       });
 
-      setReportReason('');
-      setAdditionalComment('');
+      Alert.alert('Sucesso', 'O vídeo foi reportado com sucesso. Obrigado pela sua contribuição.');
       onClose();
     } catch (error) {
-      console.error('Error submitting report: ', error);
-      Alert.alert('Erro', 'Ocorreu um erro ao enviar o reporte. Tente novamente mais tarde.');
-    } finally {
-      setLoading(false);
+      Alert.alert('Erro', 'Ocorreu um erro ao reportar o vídeo. Por favor, tente novamente.');
     }
+    setLoading(false);
   };
 
   const data = [
@@ -51,6 +56,10 @@ const ReportModal = ({ visible, onClose, videoId }) => {
     { key: 3, label: 'Spam ou propaganda', value: 'spam_or_ads' },
     { key: 4, label: 'Outro', value: 'other' },
   ];
+
+  const initValue = reportReason
+    ? data.find(option => option.value === reportReason)?.label || 'Selecione um motivo'
+    : 'Selecione um motivo';
 
   return (
     <Modal visible={visible} transparent={true} animationType="slide">
@@ -64,10 +73,15 @@ const ReportModal = ({ visible, onClose, videoId }) => {
 
           <ModalSelector
             data={data}
-            initValue="Selecione um motivo"
+            initValue={initValue}
             onChange={option => setReportReason(option.value)}
             style={styles.pickerContainer}
-          ></ModalSelector>
+            selectTextStyle={styles.pickerText}
+            cancelTextStyle={styles.pickerText}
+            optionTextStyle={styles.pickerText}
+            optionContainerStyle={styles.pickerOptions}
+            initValueTextStyle={styles.pickerText}
+          />
 
           <TextInput
             style={styles.input}
@@ -135,11 +149,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     overflow: 'hidden',
   },
-  picker: {
-    width: '100%',
-    height: 50,
+  pickerText: {
     color: '#333',
-    paddingLeft: 10,
+  },
+  pickerOptions: {
+    borderRadius: 10,
   },
   input: {
     width: '100%',
