@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import {
   View,
   Text,
@@ -25,6 +25,7 @@ import { Menu, Divider, RadioButton } from 'react-native-paper';
 import VideosScreen from '../VideoRepro/VideoRepre';
 import { useNavigation } from '@react-navigation/native';
 import { TextInput } from 'react-native-paper';
+import CommentsModal from '../../../components/CommentsModal';
 
 const { width, height } = Dimensions.get('window');
 LogBox.ignoreLogs(['Sending `onAnimatedValueUpdate` with no listeners registered.']);
@@ -44,7 +45,7 @@ export const PrivateScreen = ({ navigation }) => {
 
   const handleModalClose = () => {
     setDescription('');
-    setStatus('Public');
+    setStatus('Private');
     setTypeVideo('Running');
     setSelectedVideo(null);
     setShowModal(false);
@@ -156,7 +157,7 @@ export const PrivateScreen = ({ navigation }) => {
                   handleDeleteVideoConfirmation(item);
                 }}
                 style={styles.deleteVideo}
-                //activeOpacity={0.8}
+                activeOpacity={0.8}
               >
                 <Feather name="trash-2" size={20} color="red" />
               </TouchableOpacity>
@@ -171,7 +172,7 @@ export const PrivateScreen = ({ navigation }) => {
         contentContainerStyle={styles.videoGridContainer}
         removeClippedSubviews={true}
         ListFooterComponent={<View style={{ marginBottom: 80 }} />}
-        ListEmptyComponent={() => <Text style={styles.emptyText}>Nenhum vídeo privado encontrado</Text>}
+        ListEmptyComponent={() => <Text style={styles.emptyText}>Nenhum vídeo público encontrado</Text>}
       />
       <Modal
         onRequestClose={handleModalClose}
@@ -198,6 +199,7 @@ export const PrivateScreen = ({ navigation }) => {
               multiline={true}
               bordercolor="#581DB9"
             />
+
             <Text style={styles.modalLabel}>Status do Vídeo:</Text>
             <RadioButton.Group onValueChange={value => setStatus(value)} value={status}>
               <RadioButton.Item label="Público" value="Public" color="green" />
@@ -213,7 +215,6 @@ export const PrivateScreen = ({ navigation }) => {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
-
       <Modal
         visible={showDeleteConfirmation}
         animationType="slide"
@@ -265,28 +266,67 @@ const UserInfo = ({ userName, location, tipo, creatorAvatar, navigation }) => (
   </View>
 );
 
-const VideoItem = ({ video, navigation }) => (
-  <TouchableOpacity
-    onPress={() => navigation.navigate('VideosScreen', { videoURL: video })}
-    style={styles.videoItem}
-    activeOpacity={1}
-  >
-    <TouchableOpacity
-      onPress={() => navigation.navigate('VideosScreen', { videoURL: video })}
-      activeOpacity={0.8}
-      style={styles.playButton}
-    >
-      <Feather name="play-circle" size={50} color="#581DB9" />
-    </TouchableOpacity>
+const VideoItem = memo(({ video, navigation }) => {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState(null);
 
-    <Video
-      resizeMode="cover"
-      style={styles.video}
-      source={{ uri: video }}
-      isMuted={true}
-      isLooping={false}
-      shouldPlay
-      focusable={true}
-    />
-  </TouchableOpacity>
-);
+  useEffect(() => {
+    const fetchVideos = async () => {
+      try {
+        const q = query(collection(db, 'videos'), where('videoURL', '==', video));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach(doc => {
+          setSelectedVideo({ id: doc.id, ...doc.data() });
+        });
+      } catch (error) {
+        console.error('Error fetching video:', error);
+      }
+    };
+
+    fetchVideos();
+
+    console.log('Selected video:', selectedVideo);
+  }, []);
+
+  const handleOpenComments = () => {
+    setSelectedVideo({ id: video });
+    setModalVisible(true);
+  };
+
+  return (
+    <View style={styles.videoItemContainer}>
+      <TouchableOpacity
+        onPress={() => navigation.navigate('VideosScreen', { videoURL: video })}
+        style={styles.videoItem}
+        activeOpacity={1}
+      >
+        <View style={styles.videoContainer}>
+          <Video
+            style={styles.video}
+            source={{ uri: video }}
+            resizeMode="cover"
+            isMuted
+            shouldPlay={false}
+            useNativeControls={false}
+            isLooping={false}
+          />
+          <TouchableOpacity
+            onPress={() => navigation.navigate('VideosScreen', { videoURL: video })}
+            activeOpacity={0.8}
+            style={styles.playButton}
+          >
+            <Feather name="play-circle" size={50} color="#581DB9" />
+          </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
+      <View style={styles.iconsContainer}>
+        <TouchableOpacity style={styles.iconItem} onPress={handleOpenComments} activeOpacity={0.8}>
+          <Feather name="message-circle" size={20} color="black" />
+          <Text style={styles.iconText}>Comentários</Text>
+        </TouchableOpacity>
+      </View>
+
+      <CommentsModal visible={modalVisible} onClose={() => setModalVisible(false)} videoId={selectedVideo?.id} />
+    </View>
+  );
+});
