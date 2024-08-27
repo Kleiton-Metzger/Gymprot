@@ -3,11 +3,13 @@ import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, 
 import { db } from '../storage/Firebase';
 import { collection, query, onSnapshot, where, doc, getDoc, deleteDoc } from 'firebase/firestore';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useAuth } from '../Hooks/useAuth';
 
 const CommentsList = ({ videoId }) => {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [userAvatars, setUserAvatars] = useState({}); // Store user avatars
+  const [userAvatars, setUserAvatars] = useState({});
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     const fetchComments = async () => {
@@ -15,55 +17,45 @@ const CommentsList = ({ videoId }) => {
         // Query to get comments for a specific video
         const commentsQuery = query(collection(db, 'comments'), where('videoId', '==', videoId));
 
-        const unsubscribe = onSnapshot(
-          commentsQuery,
-          async querySnapshot => {
-            const comments = [];
-            const userIds = new Set(); // Use a Set to avoid duplicate userId requests
+        const unsubscribe = onSnapshot(commentsQuery, async querySnapshot => {
+          const comments = [];
+          const userIds = [];
 
-            querySnapshot.forEach(doc => {
-              const data = doc.data();
-              comments.push({ id: doc.id, ...data });
-              if (data.userId) {
-                userIds.add(data.userId);
-              }
-            });
+          querySnapshot.forEach(doc => {
+            const data = doc.data();
+            comments.push({ id: doc.id, ...data });
+            if (data.userId && !userIds.includes(data.userId)) {
+              userIds.push(data.userId);
+            }
+          });
 
-            setComments(comments);
+          setComments(comments);
 
-            // Fetch avatars for all unique userIds
-            const fetchAvatars = async () => {
-              const avatars = {};
-              for (const userId of userIds) {
-                try {
-                  const userDoc = await getDoc(doc(db, 'users', userId));
-                  if (userDoc.exists()) {
-                    const userData = userDoc.data();
-                    const avatar = userData.userAvatar || 'https://example.com/path/to/default-avatar.jpg'; // Fallback URL
-                    avatars[userId] = avatar;
-                  } else {
-                    console.warn(`User document not found for userId ${userId}`);
-                  }
-                } catch (error) {
-                  console.error(`Error fetching avatar for user ${userId}: `, error);
+          const fetchAvatars = async () => {
+            const avatars = {};
+            for (const userId of userIds) {
+              try {
+                const userDocRef = doc(db, 'users', userId); // Use doc with userId
+                const userDocSnap = await getDoc(userDocRef);
+                if (userDocSnap.exists()) {
+                  const userData = userDocSnap.data();
+                  avatars[userId] = userData.avatar;
                 }
+              } catch (error) {
+                console.error('Error fetching user avatar: ', error);
               }
-              setUserAvatars(avatars);
-            };
+            }
+            setUserAvatars(avatars);
+          };
 
-            await fetchAvatars();
-            setLoading(false);
-          },
-          error => {
-            console.error('Error fetching comments: ', error);
-            setLoading(false);
-          },
-        );
+          await fetchAvatars();
 
-        return () => unsubscribe();
+          setLoading(false);
+        });
+
+        return unsubscribe;
       } catch (error) {
-        console.error('Error in fetchComments: ', error);
-        setLoading(false);
+        console.error('Error fetching comments: ', error);
       }
     };
 
@@ -93,14 +85,17 @@ const CommentsList = ({ videoId }) => {
       renderItem={({ item }) => (
         <View style={styles.commentContainer}>
           <Image
-            source={{ uri: userAvatars[item.userId] || 'https://example.com/path/to/default-avatar.jpg' }}
+            source={userAvatars[item.userId] ? { uri: userAvatars[item.userId] } : require('../assets/avatar.png')}
             style={styles.avatar}
           />
+
           <Text style={styles.userName}>{item.userName}:</Text>
           <Text>{item.comment}</Text>
-          <TouchableOpacity onPress={() => handleDeleteComment(item.id)} style={styles.deleteButton}>
-            <MaterialCommunityIcons name="delete" size={20} color="red" />
-          </TouchableOpacity>
+          {currentUser.userId === item.userId && (
+            <TouchableOpacity onPress={() => handleDeleteComment(item.id)} style={styles.deleteButton}>
+              <MaterialCommunityIcons name="delete" size={20} color="red" />
+            </TouchableOpacity>
+          )}
         </View>
       )}
       ListEmptyComponent={() => (
@@ -126,7 +121,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#DDDDDD',
     backgroundColor: '#FFFFFF',
-    width: '100%',
+    width: '98%',
     flexDirection: 'row',
     alignItems: 'center',
     shadowColor: '#000',
@@ -140,18 +135,11 @@ const styles = StyleSheet.create({
     color: '#581DB9',
     marginRight: 10,
   },
-  commentText: {
-    flex: 1,
-    color: '#333',
-  },
   deleteButton: {
     marginLeft: 10,
     padding: 5,
     borderRadius: 5,
     backgroundColor: '#FFEFEF',
-  },
-  deleteIcon: {
-    color: 'red',
   },
   emptyText: {
     color: '#666',
@@ -161,8 +149,8 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'darkgray',
     marginRight: 10,
+    backgroundColor: '#F0F0F0',
   },
 });
 
