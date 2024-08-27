@@ -336,11 +336,7 @@ const VideoItem = memo(({ videoId, video, navigation, currentUser, setReportedVi
 
   return (
     <View style={styles.videoItemContainer}>
-      <TouchableOpacity
-        onPress={() => navigation.navigate('VideosScreen', { videoURL: video })}
-        style={styles.videoItem}
-        activeOpacity={0.8}
-      >
+      <TouchableOpacity onPress={() => navigation.navigate('VideosScreen', { videoURL: video })} activeOpacity={0.8}>
         <View style={styles.videoContainer}>
           <Video
             style={styles.video}
