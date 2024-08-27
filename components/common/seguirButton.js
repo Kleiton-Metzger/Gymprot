@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 10,
     position: 'absolute',
-    backgroundColor: '#581DB9', // Cor do botão quando não estiver seguindo
+    backgroundColor: '#581DB9',
   },
   buttonFollowing: {
     width: 100,
@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 10,
     position: 'absolute',
-    backgroundColor: 'lightgrey', // Cor do botão quando já estiver seguindo
+    backgroundColor: 'lightgrey',
   },
   textNotFollowing: {
     fontSize: 16,
@@ -38,9 +38,9 @@ const styles = StyleSheet.create({
   },
   textFollowing: {
     fontSize: 16,
-    color: 'black', // Cor do texto quando já estiver seguindo
+    color: 'black',
     fontWeight: 'bold',
   },
 });
 
-export { SeguirBTN }; // Corrigindo a exportação aqui
+export { SeguirBTN };
