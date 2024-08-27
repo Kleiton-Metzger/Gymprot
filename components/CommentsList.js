@@ -91,7 +91,15 @@ const CommentsList = ({ videoId }) => {
           <View style={{ flex: 1 }}>
             <Text style={styles.userName}>{item.userName}:</Text>
             <Text>{item.comment}</Text>
-            <Text style={styles.timestamp}>{new Date(item.timestamp?.toDate()).toLocaleString()}</Text>
+            <Text style={styles.timestamp}>
+              {new Date(item.timestamp?.toDate()).toLocaleString('pt-PT', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </Text>
           </View>
 
           {currentUser.userId === item.userId && (
