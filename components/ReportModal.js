@@ -14,13 +14,12 @@ const ReportModal = ({ visible, onClose, videoId }) => {
 
   const handleReportSubmit = async () => {
     if (!reportReason || !currentUser?.userId) {
-      Alert.alert('Erro', 'Você deve selecionar um motivo e estar logado para reportar.');
+      Alert.alert('Erro', 'Você deve selecionar um motivo e estar com a sessão iniciada para reportar um vídeo.');
       return;
     }
 
     setLoading(true);
     try {
-      // Add report to the reports collection
       await addDoc(collection(db, 'reports'), {
         videoId,
         userId: currentUser.userId,
@@ -30,7 +29,6 @@ const ReportModal = ({ visible, onClose, videoId }) => {
         timestamp: new Date(),
       });
 
-      // Increment report count in video document
       const videoDocRef = doc(db, 'videos', videoId);
       await updateDoc(videoDocRef, {
         reportCount: increment(1),
@@ -69,14 +67,7 @@ const ReportModal = ({ visible, onClose, videoId }) => {
             initValue="Selecione um motivo"
             onChange={option => setReportReason(option.value)}
             style={styles.pickerContainer}
-          >
-            <TextInput
-              style={styles.picker}
-              editable={false}
-              placeholder="Selecione um motivo"
-              value={reportReason ? data.find(item => item.value === reportReason)?.label : ''}
-            />
-          </ModalSelector>
+          ></ModalSelector>
 
           <TextInput
             style={styles.input}
