@@ -180,6 +180,7 @@ export const HomeScreen = () => {
       </View>
 
       <FlatList
+        styles={styles.videoGridContainer}
         showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={() => (
           <View style={{ height: 1, width: '90%', alignSelf: 'center', backgroundColor: 'lightgrey' }} />

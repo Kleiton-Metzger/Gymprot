@@ -11,17 +11,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
   },
   uavatar: {
     width: 40,
     height: 40,
     borderRadius: 20,
     backgroundColor: 'darkgray',
-    marginLeft: 13,
   },
   filterIcon: {
-    position: 'absolute',
-    right: 20,
     flexDirection: 'row',
   },
   searchContainer: {
@@ -32,20 +33,25 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: '#F0F0F0',
     width: '95%',
+    alignSelf: 'center',
   },
   videoGridContainer: {
     backgroundColor: 'white',
+    paddingBottom: 80,
   },
   infoContainer: {
     flex: 1,
-    margin: 5,
+    margin: 10,
     padding: 10,
     borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '95%',
-    alignSelf: 'center',
-    marginBottom: 20,
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
   },
   userInfoContainer: {
     flexDirection: 'row',
@@ -65,7 +71,6 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 5,
     color: '#581DB9',
   },
   locationContainer: {
@@ -84,22 +89,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'gray',
   },
-
   videoItemContainer: {
     marginBottom: 20,
     width: '100%',
   },
   videoContainer: {
-    width: '105%',
+    width: '100%',
     height: 200,
     borderRadius: 20,
     overflow: 'hidden',
     alignSelf: 'center',
+    backgroundColor: 'black',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+    marginTop: 10,
+    paddingBottom: 10, // Adicionado padding bottom
   },
   video: {
     width: '100%',
     height: '100%',
-    borderRadius: 20,
   },
   playButton: {
     position: 'absolute',
@@ -112,6 +125,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 10,
+    paddingHorizontal: 10,
   },
   iconItem: {
     flexDirection: 'row',
@@ -152,10 +166,6 @@ const styles = StyleSheet.create({
   },
   commentList: {
     paddingBottom: 10,
-  },
-  emptyText: {
-    textAlign: 'center',
-    color: 'gray',
   },
 });
 
