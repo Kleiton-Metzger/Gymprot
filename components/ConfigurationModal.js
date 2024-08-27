@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Switch, Text, Modal, TouchableOpacity, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native';
+import {
+  View,
+  Switch,
+  Text,
+  Modal,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Alert,
+  Image,
+} from 'react-native';
 import { Button } from '../components/common/Button';
 import { TextInput, List } from 'react-native-paper';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
@@ -351,6 +361,8 @@ const ConfigurationModal = ({
               <View key={index} style={styles.machineItemContainer}>
                 {machine.Treadmill && (
                   <>
+                    <Image source={require('../assets/treadmill.png')} style={{ width: 24, height: 24 }} />
+
                     <List.Item
                       onPress={() => handleFillMachineData(machine)}
                       title={`Passadeira : ${machine.Treadmill.name}`}
@@ -359,6 +371,7 @@ const ConfigurationModal = ({
                 )}
                 {machine.Bicycle && (
                   <>
+                    <Image source={require('../assets/stationary-bike.png')} style={{ width: 24, height: 24 }} />
                     <List.Item
                       onPress={() => handleFillMachineData(machine)}
                       title={`Bicicleta : ${machine.Bicycle.name}`}
