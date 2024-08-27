@@ -12,13 +12,13 @@ export const ForgotPassword = ({ navigation, navigation: { goBack } }) => {
   const handleResetPassword = () => {
     setEmailError('');
     if (!email.trim()) {
-      setEmailError('Introduza o seu email');
+      setEmailError('Introduza o seu email para redefinir a sua palavra-passe');
       return;
     }
 
     sendPasswordResetEmail(auth, email)
       .then(() => {
-        alert('Palaavra-passe enviada com sucesso. Verifique o seu email para redefinir a sua palavra-passe');
+        alert('Palavra-passe enviada com sucesso. Verifique o seu email para redefinir a sua palavra-passe');
         navigation.navigate('Login');
       })
       .catch(error => {
@@ -65,7 +65,7 @@ export const ForgotPassword = ({ navigation, navigation: { goBack } }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    //backgroundColor: 'white',
   },
   hederContainer: {
     height: 50,

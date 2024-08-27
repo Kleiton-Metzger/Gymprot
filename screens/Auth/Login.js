@@ -51,7 +51,7 @@ export const Login = () => {
       .then(userCredential => {
         const user = userCredential.user;
       })
-      .catch(error => setError('Palaavra-passe ou email incorretos'));
+      .catch(error => setError('Palavra-passe ou email incorretos'));
   };
 
   return (
