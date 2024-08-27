@@ -162,9 +162,6 @@ export const PublicScreen = ({ navigation }) => {
                 <Feather name="trash-2" size={20} color="red" />
               </TouchableOpacity>
             </View>
-            <View style={styles.videoInfoContainer}>
-              <Text style={styles.videoLocation}> {item.location.cityName}</Text>
-            </View>
             <VideoItem video={item.videoURL} navigation={navigation} />
           </View>
         )}
