@@ -266,29 +266,34 @@ const UserInfo = ({ userName, location, tipo, creatorAvatar, navigation }) => (
 
 const VideoItem = memo(({ video, navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedVideo, setSelectedVideo] = useState(null);
+  const [idVideo, setIdVideo] = useState(null);
 
   useEffect(() => {
     const fetchVideos = async () => {
       try {
         const q = query(collection(db, 'videos'), where('videoURL', '==', video));
         const querySnapshot = await getDocs(q);
-        querySnapshot.forEach(doc => {
-          setSelectedVideo({ id: doc.id, ...doc.data() });
-        });
+
+        if (!querySnapshot.empty) {
+          const doc = querySnapshot.docs[0];
+          setIdVideo({ id: doc.id, ...doc.data() });
+        } else {
+          setIdVideo(null);
+        }
       } catch (error) {
-        console.error('Error fetching video:', error);
+        console.log('Error fetching videos', error);
       }
     };
 
     fetchVideos();
-
-    console.log('Selected video:', selectedVideo);
-  }, []);
+  }, [video]);
 
   const handleOpenComments = () => {
-    setSelectedVideo({ id: video });
-    setModalVisible(true);
+    if (idVideo && typeof idVideo.id === 'string') {
+      setModalVisible(true);
+    } else {
+      console.log('Video id is undefined or null');
+    }
   };
 
   return (
@@ -323,8 +328,7 @@ const VideoItem = memo(({ video, navigation }) => {
           <Text style={styles.iconText}>Comentários</Text>
         </TouchableOpacity>
       </View>
-
-      <CommentsModal visible={modalVisible} onClose={() => setModalVisible(false)} videoId={selectedVideo?.id} />
+      <CommentsModal visible={modalVisible} onClose={() => setModalVisible(false)} videoId={idVideo?.id} />
     </View>
   );
 });

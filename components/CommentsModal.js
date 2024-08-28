@@ -13,7 +13,7 @@ const CommentsModal = ({ visible, onClose, videoId }) => {
 
   const handleCommentSubmit = async () => {
     if (!comment.trim() || !currentUser?.userId) {
-      Alert.alert('Erro', 'O comentário não pode estar vazio e você deve estar logado para comentar.');
+      Alert.alert('Erro', 'O comentário não pode estar vazio.');
       return;
     }
 
