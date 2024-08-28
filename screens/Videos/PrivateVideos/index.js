@@ -170,7 +170,7 @@ export const PrivateScreen = ({ navigation }) => {
         contentContainerStyle={styles.videoGridContainer}
         removeClippedSubviews={true}
         ListFooterComponent={<View style={{ marginBottom: 80 }} />}
-        ListEmptyComponent={() => <Text style={styles.emptyText}>Nenhum vídeo público encontrado</Text>}
+        ListEmptyComponent={() => <Text style={styles.emptyText}>Nenhum vídeo privado encontrado</Text>}
       />
       <Modal
         onRequestClose={handleModalClose}

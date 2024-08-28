@@ -31,7 +31,7 @@ export const Notifications = () => {
     const fetchNotifications = async () => {
       try {
         const response = await getNotificationInbox(22648, 'ORCAvOl2Mp53Ll26YDq01d');
-        console.log('API Response:', response);
+        //console.log('API Response:', response);
         if (Array.isArray(response)) {
           setData(response);
         } else {
