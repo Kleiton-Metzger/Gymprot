@@ -1,17 +1,14 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import Pdf from 'react-native-pdf';
+import PDFReader from 'rn-pdf-reader-js';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export const PdfViewer = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { uri, name } = route.params || {};
-
-  const pdfRef = useRef(null);
-  const [currentPage, setCurrentPage] = useState(1);
 
   if (!uri || !name) {
     return (
@@ -20,20 +17,6 @@ export const PdfViewer = () => {
       </SafeAreaView>
     );
   }
-
-  const handleNextPage = () => {
-    if (pdfRef.current) {
-      pdfRef.current.setPage(currentPage + 1);
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  const handlePreviousPage = () => {
-    if (pdfRef.current) {
-      pdfRef.current.setPage(currentPage - 1);
-      setCurrentPage(currentPage - 1);
-    }
-  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -44,29 +27,22 @@ export const PdfViewer = () => {
         <Text style={styles.title}>{name}</Text>
       </View>
       <View style={styles.pdfContainer}>
-        <Pdf
-          ref={pdfRef}
+        <PDFReader
           source={{ uri: uri }}
-          onLoadComplete={numberOfPages => {
-            console.log(`number of pages: ${numberOfPages}`);
-          }}
-          onPageChanged={(page, numberOfPages) => {
-            setCurrentPage(page);
-          }}
-          onError={error => {
+          onError={() => {
             alert('Failed to load PDF');
           }}
-          onPressLink={uri => {
-            console.log(`Link pressed: ${uri}`);
-          }}
+          activityIndicatorColor="blue"
         />
       </View>
       <View style={styles.controls}>
-        <TouchableOpacity onPress={handlePreviousPage} style={styles.controlButton} activeOpacity={0.8}>
-          <MaterialCommunityIcons name="page-previous" size={30} color="black" />
+        <TouchableOpacity style={styles.controlButton} activeOpacity={0.8}>
+          <MaterialCommunityIcons name="page-previous" size={40} color="black" />
+          <Text>Anterior</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleNextPage} style={styles.controlButton} activeOpacity={0.8}>
-          <MaterialCommunityIcons name="page-next" size={30} color="black" />
+        <TouchableOpacity style={styles.controlButton} activeOpacity={0.8}>
+          <Text>Próximo</Text>
+          <MaterialCommunityIcons name="page-next" size={40} color="black" />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -115,6 +91,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: 10,
+    backgroundColor: 'gray',
   },
   controlButton: {
     flexDirection: 'row',

@@ -22,13 +22,12 @@ export const styles = StyleSheet.create({
     left: width / 2,
   },
   videoContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: '100%',
+    height: '100%',
   },
   video: {
     width: '100%',
-    height: '95%',
-    marginBottom: '25%',
+    height: '90%',
   },
   dataContainer: {
     position: 'absolute',
@@ -42,5 +41,19 @@ export const styles = StyleSheet.create({
   dataText: {
     color: 'white',
     fontSize: 15,
+  },
+  playPauseButton: {
+    position: 'absolute',
+    top: 25,
+    zIndex: 1,
+    right: '45%',
+    backgroundColor: '#581DB9',
+    padding: 10,
+    borderRadius: 50,
+  },
+  playPauseButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

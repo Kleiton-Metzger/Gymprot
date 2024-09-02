@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, SafeAreaView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, SafeAreaView, TouchableOpacity, Text, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Video } from 'expo-av';
@@ -22,6 +22,9 @@ export const VideosScreen = () => {
   const [inclination, setInclination] = useState('');
   const [maxSpeed, setMaxSpeed] = useState('');
   const [type, setType] = useState('');
+  const [isVideoFinished, setIsVideoFinished] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true); // Track whether the video is playing or paused
+  const videoRef = useRef(null);
 
   useEffect(() => {
     const fetchVideoData = async () => {
@@ -75,6 +78,28 @@ export const VideosScreen = () => {
     navigation.goBack();
   };
 
+  const handlePlayPause = async () => {
+    if (isVideoFinished) {
+      await videoRef.current.replayAsync();
+      setIsVideoFinished(false); // Reset the flag after replaying
+      setIsPlaying(true); // Set video to play state
+    } else {
+      if (isPlaying) {
+        await videoRef.current.pauseAsync();
+      } else {
+        await videoRef.current.playAsync();
+      }
+      setIsPlaying(!isPlaying); // Toggle play/pause state
+    }
+  };
+
+  const onPlaybackStatusUpdate = status => {
+    if (status.didJustFinish) {
+      setIsVideoFinished(true);
+      setIsPlaying(false); // Update playing state when finished
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <TouchableOpacity style={styles.header} onPress={() => navigation.goBack()} activeOpacity={0.8}>
@@ -84,18 +109,23 @@ export const VideosScreen = () => {
         {isVideoLoading && <ActivityIndicator size={30} color="#581DB9" style={styles.activityIndicator} />}
         {videoData && !isModalVisible && (
           <Video
+            ref={videoRef}
             source={{ uri: videoURL }}
             isMuted
             volume={2.0}
             resizeMode="cover"
-            shouldPlay
+            shouldPlay={isPlaying} // Control playback based on state
             isLooping={false}
-            useNativeControls
+            useNativeControls={false} // Disable native controls
             onLoadStart={() => setIsVideoLoading(false)}
             style={styles.video}
             onLoad={() => setIsVideoLoading(false)}
+            onPlaybackStatusUpdate={onPlaybackStatusUpdate}
           />
         )}
+        <TouchableOpacity style={styles.playPauseButton} onPress={handlePlayPause} activeOpacity={0.8}>
+          <Text style={styles.playPauseButtonText}>{isPlaying ? 'Pause' : 'Play'}</Text>
+        </TouchableOpacity>
         <View style={styles.dataContainer}>
           {videoData && (
             <VideoData
