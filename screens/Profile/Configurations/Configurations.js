@@ -72,7 +72,6 @@ export const Configurations = () => {
         </TouchableOpacity>
         <Text style={styles.title}>Configurações</Text>
       </View>
-
       <ScrollView contentContainerStyle={styles.settingsContainer}>
         <TouchableOpacity style={styles.setting} onPress={() => navigation.navigate('EditProfileScreen')} opacity={0.8}>
           <Text style={styles.settingText}>Editar Perfil</Text>
@@ -90,6 +89,16 @@ export const Configurations = () => {
         <View
           style={{ height: 1, width: '90%', alignSelf: 'center', backgroundColor: 'lightgrey', marginBottom: 10 }}
         />
+        <TouchableOpacity
+          style={styles.setting}
+          onPress={() => navigation.navigate('PoliticaPrivacidade')}
+          opacity={0.8}
+        >
+          <Text style={styles.settingText}>Política de Privacidade</Text>
+        </TouchableOpacity>
+        <View
+          style={{ height: 1, width: '90%', alignSelf: 'center', backgroundColor: 'lightgrey', marginBottom: 10 }}
+        />
         <TouchableOpacity style={styles.setting} onPress={() => handleSignOut()} opacity={0.8}>
           <Text style={styles.settingText}>Sair</Text>
         </TouchableOpacity>
@@ -99,6 +108,7 @@ export const Configurations = () => {
         <Text style={styles.deletAccountText}>Apagar Conta</Text>
       </TouchableOpacity>
       <Text style={{ textAlign: 'center', marginBottom: 20, color: 'black' }}>Versão 1.0.0</Text>
+
       <Modal
         animationType="slide"
         transparent={true}

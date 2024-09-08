@@ -6,3 +6,4 @@ export * from './Configurations/Configurations';
 export * from './Follow/FolloList';
 export * from './Follow/Follower';
 export * from './Follow/Following';
+export * from './PoliticaPrivacidade';
