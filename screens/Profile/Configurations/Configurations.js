@@ -1,13 +1,29 @@
-import React from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, SafeAreaView, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  SafeAreaView,
+  ScrollView,
+  Alert,
+  Modal,
+  TextInput,
+  ActivityIndicator,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../../Hooks/useAuth';
 import { unregisterIndieDevice } from 'native-notify';
+import { auth } from '../../../storage/Firebase';
+import { EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 
 export const Configurations = () => {
   const navigation = useNavigation();
-  const { currentUser, signOut } = useAuth();
+  const { currentUser, signOut, deleteUser } = useAuth();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSignOut = async () => {
     try {
@@ -19,6 +35,27 @@ export const Configurations = () => {
     }
   };
 
+  const handleDeleteAccount = () => {
+    setModalVisible(true);
+  };
+
+  const handleConfirmDeleteAccount = async () => {
+    setLoading(true);
+    try {
+      const credential = EmailAuthProvider.credential(auth.currentUser.email, password); // Use the input password
+      await reauthenticateWithCredential(auth.currentUser, credential);
+      await deleteUser();
+      unregisterIndieDevice(currentUser.email, 22648, 'ORCAvOl2Mp53Ll26YDq01d');
+      navigation.replace('Login');
+    } catch (error) {
+      console.log('Error deleting account:', error.message);
+      Alert.alert('Error', error.message);
+    } finally {
+      setLoading(false);
+      setModalVisible(false);
+    }
+  };
+
   if (!currentUser) {
     return (
       <View style={styles.container}>
@@ -26,6 +63,7 @@ export const Configurations = () => {
       </View>
     );
   }
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -57,7 +95,37 @@ export const Configurations = () => {
         </TouchableOpacity>
       </ScrollView>
       <View style={{ flex: 1 }} />
+      <TouchableOpacity style={styles.deletAccount} onPress={() => handleDeleteAccount()} opacity={0.8}>
+        <Text style={styles.deletAccountText}>Apagar Conta</Text>
+      </TouchableOpacity>
       <Text style={{ textAlign: 'center', marginBottom: 20, color: 'black' }}>Versão 1.0.0</Text>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.modalView}>
+          <Text style={styles.modalText}>Para apagar a sua conta, insira a sua palavra-passe</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
+          <View style={styles.modalButtonContainer}>
+            <TouchableOpacity style={styles.buttonCancel} onPress={() => setModalVisible(false)}>
+              <Text style={styles.buttonText}>Cancelar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.buttonDelete} onPress={handleConfirmDeleteAccount} disabled={loading}>
+              <Text style={styles.buttonText}>{loading ? 'A apagar...' : 'Apagar'}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -100,6 +168,71 @@ const styles = StyleSheet.create({
   settingText: {
     fontSize: 16,
     color: '#333',
+  },
+  deletAccount: {
+    backgroundColor: '#DC143C',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+    justifyContent: 'center',
+    marginHorizontal: 20,
+  },
+  deletAccountText: {
+    fontSize: 16,
+    color: 'white',
+    textAlign: 'center',
+  },
+  modalView: {
+    top: '40%',
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  input: {
+    width: '80%',
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 20,
+  },
+  modalButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  buttonCancel: {
+    backgroundColor: 'lightgray',
+    padding: 10,
+    borderRadius: 5,
+    width: '45%',
+    alignItems: 'center',
+  },
+  buttonDelete: {
+    backgroundColor: 'red',
+    padding: 10,
+    borderRadius: 5,
+    width: '45%',
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
 

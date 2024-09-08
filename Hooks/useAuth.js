@@ -21,6 +21,15 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const deleteUser = async () => {
+    try {
+      await auth.currentUser.delete();
+      setUser(null);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const fetchUserData = async userId => {
     const userDoc = await getDoc(doc(db, 'users', userId));
     if (userDoc.exists()) {
@@ -77,6 +86,9 @@ export const AuthProvider = ({ children }) => {
       videos,
       setCategoria,
       setLocalizacao,
+      originalVideos,
+      setOriginalVideos,
+      deleteUser,
     }),
     [currentUser, user, videos],
   );
