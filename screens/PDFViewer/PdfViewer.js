@@ -4,11 +4,41 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import PDFReader from 'rn-pdf-reader-js';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import Toast from 'react-native-toast-message';
 
 export const PdfViewer = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { uri, name } = route.params || {};
+
+  const showToast = (message, type = 'success') => {
+    Toast.show({
+      type: type,
+      text1: 'Atualização',
+      text2: 'Aumente o percentual de inclinação da passadeira para 5%',
+    });
+  };
+
+  const toastConfig = {
+    success: ({ text1, text2 }) => (
+      <View style={styles.toastSuccessContainer}>
+        <Text style={styles.toastTitle}>{text1}</Text>
+        <Text style={styles.toastText}>{text2}</Text>
+      </View>
+    ),
+    error: ({ text1, text2 }) => (
+      <View style={styles.toastErrorContainer}>
+        <Text style={styles.toastTitle}>{text1}</Text>
+        <Text style={styles.toastText}>{text2}</Text>
+      </View>
+    ),
+    info: ({ text1, text2 }) => (
+      <View style={styles.toastInfoContainer}>
+        <Text style={styles.toastTitle}>{text1}</Text>
+        <Text style={styles.toastText}>{text2}</Text>
+      </View>
+    ),
+  };
 
   if (!uri || !name) {
     return (
@@ -30,21 +60,22 @@ export const PdfViewer = () => {
         <PDFReader
           source={{ uri: uri }}
           onError={() => {
-            alert('Failed to load PDF');
+            showToast('Failed to load PDF', 'error');
           }}
           activityIndicatorColor="blue"
         />
       </View>
       <View style={styles.controls}>
-        <TouchableOpacity style={styles.controlButton} activeOpacity={0.8}>
+        <TouchableOpacity style={styles.controlButton} activeOpacity={0.8} onPress={() => showToast('Previous Page')}>
           <MaterialCommunityIcons name="page-previous" size={40} color="black" />
           <Text>Anterior</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.controlButton} activeOpacity={0.8}>
+        <TouchableOpacity style={styles.controlButton} activeOpacity={0.8} onPress={() => showToast('Next Page')}>
           <Text>Próximo</Text>
           <MaterialCommunityIcons name="page-next" size={40} color="black" />
         </TouchableOpacity>
       </View>
+      <Toast config={toastConfig} />
     </SafeAreaView>
   );
 };
@@ -101,5 +132,38 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     width: '45%',
+  },
+  toastSuccessContainer: {
+    backgroundColor: 'darkgray',
+    padding: 10,
+    borderRadius: 5,
+    marginHorizontal: 10,
+    marginTop: 5,
+    width: '90%',
+    height: 100,
+  },
+  toastErrorContainer: {
+    backgroundColor: 'red',
+    padding: 10,
+    borderRadius: 5,
+    marginHorizontal: 10,
+    marginTop: 5,
+  },
+  toastInfoContainer: {
+    backgroundColor: 'blue',
+    padding: 10,
+    borderRadius: 5,
+    marginHorizontal: 10,
+    marginTop: 5,
+  },
+  toastText: {
+    color: 'white',
+    fontSize: 18,
+  },
+  toastTitle: {
+    color: '#581DB9',
+    fontSize: 20,
+    fontWeight: 'bold',
+    alignSelf: 'center',
   },
 });
