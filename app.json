@@ -9,6 +9,7 @@
     "UIBackgroundModes": ["location", "fetch"],
     "assetBundlePatterns": ["**/*"],
     "ios": {
+      "requireFullScreen": true,
       "supportsTablet": true,
       "bundleIdentifier": "com.gymprot.app",
       "buildNumber": "1.0.0",
@@ -76,6 +77,12 @@
         }
       ],
       [
+        "expo-screen-orientation",
+        {
+          "initialOrientation": "DEFAULT"
+        }
+      ],
+      [
         "expo-location",
         {
           "locationAlwaysAndWhenInUsePermission": "Allow Gymprot to use your location."
@@ -124,12 +131,31 @@
             "ios": {
               "allowAlert": true,
               "allowBadge": true,
-              "allowSound": true
+              "allowSound": true,
+              "allowCriticalAlert": true,
+              "allowCarPlay": true,
+              "allowProvisional": true,
+              "allowAnnouncement": true,
+              "allowTimeSensitive": true,
+              "allowShowPreviews": true,
+              "allowLockScreenMediaControls": true,
+              "allowInAppNotificationSettings": true,
+              "allowAnnouncements": true,
+              "allowSpokenAnnouncements": true,
+              "allowPersistent": true,
+              "allowCritical": true,
+              "allowProvisionalCritical": true
             },
             "android": {
               "allowAlert": true,
               "allowBadge": true,
-              "allowSound": true
+              "allowSound": true,
+              "allowVibration": true,
+              "allowLights": true,
+              "allowPriority": true,
+              "allowFullScreenIntent": true,
+              "allowAutoCancel": true,
+              "allowSticky": true
             }
           }
         }

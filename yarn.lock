@@ -2269,6 +2269,11 @@
   resolved "https://registry.yarnpkg.com/@react-native-community/progress-view/-/progress-view-1.4.2.tgz#16ef7cff8ac5b034d2ad3281a647a8ed6fe1a8f0"
   integrity sha512-eFn8hssvFjr0w78mdlN0rt2KY5ptR5DAj2sjn7CWlmEkdFuOKAYt6HnHP1cKdXFrmeH31MVbqib43+iA6wEbWQ==
 
+"@react-native-community/slider@^4.5.2":
+  version "4.5.2"
+  resolved "https://registry.yarnpkg.com/@react-native-community/slider/-/slider-4.5.2.tgz#c3835788dbc1bd83d3778b83ca15533c805db149"
+  integrity sha512-DbFyCyI7rwl0FkBkp0lzEVp+5mNfS5qU/nM2sK2aSguWhj0Odkt1aKHP2iW/ljruOhgS/O4dEixXlne4OdZJDQ==
+
 "@react-native-firebase/firestore@^20.1.0":
   version "20.4.0"
   resolved "https://registry.yarnpkg.com/@react-native-firebase/firestore/-/firestore-20.4.0.tgz#de10b44ea238c39c5eb080ee938543b85332c5d7"
@@ -4759,6 +4764,11 @@ expo-permissions@~14.4.0:
   version "14.4.0"
   resolved "https://registry.yarnpkg.com/expo-permissions/-/expo-permissions-14.4.0.tgz#d7bb2f0026b87e1294ee551969c35306193f4ad3"
   integrity sha512-oAcnJ7dlZhpBydK73cwomA2xofizayVUz+FW5REl7dMu7MYyeN/3aqhlpZ3mYddrxvG161bqu97MQr01UixUnw==
+
+expo-screen-orientation@~7.0.5:
+  version "7.0.5"
+  resolved "https://registry.yarnpkg.com/expo-screen-orientation/-/expo-screen-orientation-7.0.5.tgz#0a517982151c6519fa4b10ce27047de39c1f92cf"
+  integrity sha512-1j0MzVzYpjKQo4BWowQ3ZYwC3OnddX/8k06C8VYTAxMyd8ou1k+rG4tm+GIV2n2RSzc3g7cfPlQwSYr3/SGmbg==
 
 expo-sensors@~13.0.9:
   version "13.0.9"
@@ -8125,6 +8135,11 @@ react-native-sensors@^7.3.6:
   dependencies:
     rxjs ">= 6"
 
+react-native-simple-toast@^3.3.1:
+  version "3.3.1"
+  resolved "https://registry.yarnpkg.com/react-native-simple-toast/-/react-native-simple-toast-3.3.1.tgz#0eeab7cdcb98d999467e1cef812cfdc198549c23"
+  integrity sha512-5SbAvZpzjSHNkMGbO1cr/7kg/oHZEVZbgeqC+6FtYTtvBbkRMbEaUIfiD1rvghbxZrJB783Y/mHRDUab2ogTqA==
+
 react-native-svg-charts@^5.4.0:
   version "5.4.0"
   resolved "https://registry.yarnpkg.com/react-native-svg-charts/-/react-native-svg-charts-5.4.0.tgz#3817a4714c276b7024e60ae5c9f13191614aecc8"
@@ -8150,6 +8165,11 @@ react-native-tab-view@^3.5.2:
   integrity sha512-nE5WqjbeEPsWQx4mtz81QGVvgHRhujTNIIZiMCx3Bj6CBFDafbk7XZp9ocmtzXUQaZ4bhtVS43R4FIiR4LboJw==
   dependencies:
     use-latest-callback "^0.1.5"
+
+react-native-toast-message@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/react-native-toast-message/-/react-native-toast-message-2.2.0.tgz#c53a4746b15616858a7d61c4386b92cbe9fbf911"
+  integrity sha512-AFti8VzUk6JvyGAlLm9/BknTNDXrrhqnUk7ak/pM7uCTxDPveAu2ekszU0on6vnUPFnG04H/QfYE2IlETqeaWw==
 
 react-native-uuid@^2.0.2:
   version "2.0.2"
