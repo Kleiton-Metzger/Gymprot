@@ -16,6 +16,33 @@ import { useAuth } from '../../Hooks/useAuth';
 import { MaterialIcons } from '@expo/vector-icons';
 import axios from 'axios';
 
+class KalmanFilter {
+  constructor(R = 0.01, Q = 1) {
+    this.R = R; // Variância do ruído do sensor
+    this.Q = Q; // Variância do ruído do processo
+    this.A = 1;
+    this.B = 0;
+    this.C = 1;
+    this.cov = NaN;
+    this.x = NaN; // Valor estimado
+  }
+
+  filter(z) {
+    if (isNaN(this.x)) {
+      this.x = (1 / this.C) * z;
+      this.cov = (1 / this.C) * this.Q * (1 / this.C);
+    } else {
+      const predX = this.A * this.x + this.B * 0;
+      const predCov = this.A * this.cov * this.A + this.R;
+
+      const K = predCov * this.C * (1 / (this.C * predCov * this.C + this.Q));
+      this.x = predX + K * (z - this.C * predX);
+      this.cov = predCov - K * this.C * predCov;
+    }
+    return this.x;
+  }
+}
+
 export const CameraScreen = () => {
   const { currentUser } = useAuth();
   const cameraRef = useRef(null);
@@ -40,10 +67,20 @@ export const CameraScreen = () => {
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
   const [inclinacao, setInclinacao] = useState({ x: 0.05, y: -0.97, z: -0.25, tolerance: 0.1 });
+  const [instantaneousSpeed, setInstantaneousSpeed] = useState(0); // Instantaneous speed from accelerometer
+  const [gpsSpeed, setGpsSpeed] = useState(0); // Speed calculated from GPS data
+  const MY_API_KEY = 'AIzaSyBtVgHlGmQGx5sVAuEVZHNrFINlKYVxYh0';
 
+  // Time tracking for speed calculation
+  const lastAccelDataRef = useRef(null);
+  const lastTimeRef = useRef(null);
   function toggleCameraFacing() {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
   }
+  // Instância do filtro de Kalman para cada eixo do acelerômetro
+  const kalmanX = useRef(new KalmanFilter()).current;
+  const kalmanY = useRef(new KalmanFilter()).current;
+  const kalmanZ = useRef(new KalmanFilter()).current;
 
   useEffect(() => {
     const requestPermissions = async () => {
@@ -95,14 +132,41 @@ export const CameraScreen = () => {
       console.log('Tela para cima');
     }
   };
+  useEffect(() => {
+    let lastUpdateTime = Date.now();
+
+    const subscription = Accelerometer.addListener(accelerometerData => {
+      let { x, y, z } = accelerometerData;
+
+      x = kalmanX.filter(x);
+      y = kalmanY.filter(y);
+      z = kalmanZ.filter(z);
+
+      const currentTime = Date.now();
+      const deltaTime = (currentTime - lastUpdateTime) / 1000; // Diferenca de tempo em segundos
+      lastUpdateTime = currentTime;
+
+      const currentAcceleration = Math.sqrt(x * x + y * y + z * z);
+
+      setSpeed(prevSpeed => prevSpeed + currentAcceleration * deltaTime);
+    });
+
+    Accelerometer.setUpdateInterval(1000);
+
+    return () => {
+      subscription && subscription.remove();
+    };
+  }, []);
 
   useEffect(() => {
     const accelerometerSubscription = Accelerometer.addListener(accelerometerData => {
       verifyInclination(accelerometerData);
 
-      const currentSpeed = Math.sqrt(
-        Math.pow(accelerometerData.x, 2) + Math.pow(accelerometerData.y, 2) + Math.pow(accelerometerData.z, 2),
-      );
+      const filteredX = kalmanX.filter(accelerometerData.x);
+      const filteredY = kalmanY.filter(accelerometerData.y);
+      const filteredZ = kalmanZ.filter(accelerometerData.z);
+
+      const currentSpeed = Math.sqrt(filteredX ** 2 + filteredY ** 2 + filteredZ ** 2);
 
       setSpeed(currentSpeed);
     });
@@ -199,7 +263,7 @@ export const CameraScreen = () => {
     if (cameraRef.current) {
       try {
         const videoRecordPromise = cameraRef.current.recordAsync({
-          maxDuration: 60,
+          maxDuration: 1800,
           quality: '720p',
           stabilizationMode: 'auto',
           autoFocus: 'on',
@@ -286,27 +350,31 @@ export const CameraScreen = () => {
   };
 
   const getAltitude = async (latitude, longitude) => {
-    const API_KEY = 'sua-chave-aqui';
+    const API_KEY = MY_API_KEY;
     try {
       const response = await axios.get(
         `https://api.open-elevation.com/api/v1/lookup?locations=${latitude},${longitude}`,
       );
-      return response.data.results[0].elevation;
+      const altitude = response.data.results[0]?.elevation || 0;
+      setElevation(altitude);
+      return altitude;
     } catch (error) {
       console.error('Error fetching altitude:', error);
       return null;
     }
   };
-
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371;
-    const dLat = ((lat2 - lat1) * Math.PI) / 180;
-    const dLon = ((lon2 - lon1) * Math.PI) / 180;
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const R = 63713;
+    const φ1 = (lat1 * Math.PI) / 180;
+    const φ2 = (lat2 * Math.PI) / 180;
+    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+
+    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
+
+    const distance = R * c;
+    return distance;
   };
 
   const handleModalClose = () => {
@@ -324,7 +392,8 @@ export const CameraScreen = () => {
   if (hasPermission === false) {
     return (
       <View style={styles.container}>
-        <Text>No access to camera</Text>
+        <Text>Permission not granted</Text>
+        <Button label="Grant Permission" onPress={requestPermission} />
       </View>
     );
   }
@@ -352,11 +421,12 @@ export const CameraScreen = () => {
           </View>
         )}
         <View style={styles.infoContainer}>
-          <Text style={styles.infoText}>Current Speed: {speed.toFixed(2)} m/s</Text>
-          <Text style={styles.infoText}>Current Latitude: {latitude ? latitude.toFixed(6) : 'N/A'}</Text>
-          <Text style={styles.infoText}>Current Longitude: {longitude ? longitude.toFixed(6) : 'N/A'}</Text>
-          <Text style={styles.infoText}>Current Altitude: {elevation !== null ? elevation.toFixed(2) : 'N/A'} m</Text>
-          <Text style={styles.infoText}>Distance: {distance.toFixed(2)} m</Text>
+          <Text style={styles.infoText}>Speed: {speed.toFixed(2)} m/s</Text>
+          <Text style={styles.infoText}>Distance: {distance.toFixed(2)} meters</Text>
+          <Text style={styles.infoText}>Latitude: {latitude}</Text>
+          <Text style={styles.infoText}>Longitude: {longitude}</Text>
+          <Text style={styles.infoText}>Elevation: {elevation ? elevation : 'A aguardar'}</Text>
+          <Text style={styles.infoText}>Time: {formatTime(recordTime)}</Text>
         </View>
         <Modal
           onRequestClose={handleModalClose}
