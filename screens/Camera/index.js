@@ -325,27 +325,19 @@ export const CameraScreen = () => {
     try {
       const geocode = await Location.reverseGeocodeAsync({ latitude, longitude });
       const cityName = geocode[0].city;
-
-      const newVideo = {
+      await setDoc(doc(db, 'videos', uuid()), {
         id: uuid(),
         videoURL,
-        title: `${currentUser.displayName} - ${cityName}`,
         description,
-        userId: currentUser.uid,
-        uploadDate: new Date(),
-        status,
+        createBy: currentUser?.userId,
+        createAt: new Date().toISOString(),
         type: typeVideo,
-        likes: 0,
-        views: 0,
-        latitude,
-        longitude,
+        location: { cityName, latitude, longitude },
+        status,
         dataPoints,
-        distance,
-      };
-
-      await setDoc(doc(db, 'videos', newVideo.id), newVideo);
+      });
     } catch (error) {
-      console.error('Error saving video to Firestore:', error);
+      console.log('Error adding video to Firestore:', error);
     }
   };
 
