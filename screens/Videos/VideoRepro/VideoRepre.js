@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, SafeAreaView, TouchableOpacity, Text, ActivityIndicator, useWindowDimensions } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Video } from 'expo-av';
 import { collection, getDocs, query, where } from 'firebase/firestore';
@@ -9,7 +9,8 @@ import { styles } from './styles';
 import ConfigurationModal from '../../../components/ConfigurationModal';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import Slider from '@react-native-community/slider';
-
+import VideoData from '../../../components/VideoData';
+import CustomBottomSheet from './BottomSheet';
 export const VideosScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
@@ -32,6 +33,11 @@ export const VideosScreen = () => {
   const [currentTime, setCurrentTime] = useState(0);
   const [seekTime, setSeekTime] = useState(0);
   const videoRef = useRef(null);
+  const [activeView, setActiveView] = useState('video');
+  const playbackRates = [0.5, 1.0, 1.5, 2.0];
+  const [showPlaybackRates, setShowPlaybackRates] = useState(false);
+  const [showVolumeControl, setShowVolumeControl] = useState(false);
+  const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
 
   useEffect(() => {
     const lockOrientation = async () => {
@@ -99,6 +105,13 @@ export const VideosScreen = () => {
       setIsPlaying(!isPlaying);
     }
   };
+  const toggleMute = () => {
+    const newVolume = volume > 0 ? 0 : 1.0;
+    setVolume(newVolume);
+    if (videoRef.current) {
+      videoRef.current.setStatusAsync({ volume: newVolume });
+    }
+  };
 
   const onPlaybackStatusUpdate = status => {
     if (status.didJustFinish) {
@@ -135,7 +148,7 @@ export const VideosScreen = () => {
   const handleSeek = async value => {
     setSeekTime(value);
     if (videoRef.current) {
-      await videoRef.current.setPositionAsync(value * 1000);
+      await videoRef.current.setPositionAsync(value * 100);
     }
   };
 
@@ -148,12 +161,60 @@ export const VideosScreen = () => {
     navigation.goBack();
   };
 
+  const togglePlaybackRates = () => {
+    setShowPlaybackRates(prev => !prev);
+  };
+
+  const selectPlaybackRate = rate => {
+    setPlaybackRate(rate);
+    setShowPlaybackRates(false);
+    if (videoRef.current) {
+      videoRef.current.setStatusAsync({ rate: rate });
+    }
+  };
+  const toggleVolumeControl = () => {
+    setShowVolumeControl(prev => !prev);
+  };
+
+  const toggleView = view => {
+    if (view === 'video') {
+      setActiveView('video');
+      setActiveView(view);
+      setIsBottomSheetVisible(false);
+    }
+    if (view === 'document') {
+      setActiveView('document');
+      setIsBottomSheetVisible(true);
+    }
+  };
+
+  const toggleBottomSheet = () => {
+    setIsBottomSheetVisible(prev => !prev);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.headerButton} onPress={() => navigation.goBack()} activeOpacity={0.8}>
           <Ionicons name="arrow-back" size={30} color="white" />
         </TouchableOpacity>
+        <View style={styles.screenContent}>
+          <TouchableOpacity
+            style={[styles.toggleButton, activeView === 'video' ? styles.activeButton : styles.inactiveButton]}
+            onPress={() => toggleView('video')}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="play" size={24} color={activeView === 'video' ? 'black' : 'white'} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.toggleButton, activeView === 'document' ? styles.activeButton : styles.inactiveButton]}
+            onPress={() => toggleView('document')}
+            activeOpacity={0.8}
+          >
+            <MaterialIcons name="description" size={24} color={activeView === 'document' ? 'black' : 'white'} />
+          </TouchableOpacity>
+        </View>
+
         <TouchableOpacity style={styles.headerButton} onPress={changeOrientation} activeOpacity={0.8}>
           <Ionicons name={isLandscape ? 'phone-portrait-outline' : 'phone-landscape-outline'} size={30} color="white" />
         </TouchableOpacity>
@@ -177,16 +238,12 @@ export const VideosScreen = () => {
             onPlaybackStatusUpdate={onPlaybackStatusUpdate}
           />
         )}
-        <TouchableOpacity
-          style={[styles.playPauseButton, { backgroundColor: isPlaying ? 'rgba(0, 0, 0, 0.8)' : 'rgba(0, 0, 0, 0.5)' }]}
-          onPress={handlePlayPause}
-          activeOpacity={0.8}
-        >
+        <TouchableOpacity style={styles.playPauseButton} onPress={handlePlayPause} activeOpacity={0.8}>
           <Ionicons name={isPlaying ? 'pause' : 'play'} size={40} color="white" />
         </TouchableOpacity>
         <View style={styles.controlsContainer}>
           <TouchableOpacity onPress={() => handleSeek(currentTime - 10)} activeOpacity={0.8} style={styles.seekButton}>
-            <Ionicons name="play-back" size={30} color="white" />
+            <Ionicons name="play-back" size={45} color="white" />
           </TouchableOpacity>
           <Slider
             style={styles.videoTimeline}
@@ -198,38 +255,64 @@ export const VideosScreen = () => {
             maximumTrackTintColor="#000000"
           />
           <TouchableOpacity onPress={() => handleSeek(currentTime + 10)} activeOpacity={0.8} style={styles.seekButton}>
-            <Ionicons name="play-forward" size={30} color="white" />
+            <Ionicons name="play-forward" size={45} color="white" />
           </TouchableOpacity>
         </View>
         <View style={styles.volumeControlContainer}>
-          <Ionicons name="volume-high" size={30} color={volume > 0 ? 'white' : 'gray'} />
-          <Slider
-            style={styles.volumeControl}
-            minimumValue={0}
-            maximumValue={1}
-            value={volume}
-            onValueChange={handleVolumeChange}
-            minimumTrackTintColor={volume > 0 ? '#FFFFFF' : '#555555'}
-            maximumTrackTintColor="#000000"
-          />
+          <TouchableOpacity onPress={toggleVolumeControl} activeOpacity={0.8}>
+            <Ionicons
+              name={volume > 0 ? 'volume-high' : 'volume-mute'}
+              size={30}
+              color={volume > 0 ? 'white' : 'gray'}
+            />
+          </TouchableOpacity>
+
+          {showVolumeControl && (
+            <Slider
+              style={styles.volumeControl}
+              minimumValue={0}
+              maximumValue={1}
+              value={volume}
+              onValueChange={handleVolumeChange}
+              minimumTrackTintColor={volume > 0 ? '#FFFFFF' : '#555555'}
+              maximumTrackTintColor="#000000"
+            />
+          )}
         </View>
+
         <View style={styles.speedometerControlContainer}>
-          <Ionicons style={styles.speedometer} name="speedometer" size={20} color="white" />
-          <Slider
-            style={styles.speedometerControl}
-            minimumValue={0.5}
-            maximumValue={2.0}
-            step={0.1}
-            value={playbackRate}
-            onValueChange={handlePlaybackRateChange}
-            minimumTrackTintColor="#FFFFFF"
-            maximumTrackTintColor="#000000"
-          />
+          <TouchableOpacity onPress={togglePlaybackRates} activeOpacity={0.8}>
+            <MaterialIcons style={styles.speedometerIcon} name="speed" size={30} color="white" />
+          </TouchableOpacity>
+          {showPlaybackRates && (
+            <View style={styles.playbackRatesContainer}>
+              {playbackRates.map(rate => (
+                <TouchableOpacity
+                  key={rate}
+                  onPress={() => selectPlaybackRate(rate)}
+                  style={[
+                    styles.playbackRateButton,
+                    playbackRate === rate ? styles.activePlaybackRateButton : styles.inactivePlaybackRateButton,
+                  ]}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.playbackRateText}>{rate.toFixed(1)}x</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
         </View>
         <View style={styles.infoContainer}>
-          <Text style={styles.infoText}>Velocidade: km/h</Text>
-          <Text style={styles.infoText}>Inclinação: 0°</Text>
-          <Text style={styles.infoText}>Tempo do vídeo: 00:00 </Text>
+          {videoData && (
+            <VideoData
+              currentDataPointIndex={currentDataPointIndex}
+              dataPoints={videoData.dataPoints}
+              treadmillName={treadmillName}
+              bicycleName={bicycleName}
+              inclination={inclination}
+              maxSpeed={maxSpeed}
+            />
+          )}
         </View>
       </View>
       <ConfigurationModal
@@ -246,6 +329,7 @@ export const VideosScreen = () => {
         onStart={handleStart}
         type={type}
       />
+      <CustomBottomSheet isVisible={isBottomSheetVisible} />
     </SafeAreaView>
   );
 };

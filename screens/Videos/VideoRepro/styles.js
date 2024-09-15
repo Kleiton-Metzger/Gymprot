@@ -6,7 +6,6 @@ const commonButtonStyles = {
   backgroundColor: 'rgba(0, 0, 0, 0.5)',
   borderRadius: 30,
 };
-
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -17,6 +16,28 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 10,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  screenContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 10,
+    backgroundColor: '#555',
+    borderRadius: 25,
+    height: 55,
+  },
+  filterIcon: {
+    width: width * 0.25,
+    height: 35,
+    borderRadius: 20,
+    backgroundColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 5,
+    top: 10,
+  },
+  filterImage: {
+    width: 30,
+    height: 30,
   },
   headerButton: {
     padding: 10,
@@ -34,13 +55,14 @@ export const styles = StyleSheet.create({
   },
   playPauseButton: {
     position: 'absolute',
-    bottom: height * 0.4,
+    bottom: '50%',
     left: '50%',
-    transform: [{ translateX: -30 }],
+    transform: [{ translateX: -30 }, { translateY: 30 }],
     padding: 15,
     ...commonButtonStyles,
     zIndex: 1,
   },
+
   controlsContainer: {
     position: 'absolute',
     bottom: 60,
@@ -52,7 +74,8 @@ export const styles = StyleSheet.create({
   },
   seekButton: {
     padding: 10,
-    ...commonButtonStyles,
+    backgroundColor: '#555',
+    borderRadius: 20,
   },
   activityIndicator: {
     position: 'absolute',
@@ -71,19 +94,50 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   volumeControl: {
-    width: width * 0.2,
+    width: width * 0.13,
+    marginTop: 10,
   },
   speedometerControlContainer: {
     position: 'absolute',
     bottom: 10,
     right: 0,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginVertical: 10,
   },
-  speedometer: {
-    marginBottom: 5,
+  playbackRatesContainer: {
+    flexDirection: 'row',
+    marginLeft: 10,
+    alignItems: 'center',
   },
-  speedometerControl: {
-    width: width * 0.2,
+  speedometerIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 5,
+    right: 10,
+  },
+  playbackRateButton: {
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    marginHorizontal: 5,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: 'white',
+  },
+  activePlaybackRateButton: {
+    backgroundColor: '#581DB9',
+  },
+  inactivePlaybackRateButton: {
+    backgroundColor: 'white',
+  },
+  playbackRateText: {
+    color: 'wihte',
+    fontSize: 16,
   },
   infoContainer: {
     position: 'absolute',
@@ -98,5 +152,20 @@ export const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     marginBottom: 5,
+  },
+  toggleButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 5,
+    top: 3,
+  },
+  activeButton: {
+    backgroundColor: '#581DB9',
+  },
+  inactiveButton: {
+    backgroundColor: '#555',
   },
 });
