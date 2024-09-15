@@ -13,7 +13,7 @@ export default function SplashScreen() {
           marginTop: 20,
         }}
       >
-        Gymprot App
+        Exercise and Work Integrator
       </Text>
     </View>
   );

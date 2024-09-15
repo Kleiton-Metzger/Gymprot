@@ -67,7 +67,7 @@ export const PublicScreen = ({ navigation }) => {
       querySnapshot.forEach(async doc => {
         await deleteDoc(doc.ref);
         console.log('Video deleted successfully');
-        console.Alert('Sucesso', 'Vídeo apagado com sucesso.');
+        Alert.alert('Sucesso', 'Vídeo apagado com sucesso.');
       });
     } catch (error) {
       console.error('Error deleting video document:', error);
