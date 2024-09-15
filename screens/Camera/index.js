@@ -359,7 +359,7 @@ export const CameraScreen = () => {
       return altitude;
     } catch (error) {
       console.error('Error fetching altitude:', error);
-      return null || 0;
+      return null;
     }
   };
 
@@ -424,7 +424,7 @@ export const CameraScreen = () => {
           <Text style={styles.infoText}>Distance: {distance.toFixed(2)} meters</Text>
           <Text style={styles.infoText}>Latitude: {latitude}</Text>
           <Text style={styles.infoText}>Longitude: {longitude}</Text>
-          <Text style={styles.infoText}>Elevation: {elevation.toFixed(3) ? elevation.toFixed(3) : 'A aguardar'}</Text>
+          <Text style={styles.infoText}>Elevation: {elevation ? elevation : 'A aguardar'}</Text>
           <Text style={styles.infoText}>Time: {formatTime(recordTime)}</Text>
         </View>
         <Modal
